@@ -1,0 +1,1071 @@
+{
+  "version": 1,
+  "notes": "MindNest question bank. 'scores' are additive deltas applied to the 0..100 dimension vector. Sliders use 'dimension_scale' (factor magnitudes); the scorer applies a valence-aware formula. 'follow_ups' give immediate branching; the engine also adapts globally from the running dimension scores.",
+  "questions": [
+    {
+      "id": "q_checkin_mood",
+      "text": "How are you feeling right now?",
+      "type": "emoji",
+      "dimension": "general",
+      "stage": "baseline",
+      "tags": [
+        "core",
+        "seed"
+      ],
+      "options": [
+        {
+          "id": "great",
+          "label": "Great, energized",
+          "emoji": "😄",
+          "scores": {
+            "happiness": 32,
+            "motivation": 18,
+            "sadness": -10
+          }
+        },
+        {
+          "id": "good",
+          "label": "Pretty good",
+          "emoji": "🙂",
+          "scores": {
+            "happiness": 18,
+            "motivation": 8
+          }
+        },
+        {
+          "id": "ok",
+          "label": "Just okay",
+          "emoji": "😐",
+          "scores": {}
+        },
+        {
+          "id": "tired",
+          "label": "Drained",
+          "emoji": "😮‍💨",
+          "scores": {
+            "fatigue": 24,
+            "motivation": -12
+          }
+        },
+        {
+          "id": "low",
+          "label": "Low, down",
+          "emoji": "😔",
+          "scores": {
+            "sadness": 26,
+            "motivation": -12
+          }
+        },
+        {
+          "id": "anxious",
+          "label": "Anxious, on edge",
+          "emoji": "😰",
+          "scores": {
+            "anxiety": 30,
+            "stress": 18
+          }
+        },
+        {
+          "id": "angry",
+          "label": "Irritable, angry",
+          "emoji": "😠",
+          "scores": {
+            "anger": 30,
+            "instability": 12
+          }
+        }
+      ],
+      "follow_ups": [
+        {
+          "if_option": "anxious",
+          "next": "q_anx_physical"
+        },
+        {
+          "if_option": "angry",
+          "next": "q_anger_freq"
+        },
+        {
+          "if_option": "low",
+          "next": "q_sad_freq"
+        },
+        {
+          "if_option": "tired",
+          "next": "q_fatigue_morning"
+        }
+      ]
+    },
+    {
+      "id": "q_stress_level",
+      "text": "Overall, how stressed do you feel today?",
+      "type": "slider",
+      "dimension": "stress",
+      "stage": "baseline",
+      "tags": [
+        "core",
+        "seed"
+      ],
+      "slider": {
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "min_label": "Not at all",
+        "max_label": "Extremely"
+      },
+      "dimension_scale": {
+        "stress": 88
+      },
+      "follow_ups": [
+        {
+          "if_gte": 7,
+          "next": "q_stress_source"
+        }
+      ]
+    },
+    {
+      "id": "q_fatigue_level",
+      "text": "How drained or exhausted do you feel?",
+      "type": "slider",
+      "dimension": "fatigue",
+      "stage": "baseline",
+      "tags": [
+        "core",
+        "seed"
+      ],
+      "slider": {
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "min_label": "Fully rested",
+        "max_label": "Completely drained"
+      },
+      "dimension_scale": {
+        "fatigue": 85,
+        "burnout": 25
+      },
+      "follow_ups": [
+        {
+          "if_gte": 7,
+          "next": "q_burnout_work"
+        }
+      ]
+    },
+    {
+      "id": "q_motivation_level",
+      "text": "How motivated and driven do you feel lately?",
+      "type": "slider",
+      "dimension": "motivation",
+      "stage": "baseline",
+      "tags": [
+        "core",
+        "seed"
+      ],
+      "slider": {
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "min_label": "No drive",
+        "max_label": "Highly driven"
+      },
+      "dimension_scale": {
+        "motivation": 50
+      },
+      "follow_ups": [
+        {
+          "if_lte": 3,
+          "next": "q_motiv_tasks"
+        }
+      ]
+    },
+    {
+      "id": "q_worry_freq",
+      "text": "Over the last two weeks, how often have you felt worried or on edge?",
+      "type": "multiple_choice",
+      "dimension": "anxiety",
+      "stage": "baseline",
+      "tags": [
+        "core",
+        "seed"
+      ],
+      "options": [
+        {
+          "id": "not",
+          "label": "Not at all",
+          "scores": {
+            "anxiety": -4
+          }
+        },
+        {
+          "id": "some",
+          "label": "Several days",
+          "scores": {
+            "anxiety": 16
+          }
+        },
+        {
+          "id": "most",
+          "label": "More than half the days",
+          "scores": {
+            "anxiety": 30,
+            "stress": 10
+          }
+        },
+        {
+          "id": "nearly",
+          "label": "Nearly every day",
+          "scores": {
+            "anxiety": 42,
+            "stress": 16,
+            "instability": 8
+          }
+        }
+      ],
+      "follow_ups": [
+        {
+          "if_option": "nearly",
+          "next": "q_anx_future"
+        },
+        {
+          "if_option": "most",
+          "next": "q_anx_physical"
+        }
+      ]
+    },
+    {
+      "id": "q_social_connection",
+      "text": "How connected to other people have you felt this week?",
+      "type": "multiple_choice",
+      "dimension": "loneliness",
+      "stage": "baseline",
+      "tags": [
+        "core",
+        "seed"
+      ],
+      "options": [
+        {
+          "id": "very",
+          "label": "Very connected",
+          "scores": {
+            "loneliness": -8,
+            "happiness": 8
+          }
+        },
+        {
+          "id": "some",
+          "label": "Somewhat",
+          "scores": {
+            "loneliness": 6
+          }
+        },
+        {
+          "id": "little",
+          "label": "Pretty isolated",
+          "scores": {
+            "loneliness": 28,
+            "sadness": 10
+          }
+        },
+        {
+          "id": "alone",
+          "label": "Completely alone",
+          "scores": {
+            "loneliness": 42,
+            "sadness": 16
+          }
+        }
+      ],
+      "follow_ups": [
+        {
+          "if_option": "little",
+          "next": "q_lonely_support"
+        },
+        {
+          "if_option": "alone",
+          "next": "q_lonely_support"
+        }
+      ]
+    },
+    {
+      "id": "q_sleep_quality",
+      "text": "How has your sleep been recently?",
+      "type": "multiple_choice",
+      "dimension": "fatigue",
+      "stage": "baseline",
+      "tags": [
+        "core"
+      ],
+      "options": [
+        {
+          "id": "great",
+          "label": "Restful and enough",
+          "scores": {
+            "fatigue": -10
+          }
+        },
+        {
+          "id": "ok",
+          "label": "Okay",
+          "scores": {}
+        },
+        {
+          "id": "broken",
+          "label": "Broken / not enough",
+          "scores": {
+            "fatigue": 22,
+            "stress": 8,
+            "instability": 6
+          }
+        },
+        {
+          "id": "bad",
+          "label": "Barely sleeping",
+          "scores": {
+            "fatigue": 34,
+            "stress": 14,
+            "anxiety": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "q_journal_open",
+      "text": "Anything on your mind? Write a few lines if you like — it helps the read.",
+      "type": "journal",
+      "dimension": "general",
+      "stage": "baseline",
+      "allow_skip": true,
+      "tags": [
+        "nlp"
+      ],
+      "placeholder": "Today I've been feeling...",
+      "nlp_focus": [
+        "sadness",
+        "anxiety",
+        "stress",
+        "anger",
+        "happiness"
+      ]
+    },
+    {
+      "id": "q_stress_source",
+      "text": "What's the biggest source of your stress right now?",
+      "type": "multiple_choice",
+      "dimension": "stress",
+      "stage": "followup",
+      "tags": [
+        "stress"
+      ],
+      "options": [
+        {
+          "id": "work",
+          "label": "Work or studies",
+          "scores": {
+            "stress": 14,
+            "burnout": 14
+          }
+        },
+        {
+          "id": "money",
+          "label": "Money / finances",
+          "scores": {
+            "stress": 16,
+            "anxiety": 10
+          }
+        },
+        {
+          "id": "health",
+          "label": "Health",
+          "scores": {
+            "stress": 14,
+            "anxiety": 12
+          }
+        },
+        {
+          "id": "rel",
+          "label": "Relationships",
+          "scores": {
+            "stress": 12,
+            "sadness": 8,
+            "anger": 6
+          }
+        },
+        {
+          "id": "everything",
+          "label": "A bit of everything",
+          "scores": {
+            "stress": 18,
+            "burnout": 12,
+            "instability": 8
+          }
+        }
+      ],
+      "follow_ups": [
+        {
+          "if_option": "work",
+          "next": "q_burnout_work"
+        },
+        {
+          "if_option": "everything",
+          "next": "q_overwhelm"
+        }
+      ]
+    },
+    {
+      "id": "q_overwhelm",
+      "text": "How overwhelmed do you feel by everything you have to handle?",
+      "type": "slider",
+      "dimension": "stress",
+      "stage": "followup",
+      "tags": [
+        "stress",
+        "burnout"
+      ],
+      "slider": {
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "min_label": "In control",
+        "max_label": "Drowning"
+      },
+      "dimension_scale": {
+        "stress": 70,
+        "burnout": 40,
+        "instability": 20
+      }
+    },
+    {
+      "id": "q_anx_physical",
+      "text": "Do you notice physical signs of anxiety (racing heart, tight chest, restlessness)?",
+      "type": "multiple_choice",
+      "dimension": "anxiety",
+      "stage": "followup",
+      "tags": [
+        "anxiety"
+      ],
+      "options": [
+        {
+          "id": "no",
+          "label": "Rarely",
+          "scores": {
+            "anxiety": -2
+          }
+        },
+        {
+          "id": "sometimes",
+          "label": "Sometimes",
+          "scores": {
+            "anxiety": 16
+          }
+        },
+        {
+          "id": "often",
+          "label": "Often",
+          "scores": {
+            "anxiety": 30,
+            "stress": 12
+          }
+        },
+        {
+          "id": "constant",
+          "label": "Almost constantly",
+          "scores": {
+            "anxiety": 40,
+            "stress": 16,
+            "fatigue": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "q_anx_future",
+      "text": "How much do you dread or fear what's coming in the near future?",
+      "type": "slider",
+      "dimension": "anxiety",
+      "stage": "followup",
+      "tags": [
+        "anxiety"
+      ],
+      "slider": {
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "min_label": "Not at all",
+        "max_label": "Constant dread"
+      },
+      "dimension_scale": {
+        "anxiety": 72,
+        "sadness": 20
+      }
+    },
+    {
+      "id": "q_sad_freq",
+      "text": "In the last two weeks, how often have you felt down, hopeless, or empty?",
+      "type": "multiple_choice",
+      "dimension": "sadness",
+      "stage": "followup",
+      "tags": [
+        "sadness"
+      ],
+      "options": [
+        {
+          "id": "not",
+          "label": "Not at all",
+          "scores": {
+            "sadness": -4
+          }
+        },
+        {
+          "id": "some",
+          "label": "Several days",
+          "scores": {
+            "sadness": 18
+          }
+        },
+        {
+          "id": "most",
+          "label": "More than half the days",
+          "scores": {
+            "sadness": 32,
+            "motivation": -10
+          }
+        },
+        {
+          "id": "nearly",
+          "label": "Nearly every day",
+          "scores": {
+            "sadness": 44,
+            "motivation": -16,
+            "loneliness": 10
+          }
+        }
+      ],
+      "follow_ups": [
+        {
+          "if_option": "most",
+          "next": "q_sad_interest"
+        },
+        {
+          "if_option": "nearly",
+          "next": "q_sad_interest"
+        }
+      ]
+    },
+    {
+      "id": "q_sad_interest",
+      "text": "Have you lost interest or pleasure in things you usually enjoy?",
+      "type": "multiple_choice",
+      "dimension": "sadness",
+      "stage": "followup",
+      "tags": [
+        "sadness",
+        "motivation"
+      ],
+      "options": [
+        {
+          "id": "no",
+          "label": "No, still enjoy them",
+          "scores": {
+            "happiness": 8,
+            "motivation": 8
+          }
+        },
+        {
+          "id": "little",
+          "label": "A little less",
+          "scores": {
+            "sadness": 12,
+            "motivation": -8
+          }
+        },
+        {
+          "id": "lot",
+          "label": "Much less",
+          "scores": {
+            "sadness": 26,
+            "motivation": -18
+          }
+        },
+        {
+          "id": "none",
+          "label": "Nothing feels enjoyable",
+          "scores": {
+            "sadness": 38,
+            "motivation": -26,
+            "happiness": -12
+          }
+        }
+      ]
+    },
+    {
+      "id": "q_burnout_work",
+      "text": "How often do your responsibilities leave you feeling used up at the end of the day?",
+      "type": "multiple_choice",
+      "dimension": "burnout",
+      "stage": "followup",
+      "tags": [
+        "burnout"
+      ],
+      "options": [
+        {
+          "id": "rarely",
+          "label": "Rarely",
+          "scores": {
+            "burnout": -4
+          }
+        },
+        {
+          "id": "sometimes",
+          "label": "Sometimes",
+          "scores": {
+            "burnout": 16,
+            "fatigue": 8
+          }
+        },
+        {
+          "id": "often",
+          "label": "Often",
+          "scores": {
+            "burnout": 30,
+            "fatigue": 14
+          }
+        },
+        {
+          "id": "always",
+          "label": "Almost always",
+          "scores": {
+            "burnout": 42,
+            "fatigue": 20,
+            "motivation": -12
+          }
+        }
+      ],
+      "follow_ups": [
+        {
+          "if_option": "often",
+          "next": "q_burnout_cynicism"
+        },
+        {
+          "if_option": "always",
+          "next": "q_burnout_cynicism"
+        }
+      ]
+    },
+    {
+      "id": "q_burnout_cynicism",
+      "text": "Lately, how detached or cynical do you feel about your work or daily duties?",
+      "type": "multiple_choice",
+      "dimension": "burnout",
+      "stage": "followup",
+      "tags": [
+        "burnout"
+      ],
+      "options": [
+        {
+          "id": "engaged",
+          "label": "Still engaged",
+          "scores": {
+            "burnout": -6,
+            "motivation": 8
+          }
+        },
+        {
+          "id": "some",
+          "label": "Going through the motions",
+          "scores": {
+            "burnout": 20,
+            "motivation": -8
+          }
+        },
+        {
+          "id": "detached",
+          "label": "Pretty detached",
+          "scores": {
+            "burnout": 32,
+            "anger": 8,
+            "motivation": -14
+          }
+        },
+        {
+          "id": "done",
+          "label": "Completely checked out",
+          "scores": {
+            "burnout": 44,
+            "motivation": -22,
+            "sadness": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "q_fatigue_morning",
+      "text": "When you wake up, how do you usually feel?",
+      "type": "multiple_choice",
+      "dimension": "fatigue",
+      "stage": "followup",
+      "tags": [
+        "fatigue"
+      ],
+      "options": [
+        {
+          "id": "fresh",
+          "label": "Rested and ready",
+          "scores": {
+            "fatigue": -12,
+            "motivation": 8
+          }
+        },
+        {
+          "id": "slow",
+          "label": "Slow to get going",
+          "scores": {
+            "fatigue": 16
+          }
+        },
+        {
+          "id": "tired",
+          "label": "Already tired",
+          "scores": {
+            "fatigue": 28,
+            "motivation": -10
+          }
+        },
+        {
+          "id": "dread",
+          "label": "Exhausted and dreading the day",
+          "scores": {
+            "fatigue": 38,
+            "burnout": 16,
+            "sadness": 10
+          }
+        }
+      ]
+    },
+    {
+      "id": "q_lonely_support",
+      "text": "Do you have someone you can genuinely talk to when things get hard?",
+      "type": "multiple_choice",
+      "dimension": "loneliness",
+      "stage": "followup",
+      "tags": [
+        "loneliness"
+      ],
+      "options": [
+        {
+          "id": "yes",
+          "label": "Yes, more than one",
+          "scores": {
+            "loneliness": -16,
+            "happiness": 6
+          }
+        },
+        {
+          "id": "one",
+          "label": "One person",
+          "scores": {
+            "loneliness": -4
+          }
+        },
+        {
+          "id": "notreally",
+          "label": "Not really",
+          "scores": {
+            "loneliness": 26,
+            "sadness": 10
+          }
+        },
+        {
+          "id": "noone",
+          "label": "No one",
+          "scores": {
+            "loneliness": 40,
+            "sadness": 16
+          }
+        }
+      ]
+    },
+    {
+      "id": "q_anger_freq",
+      "text": "How easily have you been getting irritated or angry lately?",
+      "type": "multiple_choice",
+      "dimension": "anger",
+      "stage": "followup",
+      "tags": [
+        "anger"
+      ],
+      "options": [
+        {
+          "id": "calm",
+          "label": "Pretty calm",
+          "scores": {
+            "anger": -4
+          }
+        },
+        {
+          "id": "some",
+          "label": "More than usual",
+          "scores": {
+            "anger": 18,
+            "instability": 8
+          }
+        },
+        {
+          "id": "easily",
+          "label": "I snap easily",
+          "scores": {
+            "anger": 32,
+            "instability": 14,
+            "stress": 10
+          }
+        },
+        {
+          "id": "constant",
+          "label": "Angry most of the time",
+          "scores": {
+            "anger": 44,
+            "instability": 18,
+            "stress": 12
+          }
+        }
+      ],
+      "follow_ups": [
+        {
+          "if_option": "easily",
+          "next": "q_mood_swings"
+        },
+        {
+          "if_option": "constant",
+          "next": "q_mood_swings"
+        }
+      ]
+    },
+    {
+      "id": "q_mood_swings",
+      "text": "How much do your moods swing or change suddenly through the day?",
+      "type": "slider",
+      "dimension": "instability",
+      "stage": "followup",
+      "tags": [
+        "instability"
+      ],
+      "slider": {
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "min_label": "Very steady",
+        "max_label": "All over the place"
+      },
+      "dimension_scale": {
+        "instability": 78,
+        "anxiety": 18
+      }
+    },
+    {
+      "id": "q_motiv_tasks",
+      "text": "How hard is it to start or finish the things you need to do?",
+      "type": "multiple_choice",
+      "dimension": "motivation",
+      "stage": "followup",
+      "tags": [
+        "motivation"
+      ],
+      "options": [
+        {
+          "id": "easy",
+          "label": "No trouble",
+          "scores": {
+            "motivation": 16
+          }
+        },
+        {
+          "id": "bit",
+          "label": "A bit harder than usual",
+          "scores": {
+            "motivation": -8,
+            "fatigue": 6
+          }
+        },
+        {
+          "id": "hard",
+          "label": "Really hard to get going",
+          "scores": {
+            "motivation": -20,
+            "fatigue": 12,
+            "sadness": 8
+          }
+        },
+        {
+          "id": "cant",
+          "label": "I can barely start anything",
+          "scores": {
+            "motivation": -30,
+            "sadness": 14,
+            "burnout": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "q_happy_recent",
+      "text": "Have you had moments of real enjoyment or laughter in the past few days?",
+      "type": "multiple_choice",
+      "dimension": "happiness",
+      "stage": "followup",
+      "tags": [
+        "happiness"
+      ],
+      "options": [
+        {
+          "id": "many",
+          "label": "Plenty",
+          "scores": {
+            "happiness": 28,
+            "sadness": -10,
+            "motivation": 8
+          }
+        },
+        {
+          "id": "few",
+          "label": "A few",
+          "scores": {
+            "happiness": 14
+          }
+        },
+        {
+          "id": "rare",
+          "label": "Very few",
+          "scores": {
+            "happiness": -8,
+            "sadness": 12
+          }
+        },
+        {
+          "id": "none",
+          "label": "None I can remember",
+          "scores": {
+            "happiness": -20,
+            "sadness": 22,
+            "loneliness": 8
+          }
+        }
+      ]
+    },
+    {
+      "id": "q_happy_outlook",
+      "text": "How positive do you feel about the days ahead?",
+      "type": "slider",
+      "dimension": "happiness",
+      "stage": "followup",
+      "tags": [
+        "happiness",
+        "motivation"
+      ],
+      "slider": {
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "min_label": "Bleak",
+        "max_label": "Bright"
+      },
+      "dimension_scale": {
+        "happiness": 50,
+        "motivation": 30
+      }
+    },
+    {
+      "id": "q_freetext_feeling",
+      "text": "In your own words, how have you been feeling lately?",
+      "type": "free_text",
+      "dimension": "general",
+      "stage": "followup",
+      "allow_skip": true,
+      "tags": [
+        "nlp"
+      ],
+      "placeholder": "Honestly, I've been...",
+      "nlp_focus": [
+        "sadness",
+        "anxiety",
+        "stress",
+        "anger",
+        "happiness",
+        "loneliness"
+      ]
+    },
+    {
+      "id": "q_freetext_stressor",
+      "text": "What's weighing on you the most right now?",
+      "type": "free_text",
+      "dimension": "stress",
+      "stage": "followup",
+      "allow_skip": true,
+      "tags": [
+        "nlp"
+      ],
+      "placeholder": "The thing on my mind is...",
+      "nlp_focus": [
+        "stress",
+        "anxiety",
+        "anger",
+        "sadness"
+      ]
+    },
+    {
+      "id": "q_clarify_valence",
+      "text": "Your answers point in a few directions. Which is closest to your week overall?",
+      "type": "multiple_choice",
+      "dimension": "general",
+      "stage": "clarify",
+      "tags": [
+        "clarify"
+      ],
+      "options": [
+        {
+          "id": "mostly_good",
+          "label": "Mostly good, a few rough patches",
+          "scores": {
+            "happiness": 18,
+            "sadness": -10,
+            "stress": -8
+          }
+        },
+        {
+          "id": "mixed",
+          "label": "Genuinely mixed",
+          "scores": {
+            "instability": 12
+          }
+        },
+        {
+          "id": "mostly_hard",
+          "label": "Mostly hard, a few bright spots",
+          "scores": {
+            "sadness": 16,
+            "stress": 12,
+            "happiness": -8
+          }
+        }
+      ]
+    },
+    {
+      "id": "q_clarify_intensity",
+      "text": "And how strongly are these feelings affecting your daily life?",
+      "type": "slider",
+      "dimension": "general",
+      "stage": "clarify",
+      "tags": [
+        "clarify"
+      ],
+      "slider": {
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "min_label": "Barely",
+        "max_label": "A great deal"
+      },
+      "dimension_scale": {
+        "stress": 30,
+        "instability": 20,
+        "burnout": 20
+      }
+    }
+  ]
+}

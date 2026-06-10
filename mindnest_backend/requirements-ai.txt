@@ -1,0 +1,24 @@
+# ============================================================
+# MindNest - OPTIONAL local AI model dependencies.
+#
+# Install these for the transformer emotion classifier and the
+# embedding-similarity layer:
+#
+#   pip install -r requirements-ai.txt
+#
+# Large (PyTorch + models downloaded on first use) but 100% free,
+# open-source and CPU/offline. The app detects them at runtime and
+# enables the matching pipeline stages automatically; if missing it
+# falls back to the rule-based engine + Ollama and never crashes.
+#
+# Pinned to the latest validated set, verified on Python 3.14.5
+# (these now ship cp314 wheels — no compiler needed). Across
+# platforms/Python you may relax the pins to ranges, e.g.
+# `torch>=2.12,<3`. Probe first with `pip install --dry-run <pkg>`.
+# ============================================================
+
+torch==2.12.0                  # CPU inference is fine (no CUDA needed)
+transformers==5.9.0
+sentence-transformers==5.5.1
+scikit-learn==1.8.0
+numpy==2.4.6

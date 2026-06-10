@@ -1,0 +1,17 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.db
+*.db-journal
+.env
+.git/
+.gitignore
+.pytest_cache/
+tests/
+docs/
+flutter_integration/
+*.md
+.DS_Store
+models_cache/
+.cache/

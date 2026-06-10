@@ -1,0 +1,43 @@
+{
+  "description": "Sample data for MindNest. 'labeled_texts' exercise the rule-based + transformer text pipeline; 'scenarios' are persona answer-profiles used by the demo seeder and as reference cases. Synthetic, non-clinical, illustrative only.",
+  "labeled_texts": [
+    {"text": "Honestly I'm so overwhelmed, the deadlines keep piling up and I can't switch off.", "primary": "stress", "expect": ["stress", "anxiety"]},
+    {"text": "My chest feels tight and my thoughts are racing. I keep dreading tomorrow.", "primary": "anxiety", "expect": ["anxiety"]},
+    {"text": "Everything feels grey and empty. I don't see the point in much lately.", "primary": "sadness", "expect": ["sadness"]},
+    {"text": "I had a genuinely good day - laughed with friends and felt grateful.", "primary": "happiness", "expect": ["happiness"]},
+    {"text": "I'm running on empty. Work has drained everything out of me and I feel nothing about it now.", "primary": "burnout", "expect": ["burnout", "fatigue"]},
+    {"text": "So exhausted. I wake up tired and have no energy for anything.", "primary": "fatigue", "expect": ["fatigue"]},
+    {"text": "I feel completely alone, like no one would notice if I disappeared for a week.", "primary": "loneliness", "expect": ["loneliness", "sadness"]},
+    {"text": "I'm furious. Every little thing sets me off and I keep snapping at people.", "primary": "anger", "expect": ["anger"]},
+    {"text": "One minute I'm fine, the next I'm in tears. My moods are all over the place.", "primary": "instability", "expect": ["instability"]},
+    {"text": "I just can't get motivated. Starting anything feels impossible right now.", "primary": "motivation", "expect": ["motivation"]},
+    {"text": "Things have been okay, nothing special, just an ordinary week.", "primary": "neutral", "expect": []},
+    {"text": "I'm not stressed at all actually, feeling pretty calm and steady.", "primary": "happiness", "expect": ["happiness"]}
+  ],
+  "scenarios": [
+    {
+      "name": "Balanced",
+      "targets": {"stress": 28, "anxiety": 22, "sadness": 18, "happiness": 64, "burnout": 20, "fatigue": 25, "loneliness": 18, "anger": 15, "instability": 18, "motivation": 66}
+    },
+    {
+      "name": "Rising stress",
+      "targets": {"stress": 62, "anxiety": 55, "sadness": 30, "happiness": 42, "burnout": 48, "fatigue": 52, "loneliness": 28, "anger": 30, "instability": 35, "motivation": 45}
+    },
+    {
+      "name": "Burnout peak",
+      "targets": {"stress": 80, "anxiety": 66, "sadness": 52, "happiness": 22, "burnout": 84, "fatigue": 82, "loneliness": 48, "anger": 44, "instability": 50, "motivation": 24}
+    },
+    {
+      "name": "Low and withdrawn",
+      "targets": {"stress": 48, "anxiety": 50, "sadness": 72, "happiness": 20, "burnout": 55, "fatigue": 60, "loneliness": 70, "anger": 28, "instability": 40, "motivation": 30}
+    },
+    {
+      "name": "Recovering",
+      "targets": {"stress": 40, "anxiety": 35, "sadness": 30, "happiness": 52, "burnout": 42, "fatigue": 40, "loneliness": 30, "anger": 22, "instability": 28, "motivation": 55}
+    },
+    {
+      "name": "Back to steady",
+      "targets": {"stress": 26, "anxiety": 24, "sadness": 20, "happiness": 68, "burnout": 24, "fatigue": 28, "loneliness": 20, "anger": 16, "instability": 20, "motivation": 70}
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+# ============================================================
+# MindNest local stack.
+#
+#   docker compose up --build              # API only (rule-based + offline)
+#   docker compose --profile ai up --build # API + local Ollama LLM
+#
+# The Ollama service is behind the "ai" profile so the default `up`
+# stays tiny. When enabled, the API talks to it at http://ollama:11434.
+# ============================================================
+services:
+  api:
+    build: .
+    container_name: mindnest-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Persist SQLite on the mounted volume.
+      DATABASE_URL: sqlite+aiosqlite:////data/mindnest.db
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-prod}
+      # Point the LLM client at the compose Ollama service (used with --profile ai).
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-tinyllama}
+      # AI model layers are off by default in the slim image (no torch installed).
+      ENABLE_TRANSFORMER_EMOTION: "false"
+      ENABLE_EMBEDDINGS: "false"
+      ENABLE_LLM: "true"
+    volumes:
+      - mindnest_data:/data
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: mindnest-ollama
+    profiles: ["ai"]
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    # After first start, pull a model:
+    #   docker exec -it mindnest-ollama ollama pull tinyllama
+
+volumes:
+  mindnest_data:
+  ollama_data:

@@ -1,0 +1,28 @@
+# MindNest analysis configuration.
+# Production lint baseline (flutter_lints) + a few extras, with generated
+# code excluded from analysis.
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.config.dart"
+    - "lib/generated/**"
+  errors:
+    # freezed/json_serializable place annotations on factories/fields.
+    invalid_annotation_target: ignore
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_print
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_final_locals
+    - prefer_single_quotes
+    - sort_child_properties_last
+    - unnecessary_parenthesis
+    - use_super_parameters
+    - always_use_package_imports: true

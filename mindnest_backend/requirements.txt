@@ -1,0 +1,30 @@
+# ============================================================
+# MindNest - CORE dependencies (lightweight, pure-Python where
+# possible). These run the API, the adaptive questionnaire
+# engine, the rule-based mood scorer and the full test-suite.
+#
+# Installs in seconds on a normal laptop — NO GPU, NO paid
+# services. Pinned to the latest validated set (Python 3.11–3.14,
+# verified on 3.14.5). The heavy/optional AI models live in
+# requirements-ai.txt and load lazily; the app degrades
+# gracefully without them.
+#
+# To bump everything later:  pip install -U -r requirements.txt
+# (then re-run `pytest` and re-pin).
+# ============================================================
+
+fastapi==0.136.3
+uvicorn==0.48.0            # plain (no native uvloop/httptools/watchfiles extras)
+sqlalchemy==2.0.50
+greenlet==3.5.1           # required by SQLAlchemy async
+aiosqlite==0.22.1
+pydantic==2.13.4          # 2.13+ ships cp314 wheels for pydantic-core
+pydantic-settings==2.14.1
+python-jose==3.5.0        # JWT (HS256, pure-python, no native crypto needed)
+passlib==1.7.4            # password hashing (pbkdf2_sha256, pure-python)
+python-multipart==0.0.30  # OAuth2 form login
+httpx==0.28.1             # async client (Ollama + tests)
+
+# ---- testing ----
+pytest==9.0.3
+pytest-asyncio==1.4.0
