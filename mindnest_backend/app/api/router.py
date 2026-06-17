@@ -8,19 +8,28 @@ from app.api.routes import (
     analytics,
     assessment,
     auth,
+    bookings,
     coach,
+    community,
+    consent,
     dashboard,
     habits,
     insights,
     journal,
     library,
+    marketplace,
     memory,
+    messaging,
     mood,
     notifications,
     onboarding,
+    professional_auth,
+    professionals,
     profile,
+    programs,
     recommendations,
     reports,
+    support,
     system,
 )
 
@@ -43,3 +52,14 @@ api_router.include_router(coach.router)
 api_router.include_router(notifications.router)
 api_router.include_router(dashboard.router)
 api_router.include_router(profile.router)
+
+# ---- MVP 2: AI + Human (professional support, marketplace, bookings) ----
+api_router.include_router(professional_auth.router)
+api_router.include_router(professionals.router)
+api_router.include_router(marketplace.router)
+api_router.include_router(bookings.router)
+api_router.include_router(consent.router)
+api_router.include_router(support.router)
+api_router.include_router(messaging.router)
+api_router.include_router(community.router)
+api_router.include_router(programs.router)

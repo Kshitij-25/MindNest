@@ -65,3 +65,47 @@ def decode_access_token(token: str) -> str | None:
         return None
     sub = payload.get("sub")
     return sub if isinstance(sub, str) else None
+
+
+# ---------------------------------------------------------------------------
+# MVP 2 — multi-actor tokens (additive; the functions above are untouched so
+# MVP 1 user auth is unchanged). A token carries an ``actor`` claim so a
+# professional's token can never resolve as a regular user and vice-versa.
+# A user token (minted by ``create_access_token``) has no ``actor`` claim and
+# is therefore rejected by ``decode_actor_token(..., expected_actor=...)``.
+# ---------------------------------------------------------------------------
+
+
+def create_actor_token(
+    subject: str, actor: str, expires_minutes: int | None = None
+) -> str:
+    """An access token tagged with the actor type (e.g. ``"professional"``)."""
+    expire = utcnow() + timedelta(
+        minutes=expires_minutes or settings.ACCESS_TOKEN_EXPIRE_MINUTES
+    )
+    payload = {
+        "sub": subject, "exp": expire, "iat": utcnow(),
+        "type": "access", "actor": actor,
+    }
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def create_actor_refresh_token(subject: str, jti: str, actor: str) -> str:
+    """A refresh token bound to a server-side session, tagged with the actor."""
+    expire = utcnow() + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES)
+    payload = {
+        "sub": subject, "exp": expire, "iat": utcnow(),
+        "type": "refresh", "jti": jti, "actor": actor,
+    }
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def decode_actor_token(token: str, expected_actor: str) -> str | None:
+    """Return the subject for an access token whose ``actor`` matches, else None."""
+    payload = decode_token(token)
+    if not payload or payload.get("type") == "refresh":
+        return None
+    if payload.get("actor") != expected_actor:
+        return None
+    sub = payload.get("sub")
+    return sub if isinstance(sub, str) else None

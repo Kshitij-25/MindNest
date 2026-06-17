@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 30  # 30 days
 
+    # ---- Admin (MVP 2 manual verification review) ----
+    # Shared secret for admin-only endpoints (professional verification review).
+    # Empty by default → those endpoints are disabled (return 403).
+    ADMIN_API_TOKEN: str = ""
+
     # ---- Demo / seeding ----
     SEED_DEMO_CONTENT: bool = True  # seed topics + a demo user at startup (dev)
 
