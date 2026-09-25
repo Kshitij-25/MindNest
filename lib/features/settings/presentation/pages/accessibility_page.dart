@@ -99,78 +99,6 @@ class AccessibilityPage extends StatelessWidget {
           ],
         );
 
-        final preview = MnCard(
-          radius: 22,
-          padding: const EdgeInsets.all(22),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Live preview', style: context.text.title3),
-              const SizedBox(height: 4),
-              Text('Reflects your settings in real time', style: context.text.sub.copyWith(color: c.ink3)),
-              const SizedBox(height: 16),
-              MnCard(
-                style: MnCardStyle.inset,
-                radius: 18,
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text('How are you feeling?', style: context.text.title3),
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        for (var l = 1; l <= 5; l++)
-                          Expanded(
-                            child: Column(
-                              children: [
-                                MoodFace(level: l, size: 44, soft: l != 4),
-                                const SizedBox(height: 6),
-                                Text(moodLabel(l),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: context.text.cap.copyWith(color: l == 4 ? c.ink : c.ink3, fontWeight: FontWeight.w700)),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    MnCard(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          const MnAvatar(name: 'Amara Okafor', size: 44, photo: true),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Next session', style: context.text.headline),
-                                Text('Thu · 4:00 PM', style: context.text.sub.copyWith(color: c.ink2)),
-                              ],
-                            ),
-                          ),
-                          MnIcon(MnIcons.chevR, size: 18, color: c.ink4),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    MnButton(label: 'Join session', icon: MnIcons.video, size: MnButtonSize.small, onPressed: () {}),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-
-        const badges = [
-          (MnIcons.checkCircle, 'WCAG 2.2 AA', 'Contrast, targets, focus'),
-          (MnIcons.user, 'VoiceOver & TalkBack', 'Full label coverage'),
-          (MnIcons.sliders, 'Dynamic Type', 'Honors system text size'),
-          (MnIcons.pulse, 'Reduced motion', 'Honors system setting'),
-        ];
-
         return MnPage(
           header: const MnNavHeader(title: 'Accessibility'),
           maxWidth: 1080,
@@ -182,40 +110,7 @@ class AccessibilityPage extends StatelessWidget {
                 style: context.text.body.copyWith(color: c.ink2),
               ),
               const SizedBox(height: 22),
-              if (context.isTablet)
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [Expanded(child: controls), const SizedBox(width: 20), Expanded(child: preview)],
-                )
-              else ...[
-                controls,
-                const SizedBox(height: 18),
-                preview,
-              ],
-              const SizedBox(height: 22),
-              ResponsiveGrid(
-                columns: responsive(context, phone: 2, tablet: 4),
-                spacing: 14,
-                runSpacing: 14,
-                children: [
-                  for (final b in badges)
-                    MnCard(
-                      style: MnCardStyle.flat,
-                      radius: 20,
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          IconTile(size: 38, radius: 11, child: MnIcon(b.$1, size: 19, color: c.primary)),
-                          const SizedBox(height: 12),
-                          Text(b.$2, style: context.text.headline),
-                          const SizedBox(height: 3),
-                          Text(b.$3, style: context.text.cap.copyWith(color: c.ink3)),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+              controls,
             ],
           ),
         );

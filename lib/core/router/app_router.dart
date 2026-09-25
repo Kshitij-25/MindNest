@@ -42,7 +42,6 @@ import '../../features/sessions/presentation/pages/booking_page.dart';
 import '../../features/sessions/presentation/pages/booking_success_page.dart';
 import '../../features/sessions/presentation/pages/sessions_page.dart';
 import '../../features/settings/presentation/pages/accessibility_page.dart';
-import '../../features/settings/presentation/pages/design_system_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/shell/presentation/pages/client_shell_page.dart';
 import '../../features/shell/presentation/pages/pro_shell_page.dart';
@@ -161,7 +160,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: EditProfileRoute.page, path: '/profile/edit'),
     AutoRoute(page: SettingsRoute.page, path: '/settings'),
     AutoRoute(page: AccessibilityRoute.page, path: '/settings/accessibility'),
-    AutoRoute(page: DesignSystemRoute.page, path: '/design-system'),
 
     // Professional stack pages
     AutoRoute(page: ProCredentialsRoute.page, path: '/practice/credentials'),

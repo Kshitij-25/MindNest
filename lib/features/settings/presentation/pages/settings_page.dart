@@ -101,7 +101,6 @@ class SettingsPage extends StatelessWidget {
                 children: [
                   MnListRow(title: 'Help centre', leading: const SettingIcon(icon: MnIcons.info), onTap: () {}),
                   MnListRow(title: 'Contact us', leading: const SettingIcon(icon: MnIcons.message), onTap: () {}),
-                  MnListRow(title: 'Design system', leading: const SettingIcon(icon: MnIcons.grid), onTap: () => context.router.push(const DesignSystemRoute())),
                 ],
               ),
               const SizedBox(height: 22),

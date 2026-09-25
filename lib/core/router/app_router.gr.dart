@@ -264,22 +264,6 @@ class CreatePostRouteArgs {
 }
 
 /// generated route for
-/// [DesignSystemPage]
-class DesignSystemRoute extends PageRouteInfo<void> {
-  const DesignSystemRoute({List<PageRouteInfo>? children})
-    : super(DesignSystemRoute.name, initialChildren: children);
-
-  static const String name = 'DesignSystemRoute';
-
-  static PageInfo page = PageInfo(
-    name,
-    builder: (data) {
-      return const DesignSystemPage();
-    },
-  );
-}
-
-/// generated route for
 /// [DiscoverPage]
 class DiscoverRoute extends PageRouteInfo<void> {
   const DiscoverRoute({List<PageRouteInfo>? children})
