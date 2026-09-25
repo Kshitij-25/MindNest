@@ -1,0 +1,185 @@
+rules_version = '2';
+
+// MindNest — Firestore security rules.
+// On the Spark plan there is no server: these rules ARE the backend's
+// enforcement layer. Layout is documented in lib/core/firebase/collections.dart.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function isUser(id) { return signedIn() && uid() == id; }
+    function data() { return request.resource.data; }
+    function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function onlyChanges(keys) { return changed().hasOnly(keys); }
+    function isVerifiedPro(id) {
+      return get(/databases/$(database)/documents/therapists/$(id)).data.verified == true;
+    }
+
+    // ── Users ──────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isUser(userId);
+      allow create: if isUser(userId)
+        && data().role in ['client', 'professional']
+        && data().verification == 'none'
+        && data().onboarded == false;
+      // Role is fixed; verification can only advance to `pending` — approval
+      // is an admin action (scripts/approve_pro.mjs, Admin SDK bypasses rules).
+      allow update: if isUser(userId)
+        && onlyChanges(['name', 'onboarded', 'verification', 'title', 'phone', 'bio', 'notificationPrefs'])
+        && (data().verification == resource.data.verification || data().verification == 'pending');
+
+      match /private/{docId} {
+        allow read, write: if isUser(userId);
+      }
+      match /{col}/{docId} {
+        allow read, write: if isUser(userId)
+          && col in ['moods', 'journal', 'likedPosts', 'savedPosts', 'savedTherapists', 'fcmTokens'];
+      }
+
+      // Inbox: written by whoever triggers the event, read by the owner.
+      match /notifications/{nid} {
+        function validShape() {
+          return data().keys().hasOnly(['type', 'title', 'body', 'targetId', 'senderId', 'unread', 'createdAt'])
+            && data().type in ['booking', 'message', 'mood', 'content']
+            && data().title is string && data().title.size() <= 120
+            && data().body is string && data().body.size() <= 400
+            && data().senderId == uid()
+            && data().unread == true;
+        }
+        allow read, delete: if isUser(userId);
+        allow create: if signedIn() && validShape();
+        allow update: if (isUser(userId) && onlyChanges(['unread']))
+          // Rolling items (e.g. one per conversation) are re-set by the sender.
+          || (signedIn() && resource.data.senderId == uid() && validShape());
+      }
+    }
+
+    // ── Therapist directory ────────────────────────────────────────────
+    match /therapists/{proId} {
+      allow read: if signedIn();
+      allow create: if isUser(proId)
+        && data().verified == false && data().rating == 0 && data().reviews == 0;
+      // `verified`, `rating` and `reviews` are admin/server-managed.
+      allow update: if isUser(proId)
+        && !changed().hasAny(['verified', 'rating', 'reviews']);
+
+      // Reviews are written by the Admin SDK / Cloud Functions (aggregates).
+      match /reviews/{rid} {
+        allow read: if signedIn();
+      }
+
+      // Slot locks: one per booked start time; prevents double booking.
+      match /busy/{slot} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && data().clientId == uid()
+          && getAfter(/databases/$(database)/documents/appointments/$(data().appointmentId)).data.clientId == uid()
+          && getAfter(/databases/$(database)/documents/appointments/$(data().appointmentId)).data.therapistId == proId;
+        allow delete: if isUser(proId) || (signedIn() && resource.data.clientId == uid());
+      }
+
+      // Practitioner-private client records, notes and goals.
+      match /clients/{clientId} {
+        allow read, write: if isUser(proId);
+        match /{sub}/{id} {
+          allow read, write: if isUser(proId) && sub in ['notes', 'goals'];
+        }
+      }
+    }
+
+    // ── Appointments ───────────────────────────────────────────────────
+    match /appointments/{aid} {
+      allow read: if signedIn()
+        && (resource.data.clientId == uid() || resource.data.therapistId == uid());
+      allow create: if signedIn()
+        && data().clientId == uid()
+        && data().therapistId != uid()
+        && data().status == 'pending'
+        && data().startsAt is timestamp && data().startsAt > request.time
+        && isVerifiedPro(data().therapistId);
+      allow update: if signedIn() && (
+        // Client cancels.
+        (resource.data.clientId == uid()
+          && onlyChanges(['status', 'cancelledAt'])
+          && data().status == 'cancelled')
+        // Professional responds to a pending request.
+        || (resource.data.therapistId == uid()
+          && resource.data.status == 'pending'
+          && onlyChanges(['status', 'respondedAt'])
+          && data().status in ['accepted', 'declined'])
+      );
+      allow delete: if false;
+    }
+
+    // ── Chat ───────────────────────────────────────────────────────────
+    match /conversations/{cid} {
+      function member() { return uid() in resource.data.participants; }
+      // `resource == null` lets a participant check whether a thread exists.
+      allow read: if signedIn() && (resource == null || member());
+      allow create: if signedIn()
+        && uid() in data().participants
+        && data().participants.size() == 2
+        && cid == data().participants[0] + '_' + data().participants[1]
+        && data().clientId == data().participants[0]
+        && data().proId == data().participants[1];
+      allow update: if signedIn() && member()
+        && !changed().hasAny(['participants', 'clientId', 'proId']);
+
+      match /messages/{mid} {
+        function convMember() {
+          return uid() in get(/databases/$(database)/documents/conversations/$(cid)).data.participants;
+        }
+        allow read: if signedIn() && convMember();
+        allow create: if signedIn() && convMember()
+          && data().senderId == uid()
+          && data().text is string && data().text.size() > 0 && data().text.size() <= 4000;
+      }
+    }
+
+    // ── Feed ───────────────────────────────────────────────────────────
+    match /posts/{pid} {
+      function likedPath() {
+        return /databases/$(database)/documents/users/$(uid())/likedPosts/$(pid);
+      }
+      function likeToggle() {
+        return onlyChanges(['likes']) && (
+          (data().likes == resource.data.likes + 1 && !exists(likedPath()) && existsAfter(likedPath()))
+          || (data().likes == resource.data.likes - 1 && exists(likedPath()) && !existsAfter(likedPath()))
+        );
+      }
+      allow read: if signedIn()
+        && (resource.data.status == 'published' || resource.data.authorId == uid());
+      allow create: if signedIn()
+        && data().authorId == uid()
+        && isVerifiedPro(uid())
+        && data().likes == 0 && data().comments == 0 && data().views == 0
+        && data().status in ['published', 'draft'];
+      allow update: if signedIn() && (
+        (resource.data.authorId == uid()
+          && !changed().hasAny(['authorId', 'likes', 'comments', 'views']))
+        || (resource.data.status == 'published' && (
+          likeToggle()
+          || (onlyChanges(['comments']) && data().comments == resource.data.comments + 1)
+          || (onlyChanges(['views']) && data().views == resource.data.views + 1)
+        ))
+      );
+      allow delete: if signedIn() && resource.data.authorId == uid();
+
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn()
+          && data().authorId == uid()
+          && data().likedBy.size() == 0
+          && data().text is string && data().text.size() > 0 && data().text.size() <= 2000
+          && get(/databases/$(database)/documents/posts/$(pid)).data.status == 'published';
+        // Anyone may add/remove only their own like.
+        allow update: if signedIn() && onlyChanges(['likedBy'])
+          && data().likedBy.toSet().difference(resource.data.likedBy.toSet())
+               .union(resource.data.likedBy.toSet().difference(data().likedBy.toSet()))
+               == [uid()].toSet();
+        allow delete: if signedIn() && resource.data.authorId == uid();
+      }
+    }
+  }
+}
