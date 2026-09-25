@@ -78,6 +78,7 @@ class RequestCard extends StatelessWidget {
                     key: const ValueKey('actions'),
                     children: [
                       Expanded(
+                        flex: 10,
                         child: MnButton(
                           label: 'Decline',
                           variant: MnButtonVariant.danger,
@@ -87,7 +88,7 @@ class RequestCard extends StatelessWidget {
                       ),
                       if (!compact) ...[
                         const SizedBox(width: 10),
-                        Expanded(child: MnButton.outline(label: 'Reschedule', size: MnButtonSize.small, onPressed: onOpen)),
+                        Expanded(flex: 10, child: MnButton.outline(label: 'Reschedule', size: MnButtonSize.small, onPressed: onOpen)),
                       ],
                       const SizedBox(width: 10),
                       Expanded(

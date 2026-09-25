@@ -105,4 +105,71 @@ for (const [i, p] of posts.entries()) {
   await ref.update({ comments: comments.length });
 }
 console.log(`✔ ${posts.length} posts`);
-console.log(`\nDemo professional logins use password: ${PASSWORD}`);
+if (process.argv.includes('--demo-client')) await seedDemoClient();
+console.log(`\nDemo logins use password: ${PASSWORD}`);
+
+// A fully populated client (mood history, journal, bookings, chat…) for
+// demos and screenshots: maya@demo.mindnest.app
+async function seedDemoClient() {
+  const u = await ensureUser('maya@demo.mindnest.app', 'Maya Chen');
+  const me = u.uid, pro = uids[0], proName = pros[0].name;
+  const day = (d, h = 9, m = 0) => { const t = new Date(); t.setHours(h, m, 0, 0); t.setDate(t.getDate() + d); return Timestamp.fromDate(t); };
+  await db.doc(`users/${me}`).set({ name: 'Maya Chen', email: 'maya@demo.mindnest.app', role: 'client', onboarded: true,
+    verification: 'none', title: null, phone: '+44 7700 900892', bio: 'Learning to slow down and be kinder to myself.' });
+  await db.doc(`users/${me}/private/assessment`).set({ mood: 3, stress: 6, anxiety: 2, sleep: 3, goals: ['Reduce anxiety', 'Sleep better'] });
+
+  const levels = [3, 4, 4, 3, 2, 4, 5, 4, 3, 4, 4, 5, 5, 4, 3, 2, 3, 4, 5, 4, 4, 3, 4, 2, 4, 5, 4, 4];
+  const factors = [['Sleep', 'Exercise'], ['Work'], ['Family'], ['Exercise'], ['Relationships']];
+  for (const [i, l] of levels.entries()) {
+    await db.doc(`users/${me}/moods/seed-${i}`).set({ level: l, factors: factors[i % 5], note: i === 27 ? 'Slept well and had a calm morning walk.' : '', createdAt: day(i - 27, 9, 24) });
+  }
+  const journal = [
+    [0, 'A slower morning', 'Woke up before the alarm and let myself lie still for a few minutes. Small win: I didn’t reach for my phone straight away.', ['Calm', 'Gratitude'], 4, true],
+    [-1, 'Session reflections', 'Reframed the “I’m behind” feeling as “I’m carrying a lot” and it landed. Trying to hold that gentler story.', ['Therapy', 'Growth'], 5, false],
+    [-3, 'Heavy day', 'Deadlines piled up. Naming it here so it doesn’t sit in my chest overnight.', ['Stress'], 2, false],
+    [-5, 'Morning walk', 'Twenty minutes by the canal before work. The cold air helped. Keep choosing this.', ['Self-care', 'Calm'], 4, false],
+  ];
+  for (const [i, [d, title, body, tags, mood, fav]] of journal.entries()) {
+    await db.doc(`users/${me}/journal/seed-${i}`).set({ title, body, tags, mood, favourite: fav, draft: false, createdAt: day(d, 20, 10) });
+  }
+
+  const appt = (id, d, h, status, extra = {}) => db.doc(`appointments/${id}`).set({
+    clientId: me, clientName: 'Maya Chen', therapistId: pro, therapistName: proName, startsAt: day(d, h), type: 'video', minutes: 50,
+    status, recurrence: 'weekly', reminders: ['24h', '1h'], price: 90, reason: 'Anxiety & work stress', note: '', newClient: false,
+    createdAt: day(d - 3), ...(status !== 'pending' ? { respondedAt: day(d - 2) } : {}), ...extra });
+  await appt('seed-up1', 2, 16, 'accepted');
+  await appt('seed-req', 4, 11, 'pending', { note: 'Could we also talk about sleep next time?', recurrence: 'oneTime' });
+  for (const w of [1, 2, 3, 4]) await appt(`seed-past${w}`, -7 * w, 16, 'accepted');
+  for (const [id, d, h] of [['seed-up1', 2, 16], ['seed-req', 4, 11]]) {
+    const t = day(d, h).toDate();
+    const key = `${t.getFullYear()}${String(t.getMonth() + 1).padStart(2, '0')}${String(t.getDate()).padStart(2, '0')}${String(t.getHours()).padStart(2, '0')}00`;
+    await db.doc(`therapists/${pro}/busy/${key}`).set({ appointmentId: id, clientId: me, startsAt: day(d, h) });
+  }
+  await db.doc(`therapists/${pro}/clients/${me}`).set({ name: 'Maya Chen', focus: 'Anxiety & work stress', since: day(-60), status: 'improving' });
+  await db.doc(`therapists/${pro}/clients/${me}/notes/seed-1`).set({ date: day(-7, 16), tag: 'Session 4', text: 'Reframed “I’m behind” as “I’m carrying a lot.” Homework: 3-3-3 grounding before stand-ups. Sleep improving.' });
+  await db.doc(`therapists/${pro}/clients/${me}/notes/seed-2`).set({ date: day(-14, 16), tag: 'Session 3', text: 'Work pressure peaked midweek. Practised a boundary-setting script with manager.' });
+  for (const [i, [text, done]] of [['Practise 3-3-3 grounding daily', true], ['Set one work boundary this week', true], ['Sleep before 11pm, 5 nights', false]].entries()) {
+    await db.doc(`therapists/${pro}/clients/${me}/goals/seed-${i}`).set({ text, done, createdAt: day(-20 + i) });
+  }
+
+  const conv = db.doc(`conversations/${me}_${pro}`);
+  const msgs = [[pro, 'Hi Maya — how have you been since our last session?', -50], [me, 'A bit up and down, but I tried the grounding exercise twice.', -41], [pro, 'That sounds like real progress — well done this week.', -35]];
+  await conv.set({ participants: [me, pro], clientId: me, proId: pro,
+    members: { [me]: { name: 'Maya Chen', subtitle: 'Anxiety & work stress', verified: false }, [pro]: { name: proName, subtitle: pros[0].title, verified: true } },
+    last: msgs[2][1], updatedAt: Timestamp.fromDate(new Date(Date.now() - 35 * 6e4)), unread: { [me]: 1, [pro]: 0 },
+    lastRead: { [pro]: Timestamp.now() }, session: { title: 'Session confirmed', at: day(2, 16), status: 'Accepted' } });
+  for (const [i, [from, text, min]] of msgs.entries()) {
+    await conv.collection('messages').doc(`seed-${i}`).set({ senderId: from, text, sentAt: Timestamp.fromDate(new Date(Date.now() + min * 6e4)) });
+  }
+  const notes = [
+    ['booking', 'Booking confirmed', `${proName} accepted your upcoming session.`, 0.1, true],
+    ['message', 'New message', `${proName}: “That sounds like real progress — well done this week.”`, 0.6, true],
+    ['content', 'New from Dr. Nair', '“Why trying harder to sleep backfires” — a 2-minute read.', 5, false],
+    ['booking', 'Session reminder', `Your session with ${proName} is in 2 days.`, 26, false],
+  ];
+  for (const [i, [type, title, body, h, unread]] of notes.entries()) {
+    await db.doc(`users/${me}/notifications/seed-${i}`).set({ type, title, body, targetId: null, senderId: pro, unread, createdAt: ago(h) });
+  }
+  await db.doc(`users/${pro}/notifications/seed-0`).set({ type: 'booking', title: 'New session request', body: 'Maya Chen requested a video session.', targetId: 'seed-req', senderId: me, unread: true, createdAt: ago(0.3) });
+  console.log('✔ Demo client maya@demo.mindnest.app');
+}

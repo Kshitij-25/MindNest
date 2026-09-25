@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +16,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Local development against `firebase emulators:start`:
+  //   flutter run --dart-define=USE_FIREBASE_EMULATOR=true
+  if (const bool.fromEnvironment('USE_FIREBASE_EMULATOR')) {
+    const host = String.fromEnvironment('FIREBASE_EMULATOR_HOST', defaultValue: 'localhost');
+    await FirebaseAuth.instance.useAuthEmulator(host, 9099);
+    FirebaseFirestore.instance.useFirestoreEmulator(host, 8080);
+  }
   registerBackgroundPushHandler();
   await configureDependencies();
   await getIt<SettingsCubit>().init();

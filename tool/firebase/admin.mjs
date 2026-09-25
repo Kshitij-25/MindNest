@@ -7,7 +7,8 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
 const keyFile = new URL('./service-account.json', import.meta.url);
-if (!existsSync(keyFile) && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+const emulator = !!process.env.FIRESTORE_EMULATOR_HOST;
+if (!emulator && !existsSync(keyFile) && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   console.error(
     'Missing admin credentials.\n' +
       'Firebase console → Project settings → Service accounts → Generate new private key,\n' +
@@ -16,7 +17,7 @@ if (!existsSync(keyFile) && !process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   process.exit(1);
 }
 initializeApp({
-  credential: existsSync(keyFile) ? cert(JSON.parse(readFileSync(keyFile, 'utf8'))) : applicationDefault(),
+  ...(emulator ? {} : { credential: existsSync(keyFile) ? cert(JSON.parse(readFileSync(keyFile, 'utf8'))) : applicationDefault() }),
   projectId: 'mental-health-cecad',
 });
 
