@@ -9,7 +9,7 @@ part 'mood_summary.freezed.dart';
 abstract class MoodSummary with _$MoodSummary {
   const factory MoodSummary({
     MoodEntry? today,
-    /// Last 7 days, oldest first (level 1..5).
+    /// Last 7 days, oldest first (level 1..5, 0 = no check-in).
     required List<int> week,
     /// Last 28 days, oldest first.
     required List<int> month,
@@ -23,8 +23,14 @@ abstract class MoodSummary with _$MoodSummary {
 
   const MoodSummary._();
 
-  double get weekAverage => week.isEmpty ? 3 : week.reduce((a, b) => a + b) / week.length;
-  double get monthAverage => month.isEmpty ? 3 : month.reduce((a, b) => a + b) / month.length;
+  /// Averages over logged days only (0 = no check-in).
+  double get weekAverage => _avg(week);
+  double get monthAverage => _avg(month);
+
+  static double _avg(List<int> l) {
+    final v = l.where((x) => x > 0).toList();
+    return v.isEmpty ? 3 : v.reduce((a, b) => a + b) / v.length;
+  }
 
   /// Count of days at each level, keyed 1..5.
   Map<int, int> get distribution => {for (var l = 5; l >= 1; l--) l: month.where((m) => m == l).length};

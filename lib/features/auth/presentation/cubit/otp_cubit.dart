@@ -10,28 +10,25 @@ import 'form_status.dart';
 
 part 'otp_cubit.freezed.dart';
 
+/// Email verification after sign-up: the user taps the link Firebase sent,
+/// then confirms here.
 @freezed
 abstract class OtpState with _$OtpState {
   const factory OtpState({
-    @Default('') String code,
-    @Default(28) int secondsLeft,
+    @Default(30) int secondsLeft,
     @Default(FormStatus.idle) FormStatus status,
     String? error,
   }) = _OtpState;
-
-  const OtpState._();
-
-  bool get complete => code.length == 6;
 }
 
 @injectable
 class OtpCubit extends Cubit<OtpState> {
-  OtpCubit(this._verify, this._resend) : super(const OtpState()) {
+  OtpCubit(this._check, this._resend) : super(const OtpState()) {
     _startTimer();
   }
 
-  final VerifyOtp _verify;
-  final ResendOtp _resend;
+  final CheckEmailVerified _check;
+  final ResendVerificationEmail _resend;
   Timer? _timer;
 
   void _startTimer() {
@@ -45,25 +42,18 @@ class OtpCubit extends Cubit<OtpState> {
     });
   }
 
-  void codeChanged(String v) {
-    final digits = v.replaceAll(RegExp(r'[^0-9]'), '');
-    emit(
-      state.copyWith(
-        code: digits.length > 6 ? digits.substring(0, 6) : digits,
-        error: null,
-      ),
-    );
-  }
-
   Future<void> resend() async {
-    await _resend(const NoParams());
-    emit(state.copyWith(secondsLeft: 28));
+    final res = await _resend(const NoParams());
+    res.fold(
+      (f) => emit(state.copyWith(status: FormStatus.failure, error: f.message)),
+      (_) => emit(state.copyWith(status: FormStatus.idle, secondsLeft: 30, error: null)),
+    );
     _startTimer();
   }
 
   Future<void> verify() async {
-    emit(state.copyWith(status: FormStatus.submitting));
-    final res = await _verify(state.code);
+    emit(state.copyWith(status: FormStatus.submitting, error: null));
+    final res = await _check(const NoParams());
     res.fold(
       (f) => emit(state.copyWith(status: FormStatus.failure, error: f.message)),
       (_) => emit(state.copyWith(status: FormStatus.success)),

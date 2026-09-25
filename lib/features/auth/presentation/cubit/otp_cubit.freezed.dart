@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OtpState {
 
- String get code; int get secondsLeft; FormStatus get status; String? get error;
+ int get secondsLeft; FormStatus get status; String? get error;
 /// Create a copy of OtpState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $OtpStateCopyWith<OtpState> get copyWith => _$OtpStateCopyWithImpl<OtpState>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as OtpState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OtpState&&(identical(other.code, _this.code) || other.code == _this.code)&&(identical(other.secondsLeft, _this.secondsLeft) || other.secondsLeft == _this.secondsLeft)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.error, _this.error) || other.error == _this.error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OtpState&&(identical(other.secondsLeft, _this.secondsLeft) || other.secondsLeft == _this.secondsLeft)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.error, _this.error) || other.error == _this.error));
 }
 
 
 @override
 int get hashCode {
   final _this = this as OtpState;
-  return Object.hash(runtimeType,_this.code,_this.secondsLeft,_this.status,_this.error);
+  return Object.hash(runtimeType,_this.secondsLeft,_this.status,_this.error);
 }
 
 @override
 String toString() {
   final _this = this as OtpState;
-  return 'OtpState(code: ${_this.code}, secondsLeft: ${_this.secondsLeft}, status: ${_this.status}, error: ${_this.error})';
+  return 'OtpState(secondsLeft: ${_this.secondsLeft}, status: ${_this.status}, error: ${_this.error})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $OtpStateCopyWith<$Res>  {
   factory $OtpStateCopyWith(OtpState value, $Res Function(OtpState) _then) = _$OtpStateCopyWithImpl;
 @useResult
 $Res call({
- String code, int secondsLeft, FormStatus status, String? error
+ int secondsLeft, FormStatus status, String? error
 });
 
 
@@ -68,10 +68,9 @@ class _$OtpStateCopyWithImpl<$Res>
 
 /// Create a copy of OtpState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? code = null,Object? secondsLeft = null,Object? status = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? secondsLeft = null,Object? status = null,Object? error = freezed,}) {
   return _then(OtpState(
-code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
-as String,secondsLeft: null == secondsLeft ? _self.secondsLeft : secondsLeft // ignore: cast_nullable_to_non_nullable
+secondsLeft: null == secondsLeft ? _self.secondsLeft : secondsLeft // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FormStatus,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -159,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String code,  int secondsLeft,  FormStatus status,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int secondsLeft,  FormStatus status,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OtpState() when $default != null:
-return $default(_that.code,_that.secondsLeft,_that.status,_that.error);case _:
+return $default(_that.secondsLeft,_that.status,_that.error);case _:
   return orElse();
 
 }
@@ -180,10 +179,10 @@ return $default(_that.code,_that.secondsLeft,_that.status,_that.error);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String code,  int secondsLeft,  FormStatus status,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int secondsLeft,  FormStatus status,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _OtpState():
-return $default(_that.code,_that.secondsLeft,_that.status,_that.error);case _:
+return $default(_that.secondsLeft,_that.status,_that.error);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +199,10 @@ return $default(_that.code,_that.secondsLeft,_that.status,_that.error);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String code,  int secondsLeft,  FormStatus status,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int secondsLeft,  FormStatus status,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _OtpState() when $default != null:
-return $default(_that.code,_that.secondsLeft,_that.status,_that.error);case _:
+return $default(_that.secondsLeft,_that.status,_that.error);case _:
   return null;
 
 }
@@ -214,11 +213,10 @@ return $default(_that.code,_that.secondsLeft,_that.status,_that.error);case _:
 /// @nodoc
 
 
-class _OtpState extends OtpState {
-  const _OtpState({this.code = '', this.secondsLeft = 28, this.status = FormStatus.idle, this.error}): super._();
+class _OtpState implements OtpState {
+  const _OtpState({this.secondsLeft = 30, this.status = FormStatus.idle, this.error});
   
 
-@override@JsonKey() final  String code;
 @override@JsonKey() final  int secondsLeft;
 @override@JsonKey() final  FormStatus status;
 @override final  String? error;
@@ -233,18 +231,18 @@ _$OtpStateCopyWith<_OtpState> get copyWith => __$OtpStateCopyWithImpl<_OtpState>
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OtpState&&(identical(other.code, code) || other.code == code)&&(identical(other.secondsLeft, secondsLeft) || other.secondsLeft == secondsLeft)&&(identical(other.status, status) || other.status == status)&&(identical(other.error, error) || other.error == error));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OtpState&&(identical(other.secondsLeft, secondsLeft) || other.secondsLeft == secondsLeft)&&(identical(other.status, status) || other.status == status)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,code,secondsLeft,status,error);
+    return Object.hash(runtimeType,secondsLeft,status,error);
 }
 
 @override
 String toString() {
-    return 'OtpState(code: $code, secondsLeft: $secondsLeft, status: $status, error: $error)';
+    return 'OtpState(secondsLeft: $secondsLeft, status: $status, error: $error)';
 }
 
 
@@ -255,7 +253,7 @@ abstract mixin class _$OtpStateCopyWith<$Res> implements $OtpStateCopyWith<$Res>
   factory _$OtpStateCopyWith(_OtpState value, $Res Function(_OtpState) _then) = __$OtpStateCopyWithImpl;
 @override @useResult
 $Res call({
- String code, int secondsLeft, FormStatus status, String? error
+ int secondsLeft, FormStatus status, String? error
 });
 
 
@@ -272,10 +270,9 @@ class __$OtpStateCopyWithImpl<$Res>
 
 /// Create a copy of OtpState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? code = null,Object? secondsLeft = null,Object? status = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? secondsLeft = null,Object? status = null,Object? error = freezed,}) {
   return _then(_OtpState(
-code: null == code ? _self.code : code // ignore: cast_nullable_to_non_nullable
-as String,secondsLeft: null == secondsLeft ? _self.secondsLeft : secondsLeft // ignore: cast_nullable_to_non_nullable
+secondsLeft: null == secondsLeft ? _self.secondsLeft : secondsLeft // ignore: cast_nullable_to_non_nullable
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as FormStatus,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,

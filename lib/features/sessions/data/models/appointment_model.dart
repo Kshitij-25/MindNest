@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import '../../../../core/firebase/collections.dart';
 
 import '../../../therapists/domain/entities/therapist.dart';
 import '../../domain/entities/appointment.dart';
@@ -17,6 +20,34 @@ class AppointmentModel {
     this.recurrence = Recurrence.oneTime,
     this.reminders = const ['24h', '1h'],
   });
+
+  /// Maps a booking doc to the client's view: `declined` reads as cancelled,
+  /// and an accepted session that has ended reads as completed.
+  factory AppointmentModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> s) {
+    final d = s.data()!;
+    final startsAt = readDate(d['startsAt']);
+    final minutes = readInt(d['minutes'], 50);
+    var status = switch (d['status']) {
+      'accepted' => AppointmentStatus.accepted,
+      'completed' => AppointmentStatus.completed,
+      'cancelled' || 'declined' => AppointmentStatus.cancelled,
+      _ => AppointmentStatus.pending,
+    };
+    if (status == AppointmentStatus.accepted &&
+        startsAt.add(Duration(minutes: minutes)).isBefore(DateTime.now())) {
+      status = AppointmentStatus.completed;
+    }
+    return AppointmentModel(
+      id: s.id,
+      therapistId: d['therapistId'] as String,
+      startsAt: startsAt,
+      type: SessionType.values.asNameMap()[d['type']] ?? SessionType.video,
+      minutes: minutes,
+      status: status,
+      recurrence: Recurrence.values.asNameMap()[d['recurrence']] ?? Recurrence.oneTime,
+      reminders: readStrings(d['reminders']),
+    );
+  }
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) => _$AppointmentModelFromJson(json);
 

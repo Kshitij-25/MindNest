@@ -43,10 +43,13 @@ class TherapistRepositoryImpl implements TherapistRepository {
       guard(() async => (await _ds.reviews(therapistId)).map((r) => r.toEntity()).toList());
 
   @override
-  ResultFuture<List<DayAvailability>> getWeeklyAvailability(String therapistId) => guard(() async => [
-        for (final (i, d) in const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].indexed)
-          DayAvailability(day: d, slots: i % 3 == 0 ? 0 : 2 + i),
-      ]);
+  ResultFuture<List<DayAvailability>> getWeeklyAvailability(String therapistId) => guard(() async {
+        final hours = (await _ds.therapist(therapistId)).hours;
+        return [
+          for (final (i, d) in const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].indexed)
+            DayAvailability(day: d, slots: hours['${i + 1}']?.length ?? 0),
+        ];
+      });
 
   @override
   ResultFuture<bool> toggleSaved(String id) => guard(() => _ds.toggleSaved(id));

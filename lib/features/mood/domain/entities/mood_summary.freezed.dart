@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MoodSummary {
 
- MoodEntry? get today;/// Last 7 days, oldest first (level 1..5).
+ MoodEntry? get today;/// Last 7 days, oldest first (level 1..5, 0 = no check-in).
  List<int> get week;/// Last 28 days, oldest first.
  List<int> get month; int get streak; int get bestStreak;/// Week-over-week change, e.g. 12 for +12%.
  int get trendPercent; List<MoodEntry> get recent; List<MoodInsight> get insights;
@@ -238,9 +238,9 @@ class _MoodSummary extends MoodSummary {
   
 
 @override final  MoodEntry? today;
-/// Last 7 days, oldest first (level 1..5).
+/// Last 7 days, oldest first (level 1..5, 0 = no check-in).
  final  List<int> _week;
-/// Last 7 days, oldest first (level 1..5).
+/// Last 7 days, oldest first (level 1..5, 0 = no check-in).
 @override List<int> get week {
   if (_week is EqualUnmodifiableListView) return _week;
   // ignore: implicit_dynamic_type

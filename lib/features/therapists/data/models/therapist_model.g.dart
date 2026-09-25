@@ -26,6 +26,15 @@ TherapistModel _$TherapistModelFromJson(Map<String, dynamic> json) =>
       types:
           (json['types'] as List<dynamic>?)?.map((e) => e as String).toList() ??
           const ['Video', 'Voice', 'Chat'],
+      hours:
+          (json['hours'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              k,
+              (e as List<dynamic>).map((e) => e as String).toList(),
+            ),
+          ) ??
+          defaultWorkingHours,
+      acceptingClients: json['acceptingClients'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$TherapistModelToJson(TherapistModel instance) =>
@@ -46,6 +55,8 @@ Map<String, dynamic> _$TherapistModelToJson(TherapistModel instance) =>
       'about': instance.about,
       'quals': instance.quals,
       'types': instance.types,
+      'hours': instance.hours,
+      'acceptingClients': instance.acceptingClients,
     };
 
 ReviewModel _$ReviewModelFromJson(Map<String, dynamic> json) => ReviewModel(

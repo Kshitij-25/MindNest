@@ -1,6 +1,5 @@
 import 'package:injectable/injectable.dart';
 
-import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/guard.dart';
 import '../../../../core/usecase/usecase.dart';
 import '../../domain/entities/conversation.dart';
@@ -23,18 +22,8 @@ class ChatRepositoryImpl implements ChatRepository {
   );
 
   @override
-  ResultFuture<Conversation> getConversation(String id) => guard(() async {
-    final all = [
-      ...await _ds.conversations(asProfessional: false),
-      ...await _ds.conversations(asProfessional: true),
-    ];
-    return all
-        .firstWhere(
-          (c) => c.id == id,
-          orElse: () => throw const NotFoundException(),
-        )
-        .toEntity();
-  });
+  ResultFuture<Conversation> getConversation(String id) =>
+      guard(() async => (await _ds.conversation(id)).toEntity());
 
   @override
   ResultFuture<String> conversationWith(String participantId) =>

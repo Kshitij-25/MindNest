@@ -106,22 +106,23 @@ class SendPasswordReset implements UseCase<void, String> {
   }
 }
 
+/// Confirms the user has clicked the link in their verification email.
 @injectable
-class VerifyOtp implements UseCase<void, String> {
-  const VerifyOtp(this._repo);
+class CheckEmailVerified implements UseCase<void, NoParams> {
+  const CheckEmailVerified(this._repo);
   final AuthRepository _repo;
 
   @override
-  ResultFuture<void> call(String code) => _repo.verifyOtp(code);
+  ResultFuture<void> call(NoParams _) => _repo.checkEmailVerified();
 }
 
 @injectable
-class ResendOtp implements UseCase<void, NoParams> {
-  const ResendOtp(this._repo);
+class ResendVerificationEmail implements UseCase<void, NoParams> {
+  const ResendVerificationEmail(this._repo);
   final AuthRepository _repo;
 
   @override
-  ResultFuture<void> call(NoParams _) => _repo.resendOtp();
+  ResultFuture<void> call(NoParams _) => _repo.resendVerificationEmail();
 }
 
 @injectable

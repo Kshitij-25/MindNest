@@ -17,12 +17,34 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthLocalDataSource _local;
 
   @override
-  AppUser? get cachedUser => _local.readUser()?.toEntity();
+  AppUser? get cachedUser {
+    final uid = _remote.currentUid;
+    final cached = _local.readUser();
+    return uid != null && cached?.id == uid ? cached!.toEntity() : null;
+  }
 
   Future<AppUser> _persist(AppUserModel m) async {
     await _local.writeUser(m);
     return m.toEntity();
   }
+
+  @override
+  ResultFuture<AppUser?> restoreSession() => guard(() async {
+    if (_remote.currentUid == null) {
+      await _local.clear();
+      return null;
+    }
+    final cached = cachedUser;
+    if (cached != null) return cached;
+    final remote = await _remote.currentProfile();
+    return remote == null ? null : _persist(remote);
+  });
+
+  @override
+  Stream<AppUser> watchUser(String uid) => _remote
+      .watchProfile(uid)
+      .where((m) => m != null)
+      .asyncMap((m) => _persist(m!));
 
   @override
   ResultFuture<AppUser> signIn({
@@ -66,16 +88,22 @@ class AuthRepositoryImpl implements AuthRepository {
       guard(() => _remote.sendPasswordReset(email));
 
   @override
-  ResultFuture<void> verifyOtp(String code) =>
-      guard(() => _remote.verifyOtp(code));
+  ResultFuture<void> checkEmailVerified() =>
+      guard(() => _remote.checkEmailVerified());
 
   @override
-  ResultFuture<void> resendOtp() => guard(() => _remote.resendOtp());
+  ResultFuture<void> resendVerificationEmail() =>
+      guard(() => _remote.resendVerificationEmail());
 
   @override
-  ResultFuture<AppUser> updateUser(AppUser user) =>
-      guard(() => _persist(AppUserModel.fromEntity(user)));
+  ResultFuture<AppUser> updateUser(AppUser user) => guard(
+    () async =>
+        _persist(await _remote.updateProfile(AppUserModel.fromEntity(user))),
+  );
 
   @override
-  ResultFuture<void> signOut() => guard(() => _local.clear());
+  ResultFuture<void> signOut() => guard(() async {
+    await _remote.signOut();
+    await _local.clear();
+  });
 }

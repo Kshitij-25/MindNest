@@ -213,7 +213,7 @@ return $default(_that.phone,_that.bio);case _:
 
 
 class _ProfileDetails implements ProfileDetails {
-  const _ProfileDetails({this.phone = '+44 7700 900892', this.bio = 'Learning to slow down and be kinder to myself.'});
+  const _ProfileDetails({this.phone = '', this.bio = ''});
   
 
 @override@JsonKey() final  String phone;

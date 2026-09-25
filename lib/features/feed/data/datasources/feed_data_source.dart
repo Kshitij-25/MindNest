@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/network/mock_latency.dart';
+import '../../../../core/firebase/collections.dart';
+import '../../../../core/firebase/session.dart';
 import '../../domain/entities/post.dart';
 import '../models/post_model.dart';
 
@@ -17,165 +19,170 @@ abstract interface class FeedDataSource {
   Future<PostModel> create(PostModel model);
 }
 
+/// Posts live in `posts/`. Like/comment counters are kept with atomic
+/// increments that security rules tie to the per-user marker docs
+/// (`users/{uid}/likedPosts/{postId}`), so they can't drift or be forged.
 @LazySingleton(as: FeedDataSource)
-class FeedMockDataSource implements FeedDataSource {
-  FeedMockDataSource() {
-    final now = DateTime.now();
-    const okafor = PostAuthorModel(id: 't1', name: 'Dr. Amara Okafor', title: 'Clinical Psychologist', spec: 'Anxiety & Stress');
-    const mercer = PostAuthorModel(id: 't2', name: 'Daniel Mercer', title: 'Psychotherapist', spec: 'Depression & Mood');
-    const nair = PostAuthorModel(id: 't3', name: 'Dr. Priya Nair', title: 'Counselling Psychologist', spec: 'Sleep & Burnout');
-    const almeida = PostAuthorModel(id: 't4', name: 'Sofia Almeida', title: 'Therapist', spec: 'Relationships');
-    _posts.addAll([
-      PostModel(
-        id: 'p1',
-        author: okafor,
-        topic: 'Anxiety',
-        publishedAt: now.subtract(const Duration(hours: 2)),
-        image: true,
-        read: 4,
-        likes: 128,
-        comments: 18,
-        views: 1240,
-        title: 'The 3-3-3 rule for an anxious mind',
-        body:
-            'When anxiety spikes, try this gentle grounding tool. Name three things you can see, three sounds you can hear, and move three parts of your body. It won’t erase the feeling — but it gently reminds your nervous system that you’re here, and you’re safe.\n\nThe goal isn’t to force calm. It’s to give your attention somewhere kinder to land.',
-      ),
-      PostModel(
-        id: 'p2',
-        author: nair,
-        topic: 'Sleep',
-        publishedAt: now.subtract(const Duration(hours: 5)),
-        read: 3,
-        likes: 94,
-        comments: 12,
-        saved: true,
-        liked: true,
-        title: 'Why “trying harder” to sleep backfires',
-        body:
-            'Sleep is a letting-go, not a doing. The more we chase it, the more alert we become. Tonight, instead of trying to sleep, try simply resting — no goal, no clock-watching. Rest is restorative on its own.',
-      ),
-      PostModel(
-        id: 'p3',
-        author: mercer,
-        topic: 'Mindfulness',
-        publishedAt: now.subtract(const Duration(days: 1)),
-        image: true,
-        read: 5,
-        likes: 211,
-        comments: 31,
-        views: 2890,
-        title: 'A 60-second reset for busy days',
-        body:
-            'You don’t need an hour to come back to yourself. One slow breath, a hand on your chest, and a single kind sentence: “This is hard, and I’m doing my best.” Repeat as needed.',
-      ),
-      PostModel(
-        id: 'p4',
-        author: almeida,
-        topic: 'Relationships',
-        publishedAt: now.subtract(const Duration(days: 2)),
-        read: 4,
-        likes: 76,
-        comments: 9,
-        title: 'Boundaries are a form of care',
-        body:
-            'Saying no isn’t shutting someone out — it’s being honest about what you can hold. A clear boundary, kindly stated, protects the relationship as much as it protects you.',
-      ),
-    ]);
-    _mine.addAll([
-      PostModel(
-        id: 'pp1', author: _me, topic: 'Anxiety', publishedAt: now.subtract(const Duration(hours: 2)), image: true,
-        likes: 128, comments: 18, views: 1240, title: 'The 3-3-3 rule for an anxious mind', body: _posts[0].body,
-      ),
-      PostModel(
-        id: 'pp2', author: _me, topic: 'Mindfulness', publishedAt: now.subtract(const Duration(days: 3)), image: true,
-        likes: 211, comments: 31, views: 2890, title: 'A 60-second reset for busy days', body: _posts[2].body,
-      ),
-      PostModel(
-        id: 'pp3', author: _me, topic: 'Stress', publishedAt: now, status: PostStatus.draft,
-        title: 'Untangling the “I’m behind” feeling', body: 'Draft…',
-      ),
-    ]);
-    _comments['p1'] = [
-      CommentModel(id: 'pc1', name: 'Leah K.', createdAt: now.subtract(const Duration(hours: 1)), text: 'Needed this today. The “somewhere kinder to land” line really got me.', likes: 12),
-      CommentModel(id: 'pc2', name: 'Sam R.', createdAt: now.subtract(const Duration(minutes: 40)), text: 'Tried it on the train this morning and it genuinely helped.', likes: 5),
-      CommentModel(id: 'pc3', name: 'Maya L.', createdAt: now.subtract(const Duration(minutes: 12)), text: 'Saving this for my next anxious moment 💚', likes: 2),
-    ];
+class FirestoreFeedDataSource implements FeedDataSource {
+  FirestoreFeedDataSource(this._db, this._session);
+  final FirebaseFirestore _db;
+  final FirebaseSession _session;
+
+  String get _me => _session.uid;
+  CollectionReference<Map<String, dynamic>> get _liked => _db.userCol(_me, 'likedPosts');
+  CollectionReference<Map<String, dynamic>> get _saved => _db.userCol(_me, 'savedPosts');
+
+  Future<(Set<String>, Set<String>)> _marks() async {
+    final r = await Future.wait([_liked.get(), _saved.get()]);
+    return (r[0].docs.map((d) => d.id).toSet(), r[1].docs.map((d) => d.id).toSet());
   }
 
-  static const _me = PostAuthorModel(id: 'pro-1', name: 'Dr. Evelyn Hale', title: 'Clinical Psychologist', spec: 'Anxiety & Trauma');
-
-  final _posts = <PostModel>[];
-  final _mine = <PostModel>[];
-  final _comments = <String, List<CommentModel>>{};
-
-  PostModel _find(String id) =>
-      [..._posts, ..._mine].firstWhere((p) => p.id == id, orElse: () => throw const NotFoundException());
+  PostModel _post(DocumentSnapshot<Map<String, dynamic>> s, (Set<String>, Set<String>) marks) {
+    final d = s.data()!;
+    final a = d['author'] as Map? ?? const {};
+    return PostModel(
+      id: s.id,
+      author: PostAuthorModel(
+        id: d['authorId'] as String? ?? '',
+        name: a['name'] as String? ?? '',
+        title: a['title'] as String? ?? '',
+        spec: a['spec'] as String? ?? '',
+        verified: a['verified'] as bool? ?? false,
+      ),
+      topic: d['topic'] as String? ?? '',
+      title: d['title'] as String? ?? '',
+      body: d['body'] as String? ?? '',
+      publishedAt: readDate(d['publishedAt']),
+      image: d['image'] as bool? ?? false,
+      read: readInt(d['read'], 3),
+      likes: readInt(d['likes']),
+      comments: readInt(d['comments']),
+      views: readInt(d['views']),
+      liked: marks.$1.contains(s.id),
+      saved: marks.$2.contains(s.id),
+      status: d['status'] == 'draft' ? PostStatus.draft : PostStatus.published,
+    );
+  }
 
   @override
   Future<List<PostModel>> posts() async {
-    await mockLatency();
-    return _posts;
+    final marks = await _marks();
+    final snap = await _db.posts
+        .where('status', isEqualTo: 'published')
+        .orderBy('publishedAt', descending: true)
+        .limit(50)
+        .get();
+    return snap.docs.map((d) => _post(d, marks)).toList();
   }
 
   @override
   Future<List<PostModel>> myPosts() async {
-    await mockLatency();
-    return _mine;
+    final marks = await _marks();
+    final snap = await _db.posts.where('authorId', isEqualTo: _me).orderBy('publishedAt', descending: true).get();
+    return snap.docs.map((d) => _post(d, marks)).toList();
   }
 
   @override
   Future<PostModel> post(String id) async {
-    await mockLatency(150);
-    return _find(id);
+    final snap = await _db.posts.doc(id).get();
+    if (!snap.exists) throw const NotFoundException();
+    if (snap.data()!['authorId'] != _me) {
+      snap.reference.update({'views': FieldValue.increment(1)}).ignore();
+    }
+    return _post(snap, await _marks());
   }
 
   @override
   Future<void> setLiked(String id, bool liked) async {
-    final p = _find(id);
-    if (p.liked != liked) p.likes += liked ? 1 : -1;
-    p.liked = liked;
+    final mark = _liked.doc(id);
+    if ((await mark.get()).exists == liked) return;
+    final batch = _db.batch()..update(_db.posts.doc(id), {'likes': FieldValue.increment(liked ? 1 : -1)});
+    liked ? batch.set(mark, {'at': FieldValue.serverTimestamp()}) : batch.delete(mark);
+    await batch.commit();
   }
 
   @override
-  Future<void> setSaved(String id, bool saved) async => _find(id).saved = saved;
+  Future<void> setSaved(String id, bool saved) =>
+      saved ? _saved.doc(id).set({'at': FieldValue.serverTimestamp()}) : _saved.doc(id).delete();
+
+  CommentModel _comment(DocumentSnapshot<Map<String, dynamic>> s) {
+    final d = s.data()!;
+    final likedBy = readStrings(d['likedBy']);
+    return CommentModel(
+      id: s.id,
+      name: d['name'] as String? ?? '',
+      createdAt: readDate(d['createdAt']),
+      text: d['text'] as String? ?? '',
+      likes: likedBy.length,
+      liked: likedBy.contains(_me),
+    );
+  }
 
   @override
   Future<List<CommentModel>> comments(String postId) async {
-    await mockLatency(250);
-    return _comments.putIfAbsent(postId, () => List.of(_comments['p1'] ?? const []));
+    final snap = await _db.posts.doc(postId).collection('comments').orderBy('createdAt').limitToLast(200).get();
+    return snap.docs.map(_comment).toList();
   }
 
   @override
   Future<CommentModel> addComment(String postId, String author, String text) async {
-    await mockLatency(200);
-    final c = CommentModel(id: 'c${DateTime.now().microsecondsSinceEpoch}', name: author, createdAt: DateTime.now(), text: text);
-    _comments.putIfAbsent(postId, () => []).add(c);
-    _find(postId).comments++;
-    return c;
+    final postRef = _db.posts.doc(postId);
+    final ref = postRef.collection('comments').doc();
+    final batch = _db.batch()
+      ..set(ref, {
+        'authorId': _me,
+        'name': author,
+        'text': text,
+        'likedBy': <String>[],
+        'createdAt': FieldValue.serverTimestamp(),
+      })
+      ..update(postRef, {'comments': FieldValue.increment(1)});
+    await batch.commit();
+    return CommentModel(id: ref.id, name: author, createdAt: DateTime.now(), text: text);
   }
 
   @override
-  Future<void> setCommentLiked(String postId, String commentId, bool liked) async {
-    final c = _comments[postId]?.firstWhere((x) => x.id == commentId);
-    if (c == null) return;
-    if (c.liked != liked) c.likes += liked ? 1 : -1;
-    c.liked = liked;
-  }
+  Future<void> setCommentLiked(String postId, String commentId, bool liked) =>
+      _db.posts.doc(postId).collection('comments').doc(commentId).update({
+        'likedBy': liked ? FieldValue.arrayUnion([_me]) : FieldValue.arrayRemove([_me]),
+      });
 
   @override
-  Future<PostModel> create(PostModel model) async {
-    await mockLatency(800);
-    final m = PostModel(
-      id: 'pp${DateTime.now().microsecondsSinceEpoch}',
-      author: _me,
-      topic: model.topic,
-      title: model.title,
-      body: model.body,
-      publishedAt: DateTime.now(),
-      image: model.image,
-      status: model.status,
+  Future<PostModel> create(PostModel m) async {
+    final pro = (await _db.therapist(_me).get()).data() ?? const {};
+    final author = PostAuthorModel(
+      id: _me,
+      name: pro['name'] as String? ?? '',
+      title: pro['title'] as String? ?? 'Therapist',
+      spec: pro['spec'] as String? ?? '',
+      verified: pro['verified'] as bool? ?? false,
     );
-    _mine.insert(0, m);
-    return m;
+    final words = m.body.trim().split(RegExp(r'\s+')).length;
+    final read = (words / 200).ceil().clamp(1, 60);
+    final ref = await _db.posts.add({
+      'authorId': _me,
+      'author': {'name': author.name, 'title': author.title, 'spec': author.spec, 'verified': author.verified},
+      'topic': m.topic,
+      'title': m.title,
+      'body': m.body,
+      'image': m.image,
+      'read': read,
+      'likes': 0,
+      'comments': 0,
+      'views': 0,
+      'status': m.status.name,
+      'publishedAt': FieldValue.serverTimestamp(),
+    });
+    return PostModel(
+      id: ref.id,
+      author: author,
+      topic: m.topic,
+      title: m.title,
+      body: m.body,
+      publishedAt: DateTime.now(),
+      image: m.image,
+      read: read,
+      status: m.status,
+    );
   }
 }

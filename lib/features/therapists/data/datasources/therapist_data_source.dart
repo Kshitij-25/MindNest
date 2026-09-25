@@ -1,9 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/network/mock_latency.dart';
+import '../../../../core/firebase/collections.dart';
+import '../../../../core/firebase/session.dart';
 import '../models/therapist_model.dart';
-import 'therapist_mock_data.dart';
 
 abstract interface class TherapistDataSource {
   Future<List<TherapistModel>> therapists();
@@ -13,35 +14,51 @@ abstract interface class TherapistDataSource {
   Future<bool> toggleSaved(String id);
 }
 
+/// Public directory in `therapists/`; only verified professionals are listed.
 @LazySingleton(as: TherapistDataSource)
-class TherapistMockDataSource implements TherapistDataSource {
-  final _all = therapistsJson.map(TherapistModel.fromJson).toList();
-  final _saved = <String>{};
+class FirestoreTherapistDataSource implements TherapistDataSource {
+  FirestoreTherapistDataSource(this._db, this._session);
+  final FirebaseFirestore _db;
+  final FirebaseSession _session;
+
+  CollectionReference<Map<String, dynamic>> get _saved => _db.userCol(_session.uid, 'savedTherapists');
 
   @override
   Future<List<TherapistModel>> therapists() async {
-    await mockLatency();
-    return _all;
+    final snap = await _db.collection(Col.therapists).where('verified', isEqualTo: true).get();
+    return snap.docs.map(TherapistModel.fromFirestore).toList()
+      ..sort((a, b) => b.rating.compareTo(a.rating));
   }
 
   @override
   Future<TherapistModel> therapist(String id) async {
-    await mockLatency(200);
-    return _all.firstWhere((t) => t.id == id, orElse: () => throw const NotFoundException());
+    final snap = await _db.therapist(id).get();
+    if (!snap.exists) throw const NotFoundException();
+    return TherapistModel.fromFirestore(snap);
   }
 
   @override
   Future<List<ReviewModel>> reviews(String therapistId) async {
-    await mockLatency(250);
-    return reviewsJson.map(ReviewModel.fromJson).toList();
+    final snap = await _db
+        .therapist(therapistId)
+        .collection('reviews')
+        .orderBy('createdAt', descending: true)
+        .limit(20)
+        .get();
+    return snap.docs.map(ReviewModel.fromFirestore).toList();
   }
 
   @override
-  Future<Set<String>> savedIds() async => _saved;
+  Future<Set<String>> savedIds() async => (await _saved.get()).docs.map((d) => d.id).toSet();
 
   @override
   Future<bool> toggleSaved(String id) async {
-    await mockLatency(120);
-    return _saved.contains(id) ? !_saved.remove(id) : _saved.add(id);
+    final ref = _saved.doc(id);
+    if ((await ref.get()).exists) {
+      await ref.delete();
+      return false;
+    }
+    await ref.set({'savedAt': FieldValue.serverTimestamp()});
+    return true;
   }
 }

@@ -1,8 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/network/mock_latency.dart';
-import '../../domain/entities/appointment.dart';
+import '../../../../core/firebase/collections.dart';
+import '../../../../core/firebase/inbox.dart';
+import '../../../../core/firebase/session.dart';
+import '../../../therapists/data/models/working_hours.dart';
 import '../models/appointment_model.dart';
 
 abstract interface class SessionsDataSource {
@@ -12,69 +15,131 @@ abstract interface class SessionsDataSource {
   Future<Map<DateTime, List<(DateTime, bool)>>> availability(String therapistId, DateTime from, int days);
 }
 
+/// Client-side bookings. Each booking also writes a lock at
+/// `therapists/{id}/busy/{slotKey}` so a slot can't be double-booked and
+/// other clients can see it as taken without reading anyone's appointments.
 @LazySingleton(as: SessionsDataSource)
-class SessionsMockDataSource implements SessionsDataSource {
-  SessionsMockDataSource() {
-    final now = DateTime.now();
-    DateTime at(int dayOffset, int hour) => DateTime(now.year, now.month, now.day + dayOffset, hour);
-    _items.addAll([
-      AppointmentModel(
-        id: 'a1',
-        therapistId: 't1',
-        startsAt: at(5, 16),
-        status: AppointmentStatus.accepted,
-        recurrence: Recurrence.weekly,
-      ),
-      AppointmentModel(
-        id: 'a2',
-        therapistId: 't3',
-        startsAt: at(12, 16),
-        status: AppointmentStatus.accepted,
-        recurrence: Recurrence.weekly,
-      ),
-      AppointmentModel(id: 'p1', therapistId: 't1', startsAt: at(-7, 16), status: AppointmentStatus.completed),
-      AppointmentModel(id: 'p2', therapistId: 't1', startsAt: at(-14, 16), status: AppointmentStatus.completed),
-    ]);
-  }
+class FirestoreSessionsDataSource implements SessionsDataSource {
+  FirestoreSessionsDataSource(this._db, this._session);
+  final FirebaseFirestore _db;
+  final FirebaseSession _session;
 
-  final _items = <AppointmentModel>[];
+  DocumentReference<Map<String, dynamic>> _lock(String therapistId, DateTime at) =>
+      _db.therapist(therapistId).collection('busy').doc(slotKey(at));
 
   @override
   Future<List<AppointmentModel>> appointments() async {
-    await mockLatency();
-    return List.of(_items);
+    final snap = await _db.appointments.where('clientId', isEqualTo: _session.uid).get();
+    return snap.docs.map(AppointmentModel.fromFirestore).toList();
   }
 
   @override
-  Future<AppointmentModel> create(AppointmentModel model) async {
-    await mockLatency(700);
-    _items.add(model);
-    return model;
+  Future<AppointmentModel> create(AppointmentModel m) async {
+    final uid = _session.uid;
+    final lock = _lock(m.therapistId, m.startsAt);
+    if ((await lock.get()).exists) {
+      throw const ServerException('That time was just booked — please pick another.');
+    }
+    final me = (await _db.user(uid).get()).data() ?? const {};
+    final pro = (await _db.therapist(m.therapistId).get()).data() ?? const {};
+    final assessment = (await _db.private(uid, 'assessment').get()).data();
+    final goals = readStrings(assessment?['goals']);
+    final previous = await _db.appointments
+        .where('clientId', isEqualTo: uid)
+        .where('therapistId', isEqualTo: m.therapistId)
+        .limit(1)
+        .get();
+
+    final ref = _db.appointments.doc();
+    final clientName = me['name'] as String? ?? 'A client';
+    final batch = _db.batch()
+      ..set(ref, {
+        'clientId': uid,
+        'clientName': clientName,
+        'therapistId': m.therapistId,
+        'therapistName': pro['name'] ?? '',
+        'startsAt': Timestamp.fromDate(m.startsAt),
+        'type': m.type.name,
+        'minutes': m.minutes,
+        'status': 'pending',
+        'recurrence': m.recurrence.name,
+        'reminders': m.reminders,
+        'price': readInt(pro['price'], 80),
+        'reason': goals.isEmpty ? 'First consultation' : goals.take(2).join(' & '),
+        'note': '',
+        'newClient': previous.docs.isEmpty,
+        'createdAt': FieldValue.serverTimestamp(),
+      })
+      ..set(lock, {
+        'appointmentId': ref.id,
+        'clientId': uid,
+        'startsAt': Timestamp.fromDate(m.startsAt),
+      });
+    Inbox.add(
+      batch,
+      _db,
+      to: m.therapistId,
+      from: uid,
+      type: 'booking',
+      title: 'New session request',
+      body: '$clientName requested a ${m.type.label.toLowerCase()} session.',
+      targetId: ref.id,
+    );
+    await batch.commit();
+    return AppointmentModel(
+      id: ref.id,
+      therapistId: m.therapistId,
+      startsAt: m.startsAt,
+      type: m.type,
+      minutes: m.minutes,
+      recurrence: m.recurrence,
+      reminders: m.reminders,
+    );
   }
 
   @override
   Future<void> cancel(String id) async {
-    await mockLatency(400);
-    final i = _items.indexWhere((a) => a.id == id);
-    if (i < 0) throw const NotFoundException();
-    _items[i] = _items[i].copyWith(status: AppointmentStatus.cancelled);
+    final ref = _db.appointments.doc(id);
+    final snap = await ref.get();
+    if (!snap.exists) throw const NotFoundException();
+    final d = snap.data()!;
+    final therapistId = d['therapistId'] as String;
+    final batch = _db.batch()
+      ..update(ref, {'status': 'cancelled', 'cancelledAt': FieldValue.serverTimestamp()})
+      ..delete(_lock(therapistId, readDate(d['startsAt'])));
+    Inbox.add(
+      batch,
+      _db,
+      to: therapistId,
+      from: _session.uid,
+      type: 'booking',
+      title: 'Session cancelled',
+      body: '${d['clientName'] ?? 'A client'} cancelled their session.',
+      targetId: id,
+    );
+    await batch.commit();
   }
 
   @override
   Future<Map<DateTime, List<(DateTime, bool)>>> availability(String therapistId, DateTime from, int days) async {
-    await mockLatency(250);
-    const hours = [(9, 0), (10, 0), (11, 30), (13, 0), (14, 30), (16, 0), (17, 30)];
-    final seed = therapistId.codeUnits.fold<int>(0, (a, b) => a + b);
+    final pro = await _db.therapist(therapistId).get();
+    if (!pro.exists) throw const NotFoundException();
+    final hours = readWorkingHours(pro.data()!['hours']);
+    final to = DateTime(from.year, from.month, from.day + days);
+    final busy = await _db
+        .therapist(therapistId)
+        .collection('busy')
+        .where('startsAt', isGreaterThanOrEqualTo: Timestamp.fromDate(from))
+        .where('startsAt', isLessThan: Timestamp.fromDate(to))
+        .get();
+    final taken = busy.docs.map((d) => d.id).toSet();
+    final now = DateTime.now();
     return {
       for (var d = 0; d < days; d++)
         DateTime(from.year, from.month, from.day + d): [
-          // Weekends and one weekday per week are unavailable.
-          if (!_off(DateTime(from.year, from.month, from.day + d), seed))
-            for (final (i, (h, m)) in hours.indexed)
-              (DateTime(from.year, from.month, from.day + d, h, m), (i + d + seed) % 5 == 2),
+          for (final t in slotsOn(hours, DateTime(from.year, from.month, from.day + d)))
+            if (t.isAfter(now)) (t, taken.contains(slotKey(t))),
         ],
     };
   }
-
-  bool _off(DateTime d, int seed) => d.weekday == DateTime.sunday || (d.weekday + seed) % 6 == 0;
 }

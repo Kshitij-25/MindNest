@@ -10,10 +10,16 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 
+import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:dio/dio.dart' as _i361;
+import 'package:firebase_auth/firebase_auth.dart' as _i59;
+import 'package:firebase_messaging/firebase_messaging.dart' as _i892;
 import 'package:get_it/get_it.dart' as _i174;
+import 'package:google_sign_in/google_sign_in.dart' as _i116;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:mindnest/core/di/register_module.dart' as _i433;
+import 'package:mindnest/core/firebase/session.dart' as _i871;
+import 'package:mindnest/core/push/push_service.dart' as _i1072;
 import 'package:mindnest/core/router/app_router.dart' as _i687;
 import 'package:mindnest/features/auth/data/datasources/auth_local_data_source.dart'
     as _i572;
@@ -73,8 +79,8 @@ import 'package:mindnest/features/journal/presentation/bloc/journal_bloc.dart'
     as _i840;
 import 'package:mindnest/features/journal/presentation/bloc/journal_editor_cubit.dart'
     as _i901;
-import 'package:mindnest/features/mood/data/datasources/mood_mock_data_source.dart'
-    as _i473;
+import 'package:mindnest/features/mood/data/datasources/mood_data_source.dart'
+    as _i252;
 import 'package:mindnest/features/mood/data/repositories/mood_repository_impl.dart'
     as _i322;
 import 'package:mindnest/features/mood/domain/repositories/mood_repository.dart'
@@ -127,8 +133,8 @@ import 'package:mindnest/features/practice/presentation/bloc/requests_bloc.dart'
     as _i168;
 import 'package:mindnest/features/practice/presentation/bloc/verification_cubit.dart'
     as _i847;
-import 'package:mindnest/features/profile/data/datasources/profile_local_data_source.dart'
-    as _i846;
+import 'package:mindnest/features/profile/data/datasources/profile_data_source.dart'
+    as _i84;
 import 'package:mindnest/features/profile/data/repositories/profile_repository_impl.dart'
     as _i125;
 import 'package:mindnest/features/profile/domain/repositories/profile_repository.dart'
@@ -185,121 +191,84 @@ extension GetItInjectableX on _i174.GetIt {
       () => registerModule.prefs,
       preResolve: true,
     );
+    gh.lazySingleton<_i59.FirebaseAuth>(() => registerModule.firebaseAuth);
+    gh.lazySingleton<_i974.FirebaseFirestore>(() => registerModule.firestore);
+    gh.lazySingleton<_i892.FirebaseMessaging>(() => registerModule.messaging);
+    gh.lazySingleton<_i116.GoogleSignIn>(() => registerModule.googleSignIn);
     gh.lazySingleton<_i361.Dio>(() => registerModule.dio);
-    gh.lazySingleton<_i587.SessionsDataSource>(
-      () => _i587.SessionsMockDataSource(),
-    );
-    gh.lazySingleton<_i471.PracticeDataSource>(
-      () => _i471.PracticeMockDataSource(),
-    );
-    gh.lazySingleton<_i4.TherapistDataSource>(
-      () => _i4.TherapistMockDataSource(),
-    );
-    gh.lazySingleton<_i1024.JournalDataSource>(
-      () => _i1024.JournalMockDataSource(),
-    );
-    gh.lazySingleton<_i768.JournalRepository>(
-      () => _i496.JournalRepositoryImpl(gh<_i1024.JournalDataSource>()),
-    );
-    gh.lazySingleton<_i473.MoodDataSource>(() => _i473.MoodMockDataSource());
-    gh.lazySingleton<_i270.NotificationsDataSource>(
-      () => _i270.NotificationsMockDataSource(),
-    );
-    gh.lazySingleton<_i692.FeedDataSource>(() => _i692.FeedMockDataSource());
-    gh.lazySingleton<_i824.TherapistRepository>(
-      () => _i316.TherapistRepositoryImpl(gh<_i4.TherapistDataSource>()),
-    );
-    gh.lazySingleton<_i90.ChatDataSource>(() => _i90.ChatMockDataSource());
     gh.lazySingleton<_i530.AuthRemoteDataSource>(
-      () => _i530.MockAuthRemoteDataSource(),
-    );
-    gh.lazySingleton<_i98.MoodRepository>(
-      () => _i322.MoodRepositoryImpl(gh<_i473.MoodDataSource>()),
+      () => _i530.FirebaseAuthRemoteDataSource(
+        gh<_i59.FirebaseAuth>(),
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i116.GoogleSignIn>(),
+      ),
     );
     gh.lazySingleton<_i839.SettingsLocalDataSource>(
       () => _i839.SettingsLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
-    gh.factory<_i314.GetJournalEntries>(
-      () => _i314.GetJournalEntries(gh<_i768.JournalRepository>()),
-    );
-    gh.factory<_i314.SaveJournalEntry>(
-      () => _i314.SaveJournalEntry(gh<_i768.JournalRepository>()),
-    );
-    gh.factory<_i314.DeleteJournalEntry>(
-      () => _i314.DeleteJournalEntry(gh<_i768.JournalRepository>()),
-    );
-    gh.lazySingleton<_i840.JournalBloc>(
-      () => _i840.JournalBloc(
-        gh<_i314.GetJournalEntries>(),
-        gh<_i314.SaveJournalEntry>(),
-        gh<_i314.DeleteJournalEntry>(),
-      ),
-    );
     gh.lazySingleton<_i572.AuthLocalDataSource>(
       () => _i572.AuthLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
-    );
-    gh.factory<_i901.JournalEditorCubit>(
-      () => _i901.JournalEditorCubit(
-        gh<_i314.SaveJournalEntry>(),
-        gh<_i840.JournalBloc>(),
-      ),
     );
     gh.lazySingleton<_i637.OnboardingLocalDataSource>(
       () => _i637.OnboardingLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
     );
-    gh.lazySingleton<_i1059.ChatRepository>(
-      () => _i1041.ChatRepositoryImpl(gh<_i90.ChatDataSource>()),
+    gh.lazySingleton<_i871.FirebaseSession>(
+      () => _i871.FirebaseSession(gh<_i59.FirebaseAuth>()),
     );
-    gh.factory<_i389.GetMoodSummary>(
-      () => _i389.GetMoodSummary(gh<_i98.MoodRepository>()),
+    gh.lazySingleton<_i954.SettingsRepository>(
+      () => _i91.SettingsRepositoryImpl(
+        gh<_i839.SettingsLocalDataSource>(),
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
+      ),
     );
-    gh.factory<_i389.LogMood>(() => _i389.LogMood(gh<_i98.MoodRepository>()));
-    gh.lazySingleton<_i846.ProfileLocalDataSource>(
-      () => _i846.ProfileLocalDataSourceImpl(gh<_i460.SharedPreferences>()),
+    gh.lazySingleton<_i252.MoodDataSource>(
+      () => _i252.FirestoreMoodDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
+      ),
     );
-    gh.factory<_i906.GetTherapists>(
-      () => _i906.GetTherapists(gh<_i824.TherapistRepository>()),
+    gh.lazySingleton<_i4.TherapistDataSource>(
+      () => _i4.FirestoreTherapistDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
+      ),
     );
-    gh.factory<_i906.GetTherapist>(
-      () => _i906.GetTherapist(gh<_i824.TherapistRepository>()),
-    );
-    gh.factory<_i906.GetTherapistReviews>(
-      () => _i906.GetTherapistReviews(gh<_i824.TherapistRepository>()),
-    );
-    gh.factory<_i906.GetWeeklyAvailability>(
-      () => _i906.GetWeeklyAvailability(gh<_i824.TherapistRepository>()),
-    );
-    gh.factory<_i906.ToggleSavedTherapist>(
-      () => _i906.ToggleSavedTherapist(gh<_i824.TherapistRepository>()),
+    gh.lazySingleton<_i471.PracticeDataSource>(
+      () => _i471.FirestorePracticeDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
+      ),
     );
     gh.lazySingleton<_i989.PracticeRepository>(
       () => _i137.PracticeRepositoryImpl(gh<_i471.PracticeDataSource>()),
     );
-    gh.lazySingleton<_i233.NotificationsRepository>(
-      () => _i126.NotificationsRepositoryImpl(
-        gh<_i270.NotificationsDataSource>(),
+    gh.lazySingleton<_i637.OnboardingRemoteDataSource>(
+      () => _i637.FirestoreOnboardingDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
       ),
     );
-    gh.lazySingleton<_i954.SettingsRepository>(
-      () => _i91.SettingsRepositoryImpl(gh<_i839.SettingsLocalDataSource>()),
-    );
-    gh.lazySingleton<_i225.SessionsRepository>(
-      () => _i147.SessionsRepositoryImpl(
-        gh<_i587.SessionsDataSource>(),
-        gh<_i824.TherapistRepository>(),
+    gh.lazySingleton<_i1024.JournalDataSource>(
+      () => _i1024.FirestoreJournalDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
       ),
     );
-    gh.factory<_i961.GetConversations>(
-      () => _i961.GetConversations(gh<_i1059.ChatRepository>()),
+    gh.lazySingleton<_i768.JournalRepository>(
+      () => _i496.JournalRepositoryImpl(gh<_i1024.JournalDataSource>()),
     );
-    gh.factory<_i961.OpenConversation>(
-      () => _i961.OpenConversation(gh<_i1059.ChatRepository>()),
+    gh.lazySingleton<_i587.SessionsDataSource>(
+      () => _i587.FirestoreSessionsDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
+      ),
     );
-    gh.factory<_i961.SendMessage>(
-      () => _i961.SendMessage(gh<_i1059.ChatRepository>()),
-    );
-    gh.factory<_i961.WatchConversation>(
-      () => _i961.WatchConversation(gh<_i1059.ChatRepository>()),
+    gh.lazySingleton<_i90.ChatDataSource>(
+      () => _i90.FirestoreChatDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
+      ),
     );
     gh.lazySingleton<_i418.AuthRepository>(
       () => _i1046.AuthRepositoryImpl(
@@ -346,23 +315,35 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i889.GetEarnings>(
       () => _i889.GetEarnings(gh<_i989.PracticeRepository>()),
     );
-    gh.factory<_i968.GetUpcomingSessions>(
-      () => _i968.GetUpcomingSessions(gh<_i225.SessionsRepository>()),
+    gh.lazySingleton<_i824.TherapistRepository>(
+      () => _i316.TherapistRepositoryImpl(gh<_i4.TherapistDataSource>()),
     );
-    gh.factory<_i968.GetPastSessions>(
-      () => _i968.GetPastSessions(gh<_i225.SessionsRepository>()),
+    gh.lazySingleton<_i987.OnboardingRepository>(
+      () => _i149.OnboardingRepositoryImpl(
+        gh<_i637.OnboardingLocalDataSource>(),
+        gh<_i637.OnboardingRemoteDataSource>(),
+      ),
     );
-    gh.factory<_i968.GetBookingDays>(
-      () => _i968.GetBookingDays(gh<_i225.SessionsRepository>()),
+    gh.lazySingleton<_i270.NotificationsDataSource>(
+      () => _i270.FirestoreNotificationsDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
+      ),
     );
-    gh.factory<_i968.BookSession>(
-      () => _i968.BookSession(gh<_i225.SessionsRepository>()),
-    );
-    gh.factory<_i968.CancelSession>(
-      () => _i968.CancelSession(gh<_i225.SessionsRepository>()),
+    gh.lazySingleton<_i84.ProfileDataSource>(
+      () => _i84.FirestoreProfileDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
+      ),
     );
     gh.factory<_i295.EarningsCubit>(
       () => _i295.EarningsCubit(gh<_i889.GetEarnings>()),
+    );
+    gh.lazySingleton<_i692.FeedDataSource>(
+      () => _i692.FirestoreFeedDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i871.FirebaseSession>(),
+      ),
     );
     gh.factory<_i215.LoadPreferences>(
       () => _i215.LoadPreferences(gh<_i954.SettingsRepository>()),
@@ -370,44 +351,36 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i215.SavePreferences>(
       () => _i215.SavePreferences(gh<_i954.SettingsRepository>()),
     );
-    gh.factory<_i52.DiscoverBloc>(
-      () => _i52.DiscoverBloc(
-        gh<_i906.GetTherapists>(),
-        gh<_i906.ToggleSavedTherapist>(),
+    gh.factory<_i314.GetJournalEntries>(
+      () => _i314.GetJournalEntries(gh<_i768.JournalRepository>()),
+    );
+    gh.factory<_i314.SaveJournalEntry>(
+      () => _i314.SaveJournalEntry(gh<_i768.JournalRepository>()),
+    );
+    gh.factory<_i314.DeleteJournalEntry>(
+      () => _i314.DeleteJournalEntry(gh<_i768.JournalRepository>()),
+    );
+    gh.lazySingleton<_i840.JournalBloc>(
+      () => _i840.JournalBloc(
+        gh<_i314.GetJournalEntries>(),
+        gh<_i314.SaveJournalEntry>(),
+        gh<_i314.DeleteJournalEntry>(),
       ),
     );
-    gh.factory<_i343.TherapistProfileCubit>(
-      () => _i343.TherapistProfileCubit(
-        gh<_i906.GetTherapist>(),
-        gh<_i906.GetTherapistReviews>(),
-        gh<_i906.GetWeeklyAvailability>(),
-        gh<_i906.ToggleSavedTherapist>(),
+    gh.factory<_i901.JournalEditorCubit>(
+      () => _i901.JournalEditorCubit(
+        gh<_i314.SaveJournalEntry>(),
+        gh<_i840.JournalBloc>(),
       ),
-    );
-    gh.lazySingleton<_i522.ProfileRepository>(
-      () => _i125.ProfileRepositoryImpl(gh<_i846.ProfileLocalDataSource>()),
-    );
-    gh.lazySingleton<_i326.MoodBloc>(
-      () => _i326.MoodBloc(gh<_i389.GetMoodSummary>(), gh<_i389.LogMood>()),
     );
     gh.factory<_i956.ClientsCubit>(
       () => _i956.ClientsCubit(gh<_i889.GetClients>()),
     );
-    gh.lazySingleton<_i987.OnboardingRepository>(
-      () =>
-          _i149.OnboardingRepositoryImpl(gh<_i637.OnboardingLocalDataSource>()),
-    );
-    gh.factory<_i237.GetProfileDetails>(
-      () => _i237.GetProfileDetails(gh<_i522.ProfileRepository>()),
-    );
-    gh.factory<_i237.SaveProfileDetails>(
-      () => _i237.SaveProfileDetails(gh<_i522.ProfileRepository>()),
-    );
     gh.singleton<_i687.AppRouter>(
       () => _i687.AppRouter(gh<_i418.AuthRepository>()),
     );
-    gh.factory<_i358.ConversationsBloc>(
-      () => _i358.ConversationsBloc(gh<_i961.GetConversations>()),
+    gh.lazySingleton<_i1059.ChatRepository>(
+      () => _i1041.ChatRepositoryImpl(gh<_i90.ChatDataSource>()),
     );
     gh.factory<_i340.SignIn>(() => _i340.SignIn(gh<_i418.AuthRepository>()));
     gh.factory<_i340.SignUp>(() => _i340.SignUp(gh<_i418.AuthRepository>()));
@@ -417,11 +390,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i340.SendPasswordReset>(
       () => _i340.SendPasswordReset(gh<_i418.AuthRepository>()),
     );
-    gh.factory<_i340.VerifyOtp>(
-      () => _i340.VerifyOtp(gh<_i418.AuthRepository>()),
+    gh.factory<_i340.CheckEmailVerified>(
+      () => _i340.CheckEmailVerified(gh<_i418.AuthRepository>()),
     );
-    gh.factory<_i340.ResendOtp>(
-      () => _i340.ResendOtp(gh<_i418.AuthRepository>()),
+    gh.factory<_i340.ResendVerificationEmail>(
+      () => _i340.ResendVerificationEmail(gh<_i418.AuthRepository>()),
     );
     gh.factory<_i340.UpdateUser>(
       () => _i340.UpdateUser(gh<_i418.AuthRepository>()),
@@ -439,30 +412,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i998.GetAssessment>(
       () => _i998.GetAssessment(gh<_i987.OnboardingRepository>()),
     );
-    gh.factory<_i359.GetNotifications>(
-      () => _i359.GetNotifications(gh<_i233.NotificationsRepository>()),
-    );
-    gh.factory<_i359.MarkNotificationRead>(
-      () => _i359.MarkNotificationRead(gh<_i233.NotificationsRepository>()),
-    );
-    gh.factory<_i359.MarkAllNotificationsRead>(
-      () => _i359.MarkAllNotificationsRead(gh<_i233.NotificationsRepository>()),
-    );
     gh.factory<_i956.ClientDetailCubit>(
       () => _i956.ClientDetailCubit(
         gh<_i889.GetClientDetail>(),
         gh<_i889.AddClientNote>(),
         gh<_i889.ToggleClientGoal>(),
-      ),
-    );
-    gh.factory<_i338.MoodTrackCubit>(
-      () => _i338.MoodTrackCubit(gh<_i389.LogMood>(), gh<_i326.MoodBloc>()),
-    );
-    gh.factory<_i878.ChatThreadBloc>(
-      () => _i878.ChatThreadBloc(
-        gh<_i961.OpenConversation>(),
-        gh<_i961.SendMessage>(),
-        gh<_i961.WatchConversation>(),
       ),
     );
     gh.lazySingleton<_i1061.FeedRepository>(
@@ -480,8 +434,33 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i215.SavePreferences>(),
       ),
     );
+    gh.lazySingleton<_i522.ProfileRepository>(
+      () => _i125.ProfileRepositoryImpl(gh<_i84.ProfileDataSource>()),
+    );
+    gh.factory<_i906.GetTherapists>(
+      () => _i906.GetTherapists(gh<_i824.TherapistRepository>()),
+    );
+    gh.factory<_i906.GetTherapist>(
+      () => _i906.GetTherapist(gh<_i824.TherapistRepository>()),
+    );
+    gh.factory<_i906.GetTherapistReviews>(
+      () => _i906.GetTherapistReviews(gh<_i824.TherapistRepository>()),
+    );
+    gh.factory<_i906.GetWeeklyAvailability>(
+      () => _i906.GetWeeklyAvailability(gh<_i824.TherapistRepository>()),
+    );
+    gh.factory<_i906.ToggleSavedTherapist>(
+      () => _i906.ToggleSavedTherapist(gh<_i824.TherapistRepository>()),
+    );
     gh.factory<_i446.QuestionnaireCubit>(
       () => _i446.QuestionnaireCubit(gh<_i998.SaveAssessment>()),
+    );
+    gh.lazySingleton<_i98.MoodRepository>(
+      () => _i322.MoodRepositoryImpl(
+        gh<_i252.MoodDataSource>(),
+        gh<_i1024.JournalDataSource>(),
+        gh<_i587.SessionsDataSource>(),
+      ),
     );
     gh.factory<_i92.GetPosts>(() => _i92.GetPosts(gh<_i1061.FeedRepository>()));
     gh.factory<_i92.GetPost>(() => _i92.GetPost(gh<_i1061.FeedRepository>()));
@@ -506,8 +485,35 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i92.PublishPost>(
       () => _i92.PublishPost(gh<_i1061.FeedRepository>()),
     );
+    gh.factory<_i958.OtpCubit>(
+      () => _i958.OtpCubit(
+        gh<_i340.CheckEmailVerified>(),
+        gh<_i340.ResendVerificationEmail>(),
+      ),
+    );
     gh.factory<_i1037.CalendarCubit>(
       () => _i1037.CalendarCubit(gh<_i889.GetWeekSchedule>()),
+    );
+    gh.lazySingleton<_i233.NotificationsRepository>(
+      () => _i126.NotificationsRepositoryImpl(
+        gh<_i270.NotificationsDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i1072.PushService>(
+      () => _i1072.PushService(
+        gh<_i59.FirebaseAuth>(),
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i892.FirebaseMessaging>(),
+        gh<_i567.SettingsCubit>(),
+        gh<_i687.AppRouter>(),
+      ),
+      dispose: (i) => i.dispose(),
+    );
+    gh.lazySingleton<_i225.SessionsRepository>(
+      () => _i147.SessionsRepositoryImpl(
+        gh<_i587.SessionsDataSource>(),
+        gh<_i824.TherapistRepository>(),
+      ),
     );
     gh.factory<_i847.VerificationCubit>(
       () => _i847.VerificationCubit(
@@ -516,25 +522,34 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i889.SubmitVerification>(),
       ),
     );
-    gh.lazySingleton<_i592.SessionsBloc>(
-      () => _i592.SessionsBloc(
-        gh<_i968.GetUpcomingSessions>(),
-        gh<_i968.GetPastSessions>(),
-        gh<_i968.CancelSession>(),
-      ),
+    gh.factory<_i961.GetConversations>(
+      () => _i961.GetConversations(gh<_i1059.ChatRepository>()),
     );
-    gh.factory<_i958.OtpCubit>(
-      () => _i958.OtpCubit(gh<_i340.VerifyOtp>(), gh<_i340.ResendOtp>()),
+    gh.factory<_i961.OpenConversation>(
+      () => _i961.OpenConversation(gh<_i1059.ChatRepository>()),
+    );
+    gh.factory<_i961.SendMessage>(
+      () => _i961.SendMessage(gh<_i1059.ChatRepository>()),
+    );
+    gh.factory<_i961.WatchConversation>(
+      () => _i961.WatchConversation(gh<_i1059.ChatRepository>()),
+    );
+    gh.factory<_i968.GetUpcomingSessions>(
+      () => _i968.GetUpcomingSessions(gh<_i225.SessionsRepository>()),
+    );
+    gh.factory<_i968.GetPastSessions>(
+      () => _i968.GetPastSessions(gh<_i225.SessionsRepository>()),
+    );
+    gh.factory<_i968.GetBookingDays>(
+      () => _i968.GetBookingDays(gh<_i225.SessionsRepository>()),
+    );
+    gh.factory<_i968.BookSession>(
+      () => _i968.BookSession(gh<_i225.SessionsRepository>()),
+    );
+    gh.factory<_i968.CancelSession>(
+      () => _i968.CancelSession(gh<_i225.SessionsRepository>()),
     );
     gh.factory<_i945.SignUpCubit>(() => _i945.SignUpCubit(gh<_i340.SignUp>()));
-    gh.factory<_i571.BookingCubit>(
-      () => _i571.BookingCubit(
-        gh<_i906.GetTherapist>(),
-        gh<_i968.GetBookingDays>(),
-        gh<_i968.BookSession>(),
-        gh<_i592.SessionsBloc>(),
-      ),
-    );
     gh.factory<_i346.ForgotPasswordCubit>(
       () => _i346.ForgotPasswordCubit(gh<_i340.SendPasswordReset>()),
     );
@@ -548,11 +563,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i92.ToggleCommentLike>(),
       ),
     );
-    gh.lazySingleton<_i548.AuthBloc>(
-      () => _i548.AuthBloc(
-        gh<_i418.AuthRepository>(),
-        gh<_i340.UpdateUser>(),
-        gh<_i340.SignOut>(),
+    gh.factory<_i52.DiscoverBloc>(
+      () => _i52.DiscoverBloc(
+        gh<_i906.GetTherapists>(),
+        gh<_i906.ToggleSavedTherapist>(),
+      ),
+    );
+    gh.factory<_i343.TherapistProfileCubit>(
+      () => _i343.TherapistProfileCubit(
+        gh<_i906.GetTherapist>(),
+        gh<_i906.GetTherapistReviews>(),
+        gh<_i906.GetWeeklyAvailability>(),
+        gh<_i906.ToggleSavedTherapist>(),
       ),
     );
     gh.lazySingleton<_i242.DashboardCubit>(
@@ -562,12 +584,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i168.RequestsBloc>(),
       ),
     );
-    gh.lazySingleton<_i789.NotificationsBloc>(
-      () => _i789.NotificationsBloc(
-        gh<_i359.GetNotifications>(),
-        gh<_i359.MarkNotificationRead>(),
-        gh<_i359.MarkAllNotificationsRead>(),
+    gh.lazySingleton<_i548.AuthBloc>(
+      () => _i548.AuthBloc(
+        gh<_i418.AuthRepository>(),
+        gh<_i340.UpdateUser>(),
+        gh<_i340.SignOut>(),
+        gh<_i1072.PushService>(),
       ),
+    );
+    gh.factory<_i237.GetProfileDetails>(
+      () => _i237.GetProfileDetails(gh<_i522.ProfileRepository>()),
+    );
+    gh.factory<_i237.SaveProfileDetails>(
+      () => _i237.SaveProfileDetails(gh<_i522.ProfileRepository>()),
+    );
+    gh.factory<_i358.ConversationsBloc>(
+      () => _i358.ConversationsBloc(gh<_i961.GetConversations>()),
     );
     gh.factory<_i697.FeedBloc>(
       () => _i697.FeedBloc(
@@ -576,8 +608,38 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i92.TogglePostSave>(),
       ),
     );
+    gh.factory<_i359.GetNotifications>(
+      () => _i359.GetNotifications(gh<_i233.NotificationsRepository>()),
+    );
+    gh.factory<_i359.WatchNotifications>(
+      () => _i359.WatchNotifications(gh<_i233.NotificationsRepository>()),
+    );
+    gh.factory<_i359.MarkNotificationRead>(
+      () => _i359.MarkNotificationRead(gh<_i233.NotificationsRepository>()),
+    );
+    gh.factory<_i359.MarkAllNotificationsRead>(
+      () => _i359.MarkAllNotificationsRead(gh<_i233.NotificationsRepository>()),
+    );
     gh.lazySingleton<_i378.ContentCubit>(
       () => _i378.ContentCubit(gh<_i92.GetMyPosts>()),
+    );
+    gh.factory<_i389.GetMoodSummary>(
+      () => _i389.GetMoodSummary(gh<_i98.MoodRepository>()),
+    );
+    gh.factory<_i389.LogMood>(() => _i389.LogMood(gh<_i98.MoodRepository>()));
+    gh.factory<_i878.ChatThreadBloc>(
+      () => _i878.ChatThreadBloc(
+        gh<_i961.OpenConversation>(),
+        gh<_i961.SendMessage>(),
+        gh<_i961.WatchConversation>(),
+      ),
+    );
+    gh.lazySingleton<_i592.SessionsBloc>(
+      () => _i592.SessionsBloc(
+        gh<_i968.GetUpcomingSessions>(),
+        gh<_i968.GetPastSessions>(),
+        gh<_i968.CancelSession>(),
+      ),
     );
     gh.factory<_i465.EditProfileCubit>(
       () => _i465.EditProfileCubit(
@@ -587,11 +649,33 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i340.UpdateUser>(),
       ),
     );
+    gh.factory<_i571.BookingCubit>(
+      () => _i571.BookingCubit(
+        gh<_i906.GetTherapist>(),
+        gh<_i968.GetBookingDays>(),
+        gh<_i968.BookSession>(),
+        gh<_i592.SessionsBloc>(),
+      ),
+    );
     gh.factory<_i378.CreatePostCubit>(
       () => _i378.CreatePostCubit(
         gh<_i92.PublishPost>(),
         gh<_i378.ContentCubit>(),
       ),
+    );
+    gh.lazySingleton<_i789.NotificationsBloc>(
+      () => _i789.NotificationsBloc(
+        gh<_i359.GetNotifications>(),
+        gh<_i359.WatchNotifications>(),
+        gh<_i359.MarkNotificationRead>(),
+        gh<_i359.MarkAllNotificationsRead>(),
+      ),
+    );
+    gh.lazySingleton<_i326.MoodBloc>(
+      () => _i326.MoodBloc(gh<_i389.GetMoodSummary>(), gh<_i389.LogMood>()),
+    );
+    gh.factory<_i338.MoodTrackCubit>(
+      () => _i338.MoodTrackCubit(gh<_i389.LogMood>(), gh<_i326.MoodBloc>()),
     );
     gh.factory<_i23.HomeCubit>(
       () => _i23.HomeCubit(

@@ -118,12 +118,6 @@ class _LoginView extends StatelessWidget {
                 ),
                 const OrDivider(),
                 MnButton.outline(
-                  label: 'Continue with Apple',
-                  leading: const AppleGlyph(),
-                  onPressed: busy ? null : () => cubit.social('apple', role),
-                ),
-                const SizedBox(height: 12),
-                MnButton.outline(
                   label: 'Continue with Google',
                   leading: const GoogleGlyph(),
                   onPressed: busy ? null : () => cubit.social('google', role),

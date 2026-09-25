@@ -1,3 +1,4 @@
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -35,15 +36,28 @@ abstract class NotificationsState with _$NotificationsState {
 /// App-wide so bell badges stay in sync.
 @lazySingleton
 class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
-  NotificationsBloc(this._get, this._read, this._readAll) : super(const NotificationsState()) {
+  NotificationsBloc(this._get, this._watch, this._read, this._readAll) : super(const NotificationsState()) {
     on<NotificationsLoad>((e, emit) async {
       if (state.items.isEmpty) emit(state.copyWith(status: LoadStatus.loading));
       final res = await _get(const NoParams());
-      res.fold(
-        (f) => emit(state.copyWith(status: LoadStatus.failure, error: f.message)),
-        (list) => emit(state.copyWith(status: LoadStatus.success, items: list)),
+      final ok = res.fold(
+        (f) {
+          emit(state.copyWith(status: LoadStatus.failure, error: f.message));
+          return false;
+        },
+        (list) {
+          emit(state.copyWith(status: LoadStatus.success, items: list));
+          return true;
+        },
       );
-    });
+      if (!ok) return;
+      // Stay live so badges update as notifications arrive.
+      await emit.forEach<List<AppNotification>>(
+        _watch(),
+        onData: (list) => state.copyWith(status: LoadStatus.success, items: list),
+        onError: (_, _) => state,
+      );
+    }, transformer: restartable());
     on<NotificationsOpened>((e, emit) async {
       emit(state.copyWith(items: [for (final n in state.items) n.id == e.id ? n.copyWith(unread: false) : n]));
       await _read(e.id);
@@ -55,6 +69,7 @@ class NotificationsBloc extends Bloc<NotificationsEvent, NotificationsState> {
   }
 
   final GetNotifications _get;
+  final WatchNotifications _watch;
   final MarkNotificationRead _read;
   final MarkAllNotificationsRead _readAll;
 }

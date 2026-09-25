@@ -16,6 +16,9 @@ class NotificationsRepositoryImpl implements NotificationsRepository {
       guard(() async => (await _ds.list()).map((n) => n.toEntity()).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt)));
 
   @override
+  Stream<List<AppNotification>> watch() => _ds.watch().map((l) => [for (final n in l) n.toEntity()]);
+
+  @override
   ResultFuture<void> markRead(String id) => guard(() => _ds.markRead(id));
 
   @override

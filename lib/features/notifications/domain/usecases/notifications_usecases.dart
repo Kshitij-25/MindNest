@@ -14,6 +14,14 @@ class GetNotifications implements UseCase<List<AppNotification>, NoParams> {
 }
 
 @injectable
+class WatchNotifications {
+  const WatchNotifications(this._repo);
+  final NotificationsRepository _repo;
+
+  Stream<List<AppNotification>> call() => _repo.watch();
+}
+
+@injectable
 class MarkNotificationRead implements UseCase<void, String> {
   const MarkNotificationRead(this._repo);
   final NotificationsRepository _repo;

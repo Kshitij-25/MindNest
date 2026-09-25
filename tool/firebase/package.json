@@ -1,0 +1,18 @@
+{
+  "name": "mindnest-firebase-tools",
+  "private": true,
+  "type": "module",
+  "description": "Firestore rules tests, demo seeding and admin scripts for MindNest.",
+  "scripts": {
+    "test:rules": "firebase emulators:exec --only firestore --project demo-mindnest --config ../../firebase.json \"node --test rules.test.mjs\"",
+    "seed": "node seed.mjs",
+    "approve": "node approve_pro.mjs"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "firebase": "^12.19.0"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.0"
+  }
+}

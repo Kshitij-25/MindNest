@@ -21,7 +21,7 @@ class MoodStrip extends StatelessWidget {
     final c = context.colors;
     final days = lastSevenDayInitials();
     return Semantics(
-      label: 'Mood this week: ${levels.map(moodLabel).join(', ')}',
+      label: 'Mood this week: ${levels.map((l) => l == 0 ? 'no check-in' : moodLabel(l)).join(', ')}',
       excludeSemantics: true,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -39,7 +39,7 @@ class MoodStrip extends StatelessWidget {
                     builder: (context, h, _) => Container(
                       height: h,
                       decoration: BoxDecoration(
-                        color: c.mood(levels[i]).withValues(alpha: i == levels.length - 1 ? 1 : .85),
+                        color: levels[i] == 0 ? c.hairline : c.mood(levels[i]).withValues(alpha: i == levels.length - 1 ? 1 : .85),
                         borderRadius: BorderRadius.circular(999),
                       ),
                     ),

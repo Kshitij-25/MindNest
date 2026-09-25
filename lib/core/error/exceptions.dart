@@ -15,3 +15,7 @@ class CacheException implements Exception {
 class NotFoundException implements Exception {
   const NotFoundException();
 }
+
+class UnauthenticatedException implements Exception {
+  const UnauthenticatedException();
+}

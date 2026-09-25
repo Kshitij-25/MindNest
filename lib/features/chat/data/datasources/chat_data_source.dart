@@ -1,15 +1,18 @@
 import 'dart:async';
-import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/network/mock_latency.dart';
+import '../../../../core/firebase/collections.dart';
+import '../../../../core/firebase/inbox.dart';
+import '../../../../core/firebase/session.dart';
 import '../models/chat_models.dart';
 
-/// Real-time chat API. The mock simulates the other side typing and replying.
+/// Real-time chat API.
 abstract interface class ChatDataSource {
   Future<List<ConversationModel>> conversations({required bool asProfessional});
+  Future<ConversationModel> conversation(String id);
   Future<List<ChatMessageModel>> messages(String conversationId);
   Future<ChatMessageModel> send(String conversationId, String text);
   Future<void> markRead(String conversationId);
@@ -31,238 +34,206 @@ class MessageEvent extends ChatEvent {
 
 class ReadEvent extends ChatEvent {}
 
+/// Conversations live at `conversations/{clientUid}_{proUid}` with
+/// `participants`, per-member display info, unread counters and read
+/// markers; messages are a subcollection.
 @LazySingleton(as: ChatDataSource)
-class ChatMockDataSource implements ChatDataSource {
-  ChatMockDataSource() {
-    final now = DateTime.now();
-    DateTime ago({int d = 0, int h = 0, int m = 0}) =>
-        now.subtract(Duration(days: d, hours: h, minutes: m));
-    _client.addAll([
-      ConversationModel(
-        id: 'c1',
-        participant: const ParticipantModel(
-          id: 't1',
-          name: 'Dr. Amara Okafor',
-          subtitle: 'Clinical Psychologist',
-          verified: true,
-          online: true,
-        ),
-        last: 'That sounds like real progress — well done this week.',
-        updatedAt: ago(m: 35),
-        unread: 2,
-        sessionTitle: 'Session confirmed',
-        sessionAt: DateTime(now.year, now.month, now.day + 5, 16),
+class FirestoreChatDataSource implements ChatDataSource {
+  FirestoreChatDataSource(this._db, this._session);
+  final FirebaseFirestore _db;
+  final FirebaseSession _session;
+
+  String get _me => _session.uid;
+
+  String _other(Map<String, dynamic> d) =>
+      readStrings(d['participants']).firstWhere((p) => p != _me, orElse: () => '');
+
+  ConversationModel _conv(DocumentSnapshot<Map<String, dynamic>> s) {
+    final d = s.data()!;
+    final other = _other(d);
+    final info = (d['members'] as Map?)?[other] as Map? ?? const {};
+    final session = d['session'] as Map?;
+    return ConversationModel(
+      id: s.id,
+      participant: ParticipantModel(
+        id: other,
+        name: info['name'] as String? ?? '',
+        subtitle: info['subtitle'] as String? ?? '',
+        verified: info['verified'] as bool? ?? false,
       ),
-      ConversationModel(
-        id: 'c2',
-        participant: const ParticipantModel(
-          id: 't2',
-          name: 'Daniel Mercer',
-          subtitle: 'Psychotherapist',
-          verified: true,
-        ),
-        last: 'See you Thursday. Take it gently until then.',
-        updatedAt: ago(d: 1, h: 2),
-      ),
-      ConversationModel(
-        id: 'c3',
-        participant: const ParticipantModel(
-          id: 't3',
-          name: 'Dr. Priya Nair',
-          subtitle: 'Counselling Psychologist',
-          verified: true,
-          online: true,
-        ),
-        last: 'I’ve shared a short breathing exercise for tonight.',
-        updatedAt: ago(d: 4),
-      ),
-    ]);
-    _pro.addAll([
-      ConversationModel(
-        id: 'pc1',
-        participant: const ParticipantModel(
-          id: 'cl1',
-          name: 'Jordan Mills',
-          subtitle: 'Anxiety & work stress',
-          online: true,
-        ),
-        last: 'A bit up and down, but I tried the grounding exercise twice.',
-        updatedAt: ago(m: 20),
-        unread: 1,
-      ),
-      ConversationModel(
-        id: 'pc2',
-        participant: const ParticipantModel(
-          id: 'cl2',
-          name: 'Leah Karim',
-          subtitle: 'Weekly · Video',
-        ),
-        last: 'Thank you — see you at 1pm.',
-        updatedAt: ago(h: 3),
-      ),
-      ConversationModel(
-        id: 'pc3',
-        participant: const ParticipantModel(
-          id: 'cl3',
-          name: 'Sam Rivera',
-          subtitle: 'Weekly · Chat',
-          online: true,
-        ),
-        last: 'Could we move to 4pm next week?',
-        updatedAt: ago(d: 1),
-      ),
-      ConversationModel(
-        id: 'pc4',
-        participant: const ParticipantModel(
-          id: 'cl4',
-          name: 'Noah Bennett',
-          subtitle: 'Intro session',
-        ),
-        last: 'Looking forward to our first session.',
-        updatedAt: ago(d: 2),
-      ),
-    ]);
-    DateTime t(int m) => ago(m: m);
-    _messages['c1'] = [
-      ChatMessageModel(
-        id: 'm1',
-        fromMe: false,
-        text: 'Hi — how have you been since our last session?',
-        sentAt: t(49),
-      ),
-      ChatMessageModel(
-        id: 'm2',
-        fromMe: true,
-        text: 'A bit up and down, but I tried the grounding exercise twice.',
-        sentAt: t(41),
-        read: true,
-      ),
-      ChatMessageModel(
-        id: 'm3',
-        fromMe: false,
-        text: 'That sounds like real progress — well done this week.',
-        sentAt: t(35),
-      ),
-    ];
-    _messages['pc1'] = [
-      ChatMessageModel(
-        id: 'n1',
-        fromMe: true,
-        text: 'Hi — how have you been since our last session?',
-        sentAt: t(49),
-        read: true,
-      ),
-      ChatMessageModel(
-        id: 'n2',
-        fromMe: false,
-        text: 'A bit up and down, but I tried the grounding exercise twice.',
-        sentAt: t(20),
-      ),
-    ];
+      last: d['last'] as String? ?? '',
+      updatedAt: readDate(d['updatedAt']),
+      unread: readInt((d['unread'] as Map?)?[_me]),
+      typing: (d['typing'] as Map?)?[other] == true,
+      sessionTitle: session?['title'] as String?,
+      sessionAt: session == null ? null : readDate(session['at']),
+      sessionStatus: session?['status'] as String?,
+    );
   }
 
-  final _client = <ConversationModel>[];
-  final _pro = <ConversationModel>[];
-  final _messages = <String, List<ChatMessageModel>>{};
-  final _controllers = <String, StreamController<ChatEvent>>{};
-  final _rand = Random();
+  ChatMessageModel _msg(DocumentSnapshot<Map<String, dynamic>> s, DateTime? otherRead) {
+    final d = s.data()!;
+    final sentAt = readDate(d['sentAt']);
+    final mine = d['senderId'] == _me;
+    return ChatMessageModel(
+      id: s.id,
+      fromMe: mine,
+      text: d['text'] as String? ?? '',
+      sentAt: sentAt,
+      read: mine && otherRead != null && !sentAt.isAfter(otherRead),
+    );
+  }
 
-  static const _replies = [
-    'That makes a lot of sense. Thank you for sharing that with me.',
-    'I hear you. Let’s gently unpack that together.',
-    'You’re doing the work, and it shows. 🌱',
-  ];
-
-  ConversationModel _find(String id) => [..._client, ..._pro].firstWhere(
-    (c) => c.id == id,
-    orElse: () => throw const NotFoundException(),
-  );
+  DateTime? _lastReadBy(Map<String, dynamic> d, String uid) {
+    final v = (d['lastRead'] as Map?)?[uid];
+    return v == null ? null : readDate(v);
+  }
 
   @override
-  Future<List<ConversationModel>> conversations({
-    required bool asProfessional,
-  }) async {
-    await mockLatency();
-    return List.of(asProfessional ? _pro : _client)
-      ..sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+  Future<List<ConversationModel>> conversations({required bool asProfessional}) async {
+    final snap = await _db.conversations
+        .where('participants', arrayContains: _me)
+        .orderBy('updatedAt', descending: true)
+        .get();
+    return snap.docs.map(_conv).toList();
+  }
+
+  @override
+  Future<ConversationModel> conversation(String id) async {
+    final snap = await _db.conversations.doc(id).get();
+    if (!snap.exists) throw const NotFoundException();
+    return _conv(snap);
   }
 
   @override
   Future<List<ChatMessageModel>> messages(String id) async {
-    await mockLatency(250);
-    final c = _find(id);
-    return _messages.putIfAbsent(
-      id,
-      () => [
-        ChatMessageModel(
-          id: '${id}_0',
-          fromMe: false,
-          text: c.last,
-          sentAt: c.updatedAt,
-        ),
-      ],
-    );
+    final conv = await _db.conversations.doc(id).get();
+    if (!conv.exists) throw const NotFoundException();
+    final otherRead = _lastReadBy(conv.data()!, _other(conv.data()!));
+    final snap = await conv.reference.collection('messages').orderBy('sentAt').limitToLast(200).get();
+    return snap.docs.map((m) => _msg(m, otherRead)).toList();
   }
 
   @override
   Future<ChatMessageModel> send(String id, String text) async {
-    await mockLatency(150);
-    final m = ChatMessageModel(
-      id: 'x${DateTime.now().microsecondsSinceEpoch}',
-      fromMe: true,
-      text: text,
-      sentAt: DateTime.now(),
+    final convRef = _db.conversations.doc(id);
+    final conv = await convRef.get();
+    if (!conv.exists) throw const NotFoundException();
+    final other = _other(conv.data()!);
+    final myName = ((conv.data()!['members'] as Map?)?[_me] as Map?)?['name'] as String? ?? 'New message';
+    final ref = convRef.collection('messages').doc();
+    final now = DateTime.now();
+    final batch = _db.batch()
+      ..set(ref, {'senderId': _me, 'text': text, 'sentAt': FieldValue.serverTimestamp()})
+      ..update(convRef, {
+        'last': text,
+        'updatedAt': FieldValue.serverTimestamp(),
+        'unread.$other': FieldValue.increment(1),
+      });
+    // One rolling notification per conversation rather than one per message.
+    Inbox.add(
+      batch,
+      _db,
+      to: other,
+      from: _me,
+      type: 'message',
+      title: 'New message',
+      body: '$myName: “${text.length > 80 ? '${text.substring(0, 80)}…' : text}”',
+      targetId: id,
+      id: 'msg_$id',
     );
-    _messages.putIfAbsent(id, () => []).add(m);
-    final c = _find(id)
-      ..last = text
-      ..updatedAt = m.sentAt;
-    _simulateReply(c);
-    return m;
-  }
-
-  void _simulateReply(ConversationModel c) {
-    final ctrl = _controllers[c.id];
-    Future.delayed(
-      const Duration(milliseconds: 600),
-      () => ctrl?.add(TypingEvent(true)),
-    );
-    Future.delayed(const Duration(milliseconds: 2200), () {
-      for (final m in _messages[c.id]!) {
-        if (m.fromMe) m.read = true;
-      }
-      final r = ChatMessageModel(
-        id: 'r${DateTime.now().microsecondsSinceEpoch}',
-        fromMe: false,
-        text: _replies[_rand.nextInt(_replies.length)],
-        sentAt: DateTime.now(),
-      );
-      _messages[c.id]!.add(r);
-      c
-        ..last = r.text
-        ..updatedAt = r.sentAt;
-      ctrl
-        ?..add(TypingEvent(false))
-        ..add(ReadEvent())
-        ..add(MessageEvent(r));
-    });
+    await batch.commit();
+    return ChatMessageModel(id: ref.id, fromMe: true, text: text, sentAt: now);
   }
 
   @override
-  Future<void> markRead(String id) async => _find(id).unread = 0;
+  Future<void> markRead(String id) => _db.conversations.doc(id).update({
+        'unread.$_me': 0,
+        'lastRead.$_me': FieldValue.serverTimestamp(),
+      });
 
+  /// Finds or starts the thread between the current user and [participantId].
   @override
   Future<String> conversationWith(String participantId) async {
-    await mockLatency(150);
-    final all = [..._client, ..._pro];
-    final existing = all
-        .where((c) => c.participant.id == participantId)
-        .firstOrNull;
-    if (existing != null) return existing.id;
-    throw const NotFoundException();
+    final me = (await _db.user(_me).get()).data() ?? const {};
+    final iAmPro = me['role'] == 'professional';
+    final clientId = iAmPro ? participantId : _me;
+    final proId = iAmPro ? _me : participantId;
+    final ref = _db.conversations.doc('${clientId}_$proId');
+    if ((await ref.get()).exists) return ref.id;
+
+    final pro = (await _db.therapist(proId).get()).data();
+    if (pro == null) throw const NotFoundException();
+    Map<String, dynamic> clientInfo;
+    if (iAmPro) {
+      final c = (await _db.therapist(_me).collection('clients').doc(clientId).get()).data();
+      if (c == null) throw const NotFoundException();
+      clientInfo = {'name': c['name'] ?? 'Client', 'subtitle': c['focus'] ?? '', 'verified': false};
+    } else {
+      clientInfo = {'name': me['name'] ?? 'Client', 'subtitle': '', 'verified': false};
+    }
+    await ref.set({
+      'participants': [clientId, proId],
+      'clientId': clientId,
+      'proId': proId,
+      'members': {
+        clientId: clientInfo,
+        proId: {'name': pro['name'] ?? '', 'subtitle': pro['title'] ?? 'Therapist', 'verified': pro['verified'] ?? false},
+      },
+      'last': '',
+      'updatedAt': FieldValue.serverTimestamp(),
+      'unread': {clientId: 0, proId: 0},
+    });
+    return ref.id;
   }
 
+  /// Incoming messages, typing and read receipts from the other participant
+  /// while a thread is open. The sender's own messages are returned by [send].
   @override
-  Stream<ChatEvent> events(String id) =>
-      (_controllers[id] ??= StreamController<ChatEvent>.broadcast()).stream;
+  Stream<ChatEvent> events(String id) {
+    final convRef = _db.conversations.doc(id);
+    final openedAt = Timestamp.now();
+    late final StreamController<ChatEvent> ctrl;
+    final subs = <StreamSubscription<Object?>>[];
+    DateTime? lastRead;
+    bool? typing;
+
+    ctrl = StreamController<ChatEvent>(
+      onListen: () {
+        subs
+          ..add(convRef.snapshots().listen((s) {
+            final d = s.data();
+            if (d == null) return;
+            final other = _other(d);
+            final read = _lastReadBy(d, other);
+            if (read != null && (lastRead == null || read.isAfter(lastRead!))) {
+              if (lastRead != null) ctrl.add(ReadEvent());
+              lastRead = read;
+            }
+            final t = (d['typing'] as Map?)?[other] == true;
+            if (typing != null && t != typing) ctrl.add(TypingEvent(t));
+            typing = t;
+          }, onError: ctrl.addError))
+          ..add(convRef
+              .collection('messages')
+              .where('sentAt', isGreaterThan: openedAt)
+              .orderBy('sentAt')
+              .snapshots()
+              .listen((s) {
+            for (final c in s.docChanges) {
+              if (c.type != DocumentChangeType.added) continue;
+              if (c.doc.data()?['senderId'] == _me) continue;
+              ctrl.add(MessageEvent(_msg(c.doc, null)));
+              markRead(id).ignore();
+            }
+          }, onError: ctrl.addError));
+      },
+      onCancel: () async {
+        for (final s in subs) {
+          await s.cancel();
+        }
+      },
+    );
+    return ctrl.stream;
+  }
 }

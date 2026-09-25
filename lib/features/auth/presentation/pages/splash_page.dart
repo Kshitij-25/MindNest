@@ -23,9 +23,14 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    _t = Timer(const Duration(milliseconds: 1400), () {
+    _t = Timer(const Duration(milliseconds: 1400), () async {
       if (!mounted) return;
-      final auth = context.read<AuthBloc>().state;
+      final bloc = context.read<AuthBloc>();
+      // Session restore may still be talking to Firebase.
+      final auth = bloc.state.status == AuthStatus.unknown
+          ? await bloc.stream.firstWhere((s) => s.status != AuthStatus.unknown)
+          : bloc.state;
+      if (!mounted) return;
       if (auth.status == AuthStatus.authenticated && auth.user != null) {
         context.router.replaceAll([homeRouteFor(auth.user!)]);
       } else {
