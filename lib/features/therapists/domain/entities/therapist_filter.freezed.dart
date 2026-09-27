@@ -217,7 +217,7 @@ return $default(_that.query,_that.specialty,_that.specializations,_that.maxPrice
 
 
 class _TherapistFilter extends TherapistFilter {
-  const _TherapistFilter({this.query = '', this.specialty = 'All',  List<String> specializations = const <String>[], this.maxPrice = 150, this.minRating = 'Any', this.sessionType = 'Any'}): _specializations = specializations,super._();
+  const _TherapistFilter({this.query = '', this.specialty = 'All',  List<String> specializations = const <String>[], this.maxPrice = 5000, this.minRating = 'Any', this.sessionType = 'Any'}): _specializations = specializations,super._();
   
 
 @override@JsonKey() final  String query;

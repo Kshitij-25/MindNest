@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../utils/context_x.dart';
 import 'mn_icon.dart';
+import 'user_photo.dart';
 
 const _hues = [
   Color(0xFF7C9D6B),
@@ -38,6 +39,7 @@ class MnAvatar extends StatelessWidget {
     this.photo = false,
     this.ring = false,
     this.online = false,
+    this.userId,
   });
 
   final String name;
@@ -45,6 +47,9 @@ class MnAvatar extends StatelessWidget {
   final bool photo;
   final bool ring;
   final bool online;
+
+  /// Shows this user's profile photo when they've set one.
+  final String? userId;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +83,16 @@ class MnAvatar extends StatelessWidget {
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: (size * .38).roundToDouble()),
             ),
     );
+    final shown = userId == null
+        ? avatar
+        : SizedBox(
+            width: size,
+            height: size,
+            child: DecoratedBox(
+              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: (avatar.decoration as BoxDecoration?)?.boxShadow),
+              child: ClipOval(child: UserPhoto(userId: userId, fallback: avatar)),
+            ),
+          );
     return Semantics(
       label: name,
       image: true,
@@ -85,7 +100,7 @@ class MnAvatar extends StatelessWidget {
           ? Stack(
               clipBehavior: Clip.none,
               children: [
-                avatar,
+                shown,
                 Positioned(
                   right: 0,
                   bottom: 0,
@@ -101,7 +116,7 @@ class MnAvatar extends StatelessWidget {
                 ),
               ],
             )
-          : avatar,
+          : shown,
     );
   }
 }

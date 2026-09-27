@@ -27,6 +27,22 @@ class AccessibilityRoute extends PageRouteInfo<void> {
 }
 
 /// generated route for
+/// [BlockedUsersPage]
+class BlockedUsersRoute extends PageRouteInfo<void> {
+  const BlockedUsersRoute({List<PageRouteInfo>? children})
+    : super(BlockedUsersRoute.name, initialChildren: children);
+
+  static const String name = 'BlockedUsersRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const BlockedUsersPage();
+    },
+  );
+}
+
+/// generated route for
 /// [BookingPage]
 class BookingRoute extends PageRouteInfo<BookingRouteArgs> {
   BookingRoute({
@@ -261,6 +277,22 @@ class CreatePostRouteArgs {
 
   @override
   int get hashCode => key.hashCode ^ postId.hashCode;
+}
+
+/// generated route for
+/// [DeleteAccountPage]
+class DeleteAccountRoute extends PageRouteInfo<void> {
+  const DeleteAccountRoute({List<PageRouteInfo>? children})
+    : super(DeleteAccountRoute.name, initialChildren: children);
+
+  static const String name = 'DeleteAccountRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      return const DeleteAccountPage();
+    },
+  );
 }
 
 /// generated route for
@@ -501,6 +533,50 @@ class JournalWriteRouteArgs {
 
   @override
   int get hashCode => key.hashCode ^ entryId.hashCode ^ prompt.hashCode;
+}
+
+/// generated route for
+/// [LegalPage]
+class LegalRoute extends PageRouteInfo<LegalRouteArgs> {
+  LegalRoute({Key? key, required LegalDoc doc, List<PageRouteInfo>? children})
+    : super(
+        LegalRoute.name,
+        args: LegalRouteArgs(key: key, doc: doc),
+        initialChildren: children,
+      );
+
+  static const String name = 'LegalRoute';
+
+  static PageInfo page = PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<LegalRouteArgs>();
+      return LegalPage(key: args.key, doc: args.doc);
+    },
+  );
+}
+
+class LegalRouteArgs {
+  const LegalRouteArgs({this.key, required this.doc});
+
+  final Key? key;
+
+  final LegalDoc doc;
+
+  @override
+  String toString() {
+    return 'LegalRouteArgs{key: $key, doc: $doc}';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! LegalRouteArgs) return false;
+    return key == other.key && doc == other.doc;
+  }
+
+  @override
+  int get hashCode => key.hashCode ^ doc.hashCode;
 }
 
 /// generated route for

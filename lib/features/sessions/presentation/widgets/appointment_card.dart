@@ -34,7 +34,7 @@ class AppointmentCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                MnAvatar(name: a.therapist.name, size: 52, photo: true),
+                MnAvatar(name: a.therapist.name, size: 52, photo: true, userId: a.therapist.id),
                 const SizedBox(width: 13),
                 Expanded(
                   child: Column(

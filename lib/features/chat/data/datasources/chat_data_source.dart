@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:injectable/injectable.dart';
@@ -7,7 +8,9 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/firebase/collections.dart';
 import '../../../../core/firebase/inbox.dart';
 import '../../../../core/firebase/session.dart';
+import '../../domain/entities/conversation.dart';
 import '../models/chat_models.dart';
+import '../../../safety/data/safety_data_source.dart';
 
 /// Real-time chat API.
 abstract interface class ChatDataSource {
@@ -15,6 +18,13 @@ abstract interface class ChatDataSource {
   Future<ConversationModel> conversation(String id);
   Future<List<ChatMessageModel>> messages(String conversationId);
   Future<ChatMessageModel> send(String conversationId, String text);
+  Future<ChatMessageModel> sendAttachment(
+    String conversationId, {
+    required AttachmentKind kind,
+    required String name,
+    required Uint8List bytes,
+  });
+  Future<Uint8List> attachment(String conversationId, String attachmentId);
   Future<void> markRead(String conversationId);
   Future<String> conversationWith(String participantId);
   Stream<ChatEvent> events(String conversationId);
@@ -39,9 +49,10 @@ class ReadEvent extends ChatEvent {}
 /// markers; messages are a subcollection.
 @LazySingleton(as: ChatDataSource)
 class FirestoreChatDataSource implements ChatDataSource {
-  FirestoreChatDataSource(this._db, this._session);
+  FirestoreChatDataSource(this._db, this._session, this._safety);
   final FirebaseFirestore _db;
   final FirebaseSession _session;
+  final SafetyDataSource _safety;
 
   String get _me => _session.uid;
 
@@ -75,12 +86,17 @@ class FirestoreChatDataSource implements ChatDataSource {
     final d = s.data()!;
     final sentAt = readDate(d['sentAt']);
     final mine = d['senderId'] == _me;
+    final att = d['attachment'] as Map?;
     return ChatMessageModel(
       id: s.id,
       fromMe: mine,
       text: d['text'] as String? ?? '',
       sentAt: sentAt,
       read: mine && otherRead != null && !sentAt.isAfter(otherRead),
+      attachmentId: att?['id'] as String?,
+      attachmentKind: att?['kind'] as String?,
+      attachmentName: att?['name'] as String?,
+      attachmentSize: readInt(att?['size']),
     );
   }
 
@@ -95,7 +111,8 @@ class FirestoreChatDataSource implements ChatDataSource {
         .where('participants', arrayContains: _me)
         .orderBy('updatedAt', descending: true)
         .get();
-    return snap.docs.map(_conv).toList();
+    final blocked = await _safety.blockedIds();
+    return snap.docs.where((d) => !blocked.contains(_other(d.data()))).map(_conv).toList();
   }
 
   @override
@@ -142,8 +159,75 @@ class FirestoreChatDataSource implements ChatDataSource {
       targetId: id,
       id: 'msg_$id',
     );
-    await batch.commit();
+    await Inbox.commit(batch);
     return ChatMessageModel(id: ref.id, fromMe: true, text: text, sentAt: now);
+  }
+
+  /// Max bytes for one attachment; a Firestore document holds up to 1 MiB.
+  static const maxAttachmentBytes = 900 * 1024;
+  final _attachmentCache = <String, Future<Uint8List>>{};
+
+  /// Stores the file at `conversations/{id}/attachments/{attId}`, then posts
+  /// a message that points at it.
+  @override
+  Future<ChatMessageModel> sendAttachment(
+    String id, {
+    required AttachmentKind kind,
+    required String name,
+    required Uint8List bytes,
+  }) async {
+    if (bytes.length > maxAttachmentBytes) {
+      throw const ServerException('That file is too large to send (max 900 KB).');
+    }
+    final convRef = _db.conversations.doc(id);
+    final conv = await convRef.get();
+    if (!conv.exists) throw const NotFoundException();
+    final other = _other(conv.data()!);
+    final myName = ((conv.data()!['members'] as Map?)?[_me] as Map?)?['name'] as String? ?? 'New message';
+    final attRef = convRef.collection('attachments').doc();
+    await attRef.set({'senderId': _me, 'kind': kind.name, 'name': name, 'data': Blob(bytes)});
+    _attachmentCache['$id/${attRef.id}'] = Future.value(bytes);
+
+    final ref = convRef.collection('messages').doc();
+    final preview = kind == AttachmentKind.image ? '📷 Photo' : '📄 $name';
+    final batch = _db.batch()
+      ..set(ref, {
+        'senderId': _me,
+        'text': '',
+        'attachment': {'id': attRef.id, 'kind': kind.name, 'name': name, 'size': bytes.length},
+        'sentAt': FieldValue.serverTimestamp(),
+      })
+      ..update(convRef, {
+        'last': preview,
+        'updatedAt': FieldValue.serverTimestamp(),
+        'unread.$other': FieldValue.increment(1),
+      });
+    Inbox.add(batch, _db, to: other, from: _me, type: 'message', title: 'New message', body: '$myName: $preview', targetId: id, id: 'msg_$id');
+    await Inbox.commit(batch);
+    return ChatMessageModel(
+      id: ref.id,
+      fromMe: true,
+      text: '',
+      sentAt: DateTime.now(),
+      attachmentId: attRef.id,
+      attachmentKind: kind.name,
+      attachmentName: name,
+      attachmentSize: bytes.length,
+    );
+  }
+
+  @override
+  Future<Uint8List> attachment(String id, String attachmentId) {
+    final key = '$id/$attachmentId';
+    return _attachmentCache[key] ??= () async {
+      final snap = await _db.conversations.doc(id).collection('attachments').doc(attachmentId).get();
+      final blob = snap.data()?['data'];
+      if (blob is! Blob) {
+        _attachmentCache.remove(key);
+        throw const NotFoundException();
+      }
+      return blob.bytes;
+    }();
   }
 
   @override

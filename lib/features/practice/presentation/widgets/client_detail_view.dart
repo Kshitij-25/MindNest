@@ -45,7 +45,7 @@ class _ClientDetailViewState extends State<ClientDetailView> {
             children: [
               Row(
                 children: [
-                  MnAvatar(name: cl.name, size: wide ? 64 : 56, photo: true, ring: true),
+                  MnAvatar(name: cl.name, size: wide ? 64 : 56, photo: true, ring: true, userId: cl.id),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(

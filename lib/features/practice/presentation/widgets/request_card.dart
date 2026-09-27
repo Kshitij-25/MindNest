@@ -34,7 +34,7 @@ class RequestCard extends StatelessWidget {
             semanticLabel: 'Request from ${r.clientName}',
             child: Row(
               children: [
-                MnAvatar(name: r.clientName, size: compact ? 44 : 50, photo: true),
+                MnAvatar(name: r.clientName, size: compact ? 44 : 50, photo: true, userId: r.clientId),
                 const SizedBox(width: 13),
                 Expanded(
                   child: Column(

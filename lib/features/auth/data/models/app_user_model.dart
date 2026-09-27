@@ -12,7 +12,7 @@ class AppUserModel {
     required this.name,
     required this.email,
     required this.role,
-    this.maskedPhone = '+44 ••• ••892',
+    this.maskedPhone = '+91 ••••• ••892',
     this.onboarded = false,
     this.verification = VerificationStatus.none,
     this.title,

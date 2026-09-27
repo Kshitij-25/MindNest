@@ -17,6 +17,7 @@ enum AppointmentStatus {
   pending('Pending'),
   accepted('Accepted'),
   completed('Completed'),
+  noShow('Missed'),
   cancelled('Cancelled');
 
   const AppointmentStatus(this.label);
@@ -54,9 +55,17 @@ abstract class Appointment with _$Appointment {
     @Default(AppointmentStatus.pending) AppointmentStatus status,
     @Default(Recurrence.oneTime) Recurrence recurrence,
     @Default(<Reminder>{Reminder.day, Reminder.hour}) Set<Reminder> reminders,
+    @Default(false) bool reviewed,
   }) = _Appointment;
 
   const Appointment._();
+
+  bool get ended => startsAt.add(Duration(minutes: minutes)).isBefore(DateTime.now());
+
+  /// Over, but the professional hasn't confirmed it took place yet.
+  bool get awaitingOutcome => status == AppointmentStatus.accepted && ended;
+
+  bool get canReview => status == AppointmentStatus.completed && !reviewed;
 
   /// Free cancellation if more than 24h ahead.
   bool get freeCancellation => startsAt.difference(DateTime.now()).inHours >= 24;

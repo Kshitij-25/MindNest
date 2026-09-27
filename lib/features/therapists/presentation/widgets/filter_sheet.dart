@@ -66,11 +66,12 @@ class _FilterSheetState extends State<_FilterSheet> {
                     ),
                   ),
                   _Group(
-                    label: 'Max price · £${f.maxPrice}',
+                    label: 'Max price · ${money(f.maxPrice)}',
                     child: MnSlider(
                       value: f.maxPrice,
-                      min: 40,
-                      max: 150,
+                      min: 500,
+                      max: 5000,
+                      step: 100,
                       semanticLabel: 'Maximum price',
                       onChanged: (v) => setState(() => f = f.copyWith(maxPrice: v)),
                     ),

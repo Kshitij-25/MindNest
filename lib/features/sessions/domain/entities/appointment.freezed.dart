@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Appointment {
 
- String get id; Therapist get therapist; DateTime get startsAt; SessionType get type; int get minutes; AppointmentStatus get status; Recurrence get recurrence; Set<Reminder> get reminders;
+ String get id; Therapist get therapist; DateTime get startsAt; SessionType get type; int get minutes; AppointmentStatus get status; Recurrence get recurrence; Set<Reminder> get reminders; bool get reviewed;
 /// Create a copy of Appointment
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AppointmentCopyWith<Appointment> get copyWith => _$AppointmentCopyWithImpl<Appo
 @override
 bool operator ==(Object other) {
   final _this = this as Appointment;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Appointment&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.therapist, _this.therapist) || other.therapist == _this.therapist)&&(identical(other.startsAt, _this.startsAt) || other.startsAt == _this.startsAt)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.minutes, _this.minutes) || other.minutes == _this.minutes)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.recurrence, _this.recurrence) || other.recurrence == _this.recurrence)&&const DeepCollectionEquality().equals(other.reminders, _this.reminders));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Appointment&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.therapist, _this.therapist) || other.therapist == _this.therapist)&&(identical(other.startsAt, _this.startsAt) || other.startsAt == _this.startsAt)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.minutes, _this.minutes) || other.minutes == _this.minutes)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.recurrence, _this.recurrence) || other.recurrence == _this.recurrence)&&const DeepCollectionEquality().equals(other.reminders, _this.reminders)&&(identical(other.reviewed, _this.reviewed) || other.reviewed == _this.reviewed));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Appointment;
-  return Object.hash(runtimeType,_this.id,_this.therapist,_this.startsAt,_this.type,_this.minutes,_this.status,_this.recurrence,const DeepCollectionEquality().hash(_this.reminders));
+  return Object.hash(runtimeType,_this.id,_this.therapist,_this.startsAt,_this.type,_this.minutes,_this.status,_this.recurrence,const DeepCollectionEquality().hash(_this.reminders),_this.reviewed);
 }
 
 @override
 String toString() {
   final _this = this as Appointment;
-  return 'Appointment(id: ${_this.id}, therapist: ${_this.therapist}, startsAt: ${_this.startsAt}, type: ${_this.type}, minutes: ${_this.minutes}, status: ${_this.status}, recurrence: ${_this.recurrence}, reminders: ${_this.reminders})';
+  return 'Appointment(id: ${_this.id}, therapist: ${_this.therapist}, startsAt: ${_this.startsAt}, type: ${_this.type}, minutes: ${_this.minutes}, status: ${_this.status}, recurrence: ${_this.recurrence}, reminders: ${_this.reminders}, reviewed: ${_this.reviewed})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $AppointmentCopyWith<$Res>  {
   factory $AppointmentCopyWith(Appointment value, $Res Function(Appointment) _then) = _$AppointmentCopyWithImpl;
 @useResult
 $Res call({
- String id, Therapist therapist, DateTime startsAt, SessionType type, int minutes, AppointmentStatus status, Recurrence recurrence, Set<Reminder> reminders
+ String id, Therapist therapist, DateTime startsAt, SessionType type, int minutes, AppointmentStatus status, Recurrence recurrence, Set<Reminder> reminders, bool reviewed
 });
 
 
@@ -68,7 +68,7 @@ class _$AppointmentCopyWithImpl<$Res>
 
 /// Create a copy of Appointment
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? therapist = null,Object? startsAt = null,Object? type = null,Object? minutes = null,Object? status = null,Object? recurrence = null,Object? reminders = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? therapist = null,Object? startsAt = null,Object? type = null,Object? minutes = null,Object? status = null,Object? recurrence = null,Object? reminders = null,Object? reviewed = null,}) {
   return _then(Appointment(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,therapist: null == therapist ? _self.therapist : therapist // ignore: cast_nullable_to_non_nullable
@@ -78,7 +78,8 @@ as SessionType,minutes: null == minutes ? _self.minutes : minutes // ignore: cas
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AppointmentStatus,recurrence: null == recurrence ? _self.recurrence : recurrence // ignore: cast_nullable_to_non_nullable
 as Recurrence,reminders: null == reminders ? _self.reminders : reminders // ignore: cast_nullable_to_non_nullable
-as Set<Reminder>,
+as Set<Reminder>,reviewed: null == reviewed ? _self.reviewed : reviewed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of Appointment
@@ -172,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Therapist therapist,  DateTime startsAt,  SessionType type,  int minutes,  AppointmentStatus status,  Recurrence recurrence,  Set<Reminder> reminders)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  Therapist therapist,  DateTime startsAt,  SessionType type,  int minutes,  AppointmentStatus status,  Recurrence recurrence,  Set<Reminder> reminders,  bool reviewed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Appointment() when $default != null:
-return $default(_that.id,_that.therapist,_that.startsAt,_that.type,_that.minutes,_that.status,_that.recurrence,_that.reminders);case _:
+return $default(_that.id,_that.therapist,_that.startsAt,_that.type,_that.minutes,_that.status,_that.recurrence,_that.reminders,_that.reviewed);case _:
   return orElse();
 
 }
@@ -193,10 +194,10 @@ return $default(_that.id,_that.therapist,_that.startsAt,_that.type,_that.minutes
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Therapist therapist,  DateTime startsAt,  SessionType type,  int minutes,  AppointmentStatus status,  Recurrence recurrence,  Set<Reminder> reminders)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  Therapist therapist,  DateTime startsAt,  SessionType type,  int minutes,  AppointmentStatus status,  Recurrence recurrence,  Set<Reminder> reminders,  bool reviewed)  $default,) {final _that = this;
 switch (_that) {
 case _Appointment():
-return $default(_that.id,_that.therapist,_that.startsAt,_that.type,_that.minutes,_that.status,_that.recurrence,_that.reminders);case _:
+return $default(_that.id,_that.therapist,_that.startsAt,_that.type,_that.minutes,_that.status,_that.recurrence,_that.reminders,_that.reviewed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +214,10 @@ return $default(_that.id,_that.therapist,_that.startsAt,_that.type,_that.minutes
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Therapist therapist,  DateTime startsAt,  SessionType type,  int minutes,  AppointmentStatus status,  Recurrence recurrence,  Set<Reminder> reminders)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  Therapist therapist,  DateTime startsAt,  SessionType type,  int minutes,  AppointmentStatus status,  Recurrence recurrence,  Set<Reminder> reminders,  bool reviewed)?  $default,) {final _that = this;
 switch (_that) {
 case _Appointment() when $default != null:
-return $default(_that.id,_that.therapist,_that.startsAt,_that.type,_that.minutes,_that.status,_that.recurrence,_that.reminders);case _:
+return $default(_that.id,_that.therapist,_that.startsAt,_that.type,_that.minutes,_that.status,_that.recurrence,_that.reminders,_that.reviewed);case _:
   return null;
 
 }
@@ -228,7 +229,7 @@ return $default(_that.id,_that.therapist,_that.startsAt,_that.type,_that.minutes
 
 
 class _Appointment extends Appointment {
-  const _Appointment({required this.id, required this.therapist, required this.startsAt, this.type = SessionType.video, this.minutes = 50, this.status = AppointmentStatus.pending, this.recurrence = Recurrence.oneTime,  Set<Reminder> reminders = const <Reminder>{Reminder.day, Reminder.hour}}): _reminders = reminders,super._();
+  const _Appointment({required this.id, required this.therapist, required this.startsAt, this.type = SessionType.video, this.minutes = 50, this.status = AppointmentStatus.pending, this.recurrence = Recurrence.oneTime,  Set<Reminder> reminders = const <Reminder>{Reminder.day, Reminder.hour}, this.reviewed = false}): _reminders = reminders,super._();
   
 
 @override final  String id;
@@ -245,6 +246,7 @@ class _Appointment extends Appointment {
   return EqualUnmodifiableSetView(_reminders);
 }
 
+@override@JsonKey() final  bool reviewed;
 
 /// Create a copy of Appointment
 /// with the given fields replaced by the non-null parameter values.
@@ -256,18 +258,18 @@ _$AppointmentCopyWith<_Appointment> get copyWith => __$AppointmentCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Appointment&&(identical(other.id, id) || other.id == id)&&(identical(other.therapist, therapist) || other.therapist == therapist)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.type, type) || other.type == type)&&(identical(other.minutes, minutes) || other.minutes == minutes)&&(identical(other.status, status) || other.status == status)&&(identical(other.recurrence, recurrence) || other.recurrence == recurrence)&&const DeepCollectionEquality().equals(other.reminders, _reminders));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Appointment&&(identical(other.id, id) || other.id == id)&&(identical(other.therapist, therapist) || other.therapist == therapist)&&(identical(other.startsAt, startsAt) || other.startsAt == startsAt)&&(identical(other.type, type) || other.type == type)&&(identical(other.minutes, minutes) || other.minutes == minutes)&&(identical(other.status, status) || other.status == status)&&(identical(other.recurrence, recurrence) || other.recurrence == recurrence)&&const DeepCollectionEquality().equals(other.reminders, _reminders)&&(identical(other.reviewed, reviewed) || other.reviewed == reviewed));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,therapist,startsAt,type,minutes,status,recurrence,const DeepCollectionEquality().hash(_reminders));
+    return Object.hash(runtimeType,id,therapist,startsAt,type,minutes,status,recurrence,const DeepCollectionEquality().hash(_reminders),reviewed);
 }
 
 @override
 String toString() {
-    return 'Appointment(id: $id, therapist: $therapist, startsAt: $startsAt, type: $type, minutes: $minutes, status: $status, recurrence: $recurrence, reminders: $reminders)';
+    return 'Appointment(id: $id, therapist: $therapist, startsAt: $startsAt, type: $type, minutes: $minutes, status: $status, recurrence: $recurrence, reminders: $reminders, reviewed: $reviewed)';
 }
 
 
@@ -278,7 +280,7 @@ abstract mixin class _$AppointmentCopyWith<$Res> implements $AppointmentCopyWith
   factory _$AppointmentCopyWith(_Appointment value, $Res Function(_Appointment) _then) = __$AppointmentCopyWithImpl;
 @override @useResult
 $Res call({
- String id, Therapist therapist, DateTime startsAt, SessionType type, int minutes, AppointmentStatus status, Recurrence recurrence, Set<Reminder> reminders
+ String id, Therapist therapist, DateTime startsAt, SessionType type, int minutes, AppointmentStatus status, Recurrence recurrence, Set<Reminder> reminders, bool reviewed
 });
 
 
@@ -295,7 +297,7 @@ class __$AppointmentCopyWithImpl<$Res>
 
 /// Create a copy of Appointment
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? therapist = null,Object? startsAt = null,Object? type = null,Object? minutes = null,Object? status = null,Object? recurrence = null,Object? reminders = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? therapist = null,Object? startsAt = null,Object? type = null,Object? minutes = null,Object? status = null,Object? recurrence = null,Object? reminders = null,Object? reviewed = null,}) {
   return _then(_Appointment(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,therapist: null == therapist ? _self.therapist : therapist // ignore: cast_nullable_to_non_nullable
@@ -305,7 +307,8 @@ as SessionType,minutes: null == minutes ? _self.minutes : minutes // ignore: cas
 as int,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as AppointmentStatus,recurrence: null == recurrence ? _self.recurrence : recurrence // ignore: cast_nullable_to_non_nullable
 as Recurrence,reminders: null == reminders ? _self._reminders : reminders // ignore: cast_nullable_to_non_nullable
-as Set<Reminder>,
+as Set<Reminder>,reviewed: null == reviewed ? _self.reviewed : reviewed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

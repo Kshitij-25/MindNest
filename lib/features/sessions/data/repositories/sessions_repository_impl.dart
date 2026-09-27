@@ -71,4 +71,8 @@ class SessionsRepositoryImpl implements SessionsRepository {
 
   @override
   ResultFuture<void> cancel(String id) => guard(() => _ds.cancel(id));
+
+  @override
+  ResultFuture<void> review(String appointmentId, {required int rating, required String text}) =>
+      guard(() => _ds.review(appointmentId, rating: rating, text: text));
 }

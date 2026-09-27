@@ -81,6 +81,10 @@ class PostDetailCubit extends Cubit<PostDetailState> {
     });
   }
 
+  /// Hides a just-blocked author's comments without refetching.
+  void removeCommentsBy(String authorId) =>
+      emit(state.copyWith(comments: [for (final c in state.comments) if (c.authorId != authorId) c]));
+
   Future<void> toggleCommentLike(PostComment c) async {
     final p = state.post;
     if (p == null) return;

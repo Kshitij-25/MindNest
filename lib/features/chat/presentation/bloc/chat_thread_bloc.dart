@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -17,6 +19,11 @@ sealed class ChatThreadEvent with _$ChatThreadEvent {
     String? participantId,
   }) = ChatThreadOpened;
   const factory ChatThreadEvent.sent(String text) = ChatThreadSent;
+  const factory ChatThreadEvent.attachmentSent({
+    required AttachmentKind kind,
+    required String name,
+    required Uint8List bytes,
+  }) = ChatThreadAttachmentSent;
 }
 
 @freezed
@@ -26,14 +33,16 @@ abstract class ChatThreadState with _$ChatThreadState {
     Conversation? conversation,
     @Default(<ChatMessage>[]) List<ChatMessage> messages,
     @Default(false) bool otherTyping,
+    @Default(false) bool uploading,
     String? error,
   }) = _ChatThreadState;
 }
 
 @injectable
 class ChatThreadBloc extends Bloc<ChatThreadEvent, ChatThreadState> {
-  ChatThreadBloc(this._open, this._send, this._watch)
+  ChatThreadBloc(this._open, this._send, this._watch, this._sendAttachment)
     : super(const ChatThreadState()) {
+    on<ChatThreadAttachmentSent>(_onAttachment, transformer: sequential());
     on<ChatThreadOpened>(_onOpened, transformer: restartable());
     on<ChatThreadSent>(_onSent, transformer: sequential());
   }
@@ -41,6 +50,7 @@ class ChatThreadBloc extends Bloc<ChatThreadEvent, ChatThreadState> {
   final OpenConversation _open;
   final SendMessage _send;
   final WatchConversation _watch;
+  final SendAttachment _sendAttachment;
 
   Future<void> _onOpened(
     ChatThreadOpened e,
@@ -91,6 +101,17 @@ class ChatThreadBloc extends Bloc<ChatThreadEvent, ChatThreadState> {
     res.fold(
       (f) => emit(state.copyWith(error: f.message)),
       (m) => emit(state.copyWith(messages: [...state.messages, m])),
+    );
+  }
+
+  Future<void> _onAttachment(ChatThreadAttachmentSent e, Emitter<ChatThreadState> emit) async {
+    final conv = state.conversation;
+    if (conv == null) return;
+    emit(state.copyWith(uploading: true, error: null));
+    final res = await _sendAttachment(SendAttachmentParams(conv.id, kind: e.kind, name: e.name, bytes: e.bytes));
+    res.fold(
+      (f) => emit(state.copyWith(uploading: false, error: f.message)),
+      (m) => emit(state.copyWith(uploading: false, messages: [...state.messages, m])),
     );
   }
 }

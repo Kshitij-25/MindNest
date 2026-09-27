@@ -155,6 +155,7 @@ class MnSlider extends StatelessWidget {
     required this.onChanged,
     this.min = 0,
     this.max = 10,
+    this.step = 1,
     this.color,
     this.semanticLabel,
   });
@@ -163,6 +164,8 @@ class MnSlider extends StatelessWidget {
   final ValueChanged<int> onChanged;
   final int min;
   final int max;
+  /// Value increment; (max - min) should be a multiple of it.
+  final int step;
   final Color? color;
   final String? semanticLabel;
 
@@ -187,10 +190,11 @@ class MnSlider extends StatelessWidget {
           value: value.toDouble(),
           min: min.toDouble(),
           max: max.toDouble(),
-          divisions: max - min,
+          divisions: (max - min) ~/ step,
           onChanged: (v) {
-            if (v.round() != value) Adaptive.tap(context);
-            onChanged(v.round());
+            final next = min + ((v - min) / step).round() * step;
+            if (next != value) Adaptive.tap(context);
+            onChanged(next);
           },
         ),
       ),

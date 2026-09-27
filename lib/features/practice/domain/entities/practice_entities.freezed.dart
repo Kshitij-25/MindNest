@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$VerificationDocument {
 
- DocumentKind get kind; String get title; String get description; bool get uploaded;
+ DocumentKind get kind; String get title; String get description; bool get uploaded; String? get fileName;
 /// Create a copy of VerificationDocument
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $VerificationDocumentCopyWith<VerificationDocument> get copyWith => _$Verificati
 @override
 bool operator ==(Object other) {
   final _this = this as VerificationDocument;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is VerificationDocument&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.uploaded, _this.uploaded) || other.uploaded == _this.uploaded));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is VerificationDocument&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.uploaded, _this.uploaded) || other.uploaded == _this.uploaded)&&(identical(other.fileName, _this.fileName) || other.fileName == _this.fileName));
 }
 
 
 @override
 int get hashCode {
   final _this = this as VerificationDocument;
-  return Object.hash(runtimeType,_this.kind,_this.title,_this.description,_this.uploaded);
+  return Object.hash(runtimeType,_this.kind,_this.title,_this.description,_this.uploaded,_this.fileName);
 }
 
 @override
 String toString() {
   final _this = this as VerificationDocument;
-  return 'VerificationDocument(kind: ${_this.kind}, title: ${_this.title}, description: ${_this.description}, uploaded: ${_this.uploaded})';
+  return 'VerificationDocument(kind: ${_this.kind}, title: ${_this.title}, description: ${_this.description}, uploaded: ${_this.uploaded}, fileName: ${_this.fileName})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $VerificationDocumentCopyWith<$Res>  {
   factory $VerificationDocumentCopyWith(VerificationDocument value, $Res Function(VerificationDocument) _then) = _$VerificationDocumentCopyWithImpl;
 @useResult
 $Res call({
- DocumentKind kind, String title, String description, bool uploaded
+ DocumentKind kind, String title, String description, bool uploaded, String? fileName
 });
 
 
@@ -68,13 +68,14 @@ class _$VerificationDocumentCopyWithImpl<$Res>
 
 /// Create a copy of VerificationDocument
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? title = null,Object? description = null,Object? uploaded = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? title = null,Object? description = null,Object? uploaded = null,Object? fileName = freezed,}) {
   return _then(VerificationDocument(
 kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as DocumentKind,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,uploaded: null == uploaded ? _self.uploaded : uploaded // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,fileName: freezed == fileName ? _self.fileName : fileName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DocumentKind kind,  String title,  String description,  bool uploaded)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DocumentKind kind,  String title,  String description,  bool uploaded,  String? fileName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _VerificationDocument() when $default != null:
-return $default(_that.kind,_that.title,_that.description,_that.uploaded);case _:
+return $default(_that.kind,_that.title,_that.description,_that.uploaded,_that.fileName);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.kind,_that.title,_that.description,_that.uploaded);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DocumentKind kind,  String title,  String description,  bool uploaded)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DocumentKind kind,  String title,  String description,  bool uploaded,  String? fileName)  $default,) {final _that = this;
 switch (_that) {
 case _VerificationDocument():
-return $default(_that.kind,_that.title,_that.description,_that.uploaded);case _:
+return $default(_that.kind,_that.title,_that.description,_that.uploaded,_that.fileName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.kind,_that.title,_that.description,_that.uploaded);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DocumentKind kind,  String title,  String description,  bool uploaded)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DocumentKind kind,  String title,  String description,  bool uploaded,  String? fileName)?  $default,) {final _that = this;
 switch (_that) {
 case _VerificationDocument() when $default != null:
-return $default(_that.kind,_that.title,_that.description,_that.uploaded);case _:
+return $default(_that.kind,_that.title,_that.description,_that.uploaded,_that.fileName);case _:
   return null;
 
 }
@@ -215,13 +216,14 @@ return $default(_that.kind,_that.title,_that.description,_that.uploaded);case _:
 
 
 class _VerificationDocument implements VerificationDocument {
-  const _VerificationDocument({required this.kind, required this.title, required this.description, this.uploaded = false});
+  const _VerificationDocument({required this.kind, required this.title, required this.description, this.uploaded = false, this.fileName});
   
 
 @override final  DocumentKind kind;
 @override final  String title;
 @override final  String description;
 @override@JsonKey() final  bool uploaded;
+@override final  String? fileName;
 
 /// Create a copy of VerificationDocument
 /// with the given fields replaced by the non-null parameter values.
@@ -233,18 +235,18 @@ _$VerificationDocumentCopyWith<_VerificationDocument> get copyWith => __$Verific
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VerificationDocument&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.uploaded, uploaded) || other.uploaded == uploaded));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _VerificationDocument&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.uploaded, uploaded) || other.uploaded == uploaded)&&(identical(other.fileName, fileName) || other.fileName == fileName));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,kind,title,description,uploaded);
+    return Object.hash(runtimeType,kind,title,description,uploaded,fileName);
 }
 
 @override
 String toString() {
-    return 'VerificationDocument(kind: $kind, title: $title, description: $description, uploaded: $uploaded)';
+    return 'VerificationDocument(kind: $kind, title: $title, description: $description, uploaded: $uploaded, fileName: $fileName)';
 }
 
 
@@ -255,7 +257,7 @@ abstract mixin class _$VerificationDocumentCopyWith<$Res> implements $Verificati
   factory _$VerificationDocumentCopyWith(_VerificationDocument value, $Res Function(_VerificationDocument) _then) = __$VerificationDocumentCopyWithImpl;
 @override @useResult
 $Res call({
- DocumentKind kind, String title, String description, bool uploaded
+ DocumentKind kind, String title, String description, bool uploaded, String? fileName
 });
 
 
@@ -272,13 +274,14 @@ class __$VerificationDocumentCopyWithImpl<$Res>
 
 /// Create a copy of VerificationDocument
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? title = null,Object? description = null,Object? uploaded = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? title = null,Object? description = null,Object? uploaded = null,Object? fileName = freezed,}) {
   return _then(_VerificationDocument(
 kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as DocumentKind,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,uploaded: null == uploaded ? _self.uploaded : uploaded // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,fileName: freezed == fileName ? _self.fileName : fileName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -1998,7 +2001,7 @@ $ClientCopyWith<$Res> get client {
 /// @nodoc
 mixin _$Transaction {
 
- String get clientName; String get description; DateTime get date; int get amount;
+ String get id; String get clientName; String get description; DateTime get date; int get amount; bool get paid;
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2010,20 +2013,20 @@ $TransactionCopyWith<Transaction> get copyWith => _$TransactionCopyWithImpl<Tran
 @override
 bool operator ==(Object other) {
   final _this = this as Transaction;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Transaction&&(identical(other.clientName, _this.clientName) || other.clientName == _this.clientName)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.amount, _this.amount) || other.amount == _this.amount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Transaction&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.clientName, _this.clientName) || other.clientName == _this.clientName)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.date, _this.date) || other.date == _this.date)&&(identical(other.amount, _this.amount) || other.amount == _this.amount)&&(identical(other.paid, _this.paid) || other.paid == _this.paid));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Transaction;
-  return Object.hash(runtimeType,_this.clientName,_this.description,_this.date,_this.amount);
+  return Object.hash(runtimeType,_this.id,_this.clientName,_this.description,_this.date,_this.amount,_this.paid);
 }
 
 @override
 String toString() {
   final _this = this as Transaction;
-  return 'Transaction(clientName: ${_this.clientName}, description: ${_this.description}, date: ${_this.date}, amount: ${_this.amount})';
+  return 'Transaction(id: ${_this.id}, clientName: ${_this.clientName}, description: ${_this.description}, date: ${_this.date}, amount: ${_this.amount}, paid: ${_this.paid})';
 }
 
 
@@ -2034,7 +2037,7 @@ abstract mixin class $TransactionCopyWith<$Res>  {
   factory $TransactionCopyWith(Transaction value, $Res Function(Transaction) _then) = _$TransactionCopyWithImpl;
 @useResult
 $Res call({
- String clientName, String description, DateTime date, int amount
+ String id, String clientName, String description, DateTime date, int amount, bool paid
 });
 
 
@@ -2051,13 +2054,15 @@ class _$TransactionCopyWithImpl<$Res>
 
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? clientName = null,Object? description = null,Object? date = null,Object? amount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? clientName = null,Object? description = null,Object? date = null,Object? amount = null,Object? paid = null,}) {
   return _then(Transaction(
-clientName: null == clientName ? _self.clientName : clientName // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,clientName: null == clientName ? _self.clientName : clientName // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
 as DateTime,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,paid: null == paid ? _self.paid : paid // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -2142,10 +2147,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String clientName,  String description,  DateTime date,  int amount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String clientName,  String description,  DateTime date,  int amount,  bool paid)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Transaction() when $default != null:
-return $default(_that.clientName,_that.description,_that.date,_that.amount);case _:
+return $default(_that.id,_that.clientName,_that.description,_that.date,_that.amount,_that.paid);case _:
   return orElse();
 
 }
@@ -2163,10 +2168,10 @@ return $default(_that.clientName,_that.description,_that.date,_that.amount);case
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String clientName,  String description,  DateTime date,  int amount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String clientName,  String description,  DateTime date,  int amount,  bool paid)  $default,) {final _that = this;
 switch (_that) {
 case _Transaction():
-return $default(_that.clientName,_that.description,_that.date,_that.amount);case _:
+return $default(_that.id,_that.clientName,_that.description,_that.date,_that.amount,_that.paid);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2183,10 +2188,10 @@ return $default(_that.clientName,_that.description,_that.date,_that.amount);case
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String clientName,  String description,  DateTime date,  int amount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String clientName,  String description,  DateTime date,  int amount,  bool paid)?  $default,) {final _that = this;
 switch (_that) {
 case _Transaction() when $default != null:
-return $default(_that.clientName,_that.description,_that.date,_that.amount);case _:
+return $default(_that.id,_that.clientName,_that.description,_that.date,_that.amount,_that.paid);case _:
   return null;
 
 }
@@ -2198,13 +2203,15 @@ return $default(_that.clientName,_that.description,_that.date,_that.amount);case
 
 
 class _Transaction implements Transaction {
-  const _Transaction({required this.clientName, required this.description, required this.date, required this.amount});
+  const _Transaction({required this.id, required this.clientName, required this.description, required this.date, required this.amount, this.paid = false});
   
 
+@override final  String id;
 @override final  String clientName;
 @override final  String description;
 @override final  DateTime date;
 @override final  int amount;
+@override@JsonKey() final  bool paid;
 
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
@@ -2216,18 +2223,18 @@ _$TransactionCopyWith<_Transaction> get copyWith => __$TransactionCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Transaction&&(identical(other.clientName, clientName) || other.clientName == clientName)&&(identical(other.description, description) || other.description == description)&&(identical(other.date, date) || other.date == date)&&(identical(other.amount, amount) || other.amount == amount));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Transaction&&(identical(other.id, id) || other.id == id)&&(identical(other.clientName, clientName) || other.clientName == clientName)&&(identical(other.description, description) || other.description == description)&&(identical(other.date, date) || other.date == date)&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.paid, paid) || other.paid == paid));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,clientName,description,date,amount);
+    return Object.hash(runtimeType,id,clientName,description,date,amount,paid);
 }
 
 @override
 String toString() {
-    return 'Transaction(clientName: $clientName, description: $description, date: $date, amount: $amount)';
+    return 'Transaction(id: $id, clientName: $clientName, description: $description, date: $date, amount: $amount, paid: $paid)';
 }
 
 
@@ -2238,7 +2245,7 @@ abstract mixin class _$TransactionCopyWith<$Res> implements $TransactionCopyWith
   factory _$TransactionCopyWith(_Transaction value, $Res Function(_Transaction) _then) = __$TransactionCopyWithImpl;
 @override @useResult
 $Res call({
- String clientName, String description, DateTime date, int amount
+ String id, String clientName, String description, DateTime date, int amount, bool paid
 });
 
 
@@ -2255,13 +2262,15 @@ class __$TransactionCopyWithImpl<$Res>
 
 /// Create a copy of Transaction
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? clientName = null,Object? description = null,Object? date = null,Object? amount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? clientName = null,Object? description = null,Object? date = null,Object? amount = null,Object? paid = null,}) {
   return _then(_Transaction(
-clientName: null == clientName ? _self.clientName : clientName // ignore: cast_nullable_to_non_nullable
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,clientName: null == clientName ? _self.clientName : clientName // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String,date: null == date ? _self.date : date // ignore: cast_nullable_to_non_nullable
 as DateTime,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,paid: null == paid ? _self.paid : paid // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -2271,9 +2280,12 @@ as int,
 /// @nodoc
 mixin _$Earnings {
 
- int get available; int get yearTotal; int get sessions; int get averageRate; int get thisWeek; int get weekChangePercent; int get nextPayoutDays;/// Mon..Sun amounts for the current week.
+/// Completed sessions the client hasn't paid for yet.
+ int get outstanding; int get outstandingSessions;/// Paid sessions this year.
+ int get collected; int get yearTotal; int get sessions; int get averageRate; int get thisWeek; int get weekChangePercent;/// Mon..Sun amounts for the current week.
  List<int> get week;/// Last 8 months, oldest first.
- List<int> get months; List<String> get monthLabels; List<Transaction> get transactions;/// Share by session type (label → percent).
+ List<int> get months; List<String> get monthLabels;/// Unpaid sessions first (oldest first), then the most recent paid ones.
+ List<Transaction> get transactions;/// Share by session type (label → percent).
  Map<String, int> get byType;
 /// Create a copy of Earnings
 /// with the given fields replaced by the non-null parameter values.
@@ -2286,20 +2298,20 @@ $EarningsCopyWith<Earnings> get copyWith => _$EarningsCopyWithImpl<Earnings>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as Earnings;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Earnings&&(identical(other.available, _this.available) || other.available == _this.available)&&(identical(other.yearTotal, _this.yearTotal) || other.yearTotal == _this.yearTotal)&&(identical(other.sessions, _this.sessions) || other.sessions == _this.sessions)&&(identical(other.averageRate, _this.averageRate) || other.averageRate == _this.averageRate)&&(identical(other.thisWeek, _this.thisWeek) || other.thisWeek == _this.thisWeek)&&(identical(other.weekChangePercent, _this.weekChangePercent) || other.weekChangePercent == _this.weekChangePercent)&&(identical(other.nextPayoutDays, _this.nextPayoutDays) || other.nextPayoutDays == _this.nextPayoutDays)&&const DeepCollectionEquality().equals(other.week, _this.week)&&const DeepCollectionEquality().equals(other.months, _this.months)&&const DeepCollectionEquality().equals(other.monthLabels, _this.monthLabels)&&const DeepCollectionEquality().equals(other.transactions, _this.transactions)&&const DeepCollectionEquality().equals(other.byType, _this.byType));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Earnings&&(identical(other.outstanding, _this.outstanding) || other.outstanding == _this.outstanding)&&(identical(other.outstandingSessions, _this.outstandingSessions) || other.outstandingSessions == _this.outstandingSessions)&&(identical(other.collected, _this.collected) || other.collected == _this.collected)&&(identical(other.yearTotal, _this.yearTotal) || other.yearTotal == _this.yearTotal)&&(identical(other.sessions, _this.sessions) || other.sessions == _this.sessions)&&(identical(other.averageRate, _this.averageRate) || other.averageRate == _this.averageRate)&&(identical(other.thisWeek, _this.thisWeek) || other.thisWeek == _this.thisWeek)&&(identical(other.weekChangePercent, _this.weekChangePercent) || other.weekChangePercent == _this.weekChangePercent)&&const DeepCollectionEquality().equals(other.week, _this.week)&&const DeepCollectionEquality().equals(other.months, _this.months)&&const DeepCollectionEquality().equals(other.monthLabels, _this.monthLabels)&&const DeepCollectionEquality().equals(other.transactions, _this.transactions)&&const DeepCollectionEquality().equals(other.byType, _this.byType));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Earnings;
-  return Object.hash(runtimeType,_this.available,_this.yearTotal,_this.sessions,_this.averageRate,_this.thisWeek,_this.weekChangePercent,_this.nextPayoutDays,const DeepCollectionEquality().hash(_this.week),const DeepCollectionEquality().hash(_this.months),const DeepCollectionEquality().hash(_this.monthLabels),const DeepCollectionEquality().hash(_this.transactions),const DeepCollectionEquality().hash(_this.byType));
+  return Object.hash(runtimeType,_this.outstanding,_this.outstandingSessions,_this.collected,_this.yearTotal,_this.sessions,_this.averageRate,_this.thisWeek,_this.weekChangePercent,const DeepCollectionEquality().hash(_this.week),const DeepCollectionEquality().hash(_this.months),const DeepCollectionEquality().hash(_this.monthLabels),const DeepCollectionEquality().hash(_this.transactions),const DeepCollectionEquality().hash(_this.byType));
 }
 
 @override
 String toString() {
   final _this = this as Earnings;
-  return 'Earnings(available: ${_this.available}, yearTotal: ${_this.yearTotal}, sessions: ${_this.sessions}, averageRate: ${_this.averageRate}, thisWeek: ${_this.thisWeek}, weekChangePercent: ${_this.weekChangePercent}, nextPayoutDays: ${_this.nextPayoutDays}, week: ${_this.week}, months: ${_this.months}, monthLabels: ${_this.monthLabels}, transactions: ${_this.transactions}, byType: ${_this.byType})';
+  return 'Earnings(outstanding: ${_this.outstanding}, outstandingSessions: ${_this.outstandingSessions}, collected: ${_this.collected}, yearTotal: ${_this.yearTotal}, sessions: ${_this.sessions}, averageRate: ${_this.averageRate}, thisWeek: ${_this.thisWeek}, weekChangePercent: ${_this.weekChangePercent}, week: ${_this.week}, months: ${_this.months}, monthLabels: ${_this.monthLabels}, transactions: ${_this.transactions}, byType: ${_this.byType})';
 }
 
 
@@ -2310,7 +2322,7 @@ abstract mixin class $EarningsCopyWith<$Res>  {
   factory $EarningsCopyWith(Earnings value, $Res Function(Earnings) _then) = _$EarningsCopyWithImpl;
 @useResult
 $Res call({
- int available, int yearTotal, int sessions, int averageRate, int thisWeek, int weekChangePercent, int nextPayoutDays, List<int> week, List<int> months, List<String> monthLabels, List<Transaction> transactions, Map<String, int> byType
+ int outstanding, int outstandingSessions, int collected, int yearTotal, int sessions, int averageRate, int thisWeek, int weekChangePercent, List<int> week, List<int> months, List<String> monthLabels, List<Transaction> transactions, Map<String, int> byType
 });
 
 
@@ -2327,15 +2339,16 @@ class _$EarningsCopyWithImpl<$Res>
 
 /// Create a copy of Earnings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? available = null,Object? yearTotal = null,Object? sessions = null,Object? averageRate = null,Object? thisWeek = null,Object? weekChangePercent = null,Object? nextPayoutDays = null,Object? week = null,Object? months = null,Object? monthLabels = null,Object? transactions = null,Object? byType = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? outstanding = null,Object? outstandingSessions = null,Object? collected = null,Object? yearTotal = null,Object? sessions = null,Object? averageRate = null,Object? thisWeek = null,Object? weekChangePercent = null,Object? week = null,Object? months = null,Object? monthLabels = null,Object? transactions = null,Object? byType = null,}) {
   return _then(Earnings(
-available: null == available ? _self.available : available // ignore: cast_nullable_to_non_nullable
+outstanding: null == outstanding ? _self.outstanding : outstanding // ignore: cast_nullable_to_non_nullable
+as int,outstandingSessions: null == outstandingSessions ? _self.outstandingSessions : outstandingSessions // ignore: cast_nullable_to_non_nullable
+as int,collected: null == collected ? _self.collected : collected // ignore: cast_nullable_to_non_nullable
 as int,yearTotal: null == yearTotal ? _self.yearTotal : yearTotal // ignore: cast_nullable_to_non_nullable
 as int,sessions: null == sessions ? _self.sessions : sessions // ignore: cast_nullable_to_non_nullable
 as int,averageRate: null == averageRate ? _self.averageRate : averageRate // ignore: cast_nullable_to_non_nullable
 as int,thisWeek: null == thisWeek ? _self.thisWeek : thisWeek // ignore: cast_nullable_to_non_nullable
 as int,weekChangePercent: null == weekChangePercent ? _self.weekChangePercent : weekChangePercent // ignore: cast_nullable_to_non_nullable
-as int,nextPayoutDays: null == nextPayoutDays ? _self.nextPayoutDays : nextPayoutDays // ignore: cast_nullable_to_non_nullable
 as int,week: null == week ? _self.week : week // ignore: cast_nullable_to_non_nullable
 as List<int>,months: null == months ? _self.months : months // ignore: cast_nullable_to_non_nullable
 as List<int>,monthLabels: null == monthLabels ? _self.monthLabels : monthLabels // ignore: cast_nullable_to_non_nullable
@@ -2426,10 +2439,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int available,  int yearTotal,  int sessions,  int averageRate,  int thisWeek,  int weekChangePercent,  int nextPayoutDays,  List<int> week,  List<int> months,  List<String> monthLabels,  List<Transaction> transactions,  Map<String, int> byType)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int outstanding,  int outstandingSessions,  int collected,  int yearTotal,  int sessions,  int averageRate,  int thisWeek,  int weekChangePercent,  List<int> week,  List<int> months,  List<String> monthLabels,  List<Transaction> transactions,  Map<String, int> byType)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Earnings() when $default != null:
-return $default(_that.available,_that.yearTotal,_that.sessions,_that.averageRate,_that.thisWeek,_that.weekChangePercent,_that.nextPayoutDays,_that.week,_that.months,_that.monthLabels,_that.transactions,_that.byType);case _:
+return $default(_that.outstanding,_that.outstandingSessions,_that.collected,_that.yearTotal,_that.sessions,_that.averageRate,_that.thisWeek,_that.weekChangePercent,_that.week,_that.months,_that.monthLabels,_that.transactions,_that.byType);case _:
   return orElse();
 
 }
@@ -2447,10 +2460,10 @@ return $default(_that.available,_that.yearTotal,_that.sessions,_that.averageRate
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int available,  int yearTotal,  int sessions,  int averageRate,  int thisWeek,  int weekChangePercent,  int nextPayoutDays,  List<int> week,  List<int> months,  List<String> monthLabels,  List<Transaction> transactions,  Map<String, int> byType)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int outstanding,  int outstandingSessions,  int collected,  int yearTotal,  int sessions,  int averageRate,  int thisWeek,  int weekChangePercent,  List<int> week,  List<int> months,  List<String> monthLabels,  List<Transaction> transactions,  Map<String, int> byType)  $default,) {final _that = this;
 switch (_that) {
 case _Earnings():
-return $default(_that.available,_that.yearTotal,_that.sessions,_that.averageRate,_that.thisWeek,_that.weekChangePercent,_that.nextPayoutDays,_that.week,_that.months,_that.monthLabels,_that.transactions,_that.byType);case _:
+return $default(_that.outstanding,_that.outstandingSessions,_that.collected,_that.yearTotal,_that.sessions,_that.averageRate,_that.thisWeek,_that.weekChangePercent,_that.week,_that.months,_that.monthLabels,_that.transactions,_that.byType);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2467,10 +2480,10 @@ return $default(_that.available,_that.yearTotal,_that.sessions,_that.averageRate
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int available,  int yearTotal,  int sessions,  int averageRate,  int thisWeek,  int weekChangePercent,  int nextPayoutDays,  List<int> week,  List<int> months,  List<String> monthLabels,  List<Transaction> transactions,  Map<String, int> byType)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int outstanding,  int outstandingSessions,  int collected,  int yearTotal,  int sessions,  int averageRate,  int thisWeek,  int weekChangePercent,  List<int> week,  List<int> months,  List<String> monthLabels,  List<Transaction> transactions,  Map<String, int> byType)?  $default,) {final _that = this;
 switch (_that) {
 case _Earnings() when $default != null:
-return $default(_that.available,_that.yearTotal,_that.sessions,_that.averageRate,_that.thisWeek,_that.weekChangePercent,_that.nextPayoutDays,_that.week,_that.months,_that.monthLabels,_that.transactions,_that.byType);case _:
+return $default(_that.outstanding,_that.outstandingSessions,_that.collected,_that.yearTotal,_that.sessions,_that.averageRate,_that.thisWeek,_that.weekChangePercent,_that.week,_that.months,_that.monthLabels,_that.transactions,_that.byType);case _:
   return null;
 
 }
@@ -2482,16 +2495,19 @@ return $default(_that.available,_that.yearTotal,_that.sessions,_that.averageRate
 
 
 class _Earnings implements Earnings {
-  const _Earnings({required this.available, required this.yearTotal, required this.sessions, required this.averageRate, required this.thisWeek, required this.weekChangePercent, required this.nextPayoutDays, required  List<int> week, required  List<int> months, required  List<String> monthLabels, required  List<Transaction> transactions, required  Map<String, int> byType}): _week = week,_months = months,_monthLabels = monthLabels,_transactions = transactions,_byType = byType;
+  const _Earnings({required this.outstanding, required this.outstandingSessions, required this.collected, required this.yearTotal, required this.sessions, required this.averageRate, required this.thisWeek, required this.weekChangePercent, required  List<int> week, required  List<int> months, required  List<String> monthLabels, required  List<Transaction> transactions, required  Map<String, int> byType}): _week = week,_months = months,_monthLabels = monthLabels,_transactions = transactions,_byType = byType;
   
 
-@override final  int available;
+/// Completed sessions the client hasn't paid for yet.
+@override final  int outstanding;
+@override final  int outstandingSessions;
+/// Paid sessions this year.
+@override final  int collected;
 @override final  int yearTotal;
 @override final  int sessions;
 @override final  int averageRate;
 @override final  int thisWeek;
 @override final  int weekChangePercent;
-@override final  int nextPayoutDays;
 /// Mon..Sun amounts for the current week.
  final  List<int> _week;
 /// Mon..Sun amounts for the current week.
@@ -2517,7 +2533,9 @@ class _Earnings implements Earnings {
   return EqualUnmodifiableListView(_monthLabels);
 }
 
+/// Unpaid sessions first (oldest first), then the most recent paid ones.
  final  List<Transaction> _transactions;
+/// Unpaid sessions first (oldest first), then the most recent paid ones.
 @override List<Transaction> get transactions {
   if (_transactions is EqualUnmodifiableListView) return _transactions;
   // ignore: implicit_dynamic_type
@@ -2544,18 +2562,18 @@ _$EarningsCopyWith<_Earnings> get copyWith => __$EarningsCopyWithImpl<_Earnings>
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Earnings&&(identical(other.available, available) || other.available == available)&&(identical(other.yearTotal, yearTotal) || other.yearTotal == yearTotal)&&(identical(other.sessions, sessions) || other.sessions == sessions)&&(identical(other.averageRate, averageRate) || other.averageRate == averageRate)&&(identical(other.thisWeek, thisWeek) || other.thisWeek == thisWeek)&&(identical(other.weekChangePercent, weekChangePercent) || other.weekChangePercent == weekChangePercent)&&(identical(other.nextPayoutDays, nextPayoutDays) || other.nextPayoutDays == nextPayoutDays)&&const DeepCollectionEquality().equals(other.week, _week)&&const DeepCollectionEquality().equals(other.months, _months)&&const DeepCollectionEquality().equals(other.monthLabels, _monthLabels)&&const DeepCollectionEquality().equals(other.transactions, _transactions)&&const DeepCollectionEquality().equals(other.byType, _byType));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Earnings&&(identical(other.outstanding, outstanding) || other.outstanding == outstanding)&&(identical(other.outstandingSessions, outstandingSessions) || other.outstandingSessions == outstandingSessions)&&(identical(other.collected, collected) || other.collected == collected)&&(identical(other.yearTotal, yearTotal) || other.yearTotal == yearTotal)&&(identical(other.sessions, sessions) || other.sessions == sessions)&&(identical(other.averageRate, averageRate) || other.averageRate == averageRate)&&(identical(other.thisWeek, thisWeek) || other.thisWeek == thisWeek)&&(identical(other.weekChangePercent, weekChangePercent) || other.weekChangePercent == weekChangePercent)&&const DeepCollectionEquality().equals(other.week, _week)&&const DeepCollectionEquality().equals(other.months, _months)&&const DeepCollectionEquality().equals(other.monthLabels, _monthLabels)&&const DeepCollectionEquality().equals(other.transactions, _transactions)&&const DeepCollectionEquality().equals(other.byType, _byType));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,available,yearTotal,sessions,averageRate,thisWeek,weekChangePercent,nextPayoutDays,const DeepCollectionEquality().hash(_week),const DeepCollectionEquality().hash(_months),const DeepCollectionEquality().hash(_monthLabels),const DeepCollectionEquality().hash(_transactions),const DeepCollectionEquality().hash(_byType));
+    return Object.hash(runtimeType,outstanding,outstandingSessions,collected,yearTotal,sessions,averageRate,thisWeek,weekChangePercent,const DeepCollectionEquality().hash(_week),const DeepCollectionEquality().hash(_months),const DeepCollectionEquality().hash(_monthLabels),const DeepCollectionEquality().hash(_transactions),const DeepCollectionEquality().hash(_byType));
 }
 
 @override
 String toString() {
-    return 'Earnings(available: $available, yearTotal: $yearTotal, sessions: $sessions, averageRate: $averageRate, thisWeek: $thisWeek, weekChangePercent: $weekChangePercent, nextPayoutDays: $nextPayoutDays, week: $week, months: $months, monthLabels: $monthLabels, transactions: $transactions, byType: $byType)';
+    return 'Earnings(outstanding: $outstanding, outstandingSessions: $outstandingSessions, collected: $collected, yearTotal: $yearTotal, sessions: $sessions, averageRate: $averageRate, thisWeek: $thisWeek, weekChangePercent: $weekChangePercent, week: $week, months: $months, monthLabels: $monthLabels, transactions: $transactions, byType: $byType)';
 }
 
 
@@ -2566,7 +2584,7 @@ abstract mixin class _$EarningsCopyWith<$Res> implements $EarningsCopyWith<$Res>
   factory _$EarningsCopyWith(_Earnings value, $Res Function(_Earnings) _then) = __$EarningsCopyWithImpl;
 @override @useResult
 $Res call({
- int available, int yearTotal, int sessions, int averageRate, int thisWeek, int weekChangePercent, int nextPayoutDays, List<int> week, List<int> months, List<String> monthLabels, List<Transaction> transactions, Map<String, int> byType
+ int outstanding, int outstandingSessions, int collected, int yearTotal, int sessions, int averageRate, int thisWeek, int weekChangePercent, List<int> week, List<int> months, List<String> monthLabels, List<Transaction> transactions, Map<String, int> byType
 });
 
 
@@ -2583,15 +2601,16 @@ class __$EarningsCopyWithImpl<$Res>
 
 /// Create a copy of Earnings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? available = null,Object? yearTotal = null,Object? sessions = null,Object? averageRate = null,Object? thisWeek = null,Object? weekChangePercent = null,Object? nextPayoutDays = null,Object? week = null,Object? months = null,Object? monthLabels = null,Object? transactions = null,Object? byType = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? outstanding = null,Object? outstandingSessions = null,Object? collected = null,Object? yearTotal = null,Object? sessions = null,Object? averageRate = null,Object? thisWeek = null,Object? weekChangePercent = null,Object? week = null,Object? months = null,Object? monthLabels = null,Object? transactions = null,Object? byType = null,}) {
   return _then(_Earnings(
-available: null == available ? _self.available : available // ignore: cast_nullable_to_non_nullable
+outstanding: null == outstanding ? _self.outstanding : outstanding // ignore: cast_nullable_to_non_nullable
+as int,outstandingSessions: null == outstandingSessions ? _self.outstandingSessions : outstandingSessions // ignore: cast_nullable_to_non_nullable
+as int,collected: null == collected ? _self.collected : collected // ignore: cast_nullable_to_non_nullable
 as int,yearTotal: null == yearTotal ? _self.yearTotal : yearTotal // ignore: cast_nullable_to_non_nullable
 as int,sessions: null == sessions ? _self.sessions : sessions // ignore: cast_nullable_to_non_nullable
 as int,averageRate: null == averageRate ? _self.averageRate : averageRate // ignore: cast_nullable_to_non_nullable
 as int,thisWeek: null == thisWeek ? _self.thisWeek : thisWeek // ignore: cast_nullable_to_non_nullable
 as int,weekChangePercent: null == weekChangePercent ? _self.weekChangePercent : weekChangePercent // ignore: cast_nullable_to_non_nullable
-as int,nextPayoutDays: null == nextPayoutDays ? _self.nextPayoutDays : nextPayoutDays // ignore: cast_nullable_to_non_nullable
 as int,week: null == week ? _self._week : week // ignore: cast_nullable_to_non_nullable
 as List<int>,months: null == months ? _self._months : months // ignore: cast_nullable_to_non_nullable
 as List<int>,monthLabels: null == monthLabels ? _self._monthLabels : monthLabels // ignore: cast_nullable_to_non_nullable
@@ -2607,7 +2626,8 @@ as Map<String, int>,
 /// @nodoc
 mixin _$PracticeDashboard {
 
- int get sessionsToday; int get pendingRequests; double get rating; int get weekEarnings; int get responseRate; int get engagement; int get activeClients; int get newThisMonth; int get completedRate; int get attendanceRate; int get rebookedRate; int get totalClients; int get years; bool get acceptingClients; List<int> get earningsWeek; List<ScheduledSession> get schedule;
+ int get sessionsToday; int get pendingRequests; double get rating; int get weekEarnings; int get responseRate; int get engagement; int get activeClients; int get newThisMonth; int get completedRate; int get attendanceRate; int get rebookedRate; int get totalClients; int get years; bool get acceptingClients; List<int> get earningsWeek; List<ScheduledSession> get schedule;/// Ended sessions waiting for the professional to mark completed / no-show.
+ List<ScheduledSession> get toMark;
 /// Create a copy of PracticeDashboard
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2619,20 +2639,20 @@ $PracticeDashboardCopyWith<PracticeDashboard> get copyWith => _$PracticeDashboar
 @override
 bool operator ==(Object other) {
   final _this = this as PracticeDashboard;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PracticeDashboard&&(identical(other.sessionsToday, _this.sessionsToday) || other.sessionsToday == _this.sessionsToday)&&(identical(other.pendingRequests, _this.pendingRequests) || other.pendingRequests == _this.pendingRequests)&&(identical(other.rating, _this.rating) || other.rating == _this.rating)&&(identical(other.weekEarnings, _this.weekEarnings) || other.weekEarnings == _this.weekEarnings)&&(identical(other.responseRate, _this.responseRate) || other.responseRate == _this.responseRate)&&(identical(other.engagement, _this.engagement) || other.engagement == _this.engagement)&&(identical(other.activeClients, _this.activeClients) || other.activeClients == _this.activeClients)&&(identical(other.newThisMonth, _this.newThisMonth) || other.newThisMonth == _this.newThisMonth)&&(identical(other.completedRate, _this.completedRate) || other.completedRate == _this.completedRate)&&(identical(other.attendanceRate, _this.attendanceRate) || other.attendanceRate == _this.attendanceRate)&&(identical(other.rebookedRate, _this.rebookedRate) || other.rebookedRate == _this.rebookedRate)&&(identical(other.totalClients, _this.totalClients) || other.totalClients == _this.totalClients)&&(identical(other.years, _this.years) || other.years == _this.years)&&(identical(other.acceptingClients, _this.acceptingClients) || other.acceptingClients == _this.acceptingClients)&&const DeepCollectionEquality().equals(other.earningsWeek, _this.earningsWeek)&&const DeepCollectionEquality().equals(other.schedule, _this.schedule));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PracticeDashboard&&(identical(other.sessionsToday, _this.sessionsToday) || other.sessionsToday == _this.sessionsToday)&&(identical(other.pendingRequests, _this.pendingRequests) || other.pendingRequests == _this.pendingRequests)&&(identical(other.rating, _this.rating) || other.rating == _this.rating)&&(identical(other.weekEarnings, _this.weekEarnings) || other.weekEarnings == _this.weekEarnings)&&(identical(other.responseRate, _this.responseRate) || other.responseRate == _this.responseRate)&&(identical(other.engagement, _this.engagement) || other.engagement == _this.engagement)&&(identical(other.activeClients, _this.activeClients) || other.activeClients == _this.activeClients)&&(identical(other.newThisMonth, _this.newThisMonth) || other.newThisMonth == _this.newThisMonth)&&(identical(other.completedRate, _this.completedRate) || other.completedRate == _this.completedRate)&&(identical(other.attendanceRate, _this.attendanceRate) || other.attendanceRate == _this.attendanceRate)&&(identical(other.rebookedRate, _this.rebookedRate) || other.rebookedRate == _this.rebookedRate)&&(identical(other.totalClients, _this.totalClients) || other.totalClients == _this.totalClients)&&(identical(other.years, _this.years) || other.years == _this.years)&&(identical(other.acceptingClients, _this.acceptingClients) || other.acceptingClients == _this.acceptingClients)&&const DeepCollectionEquality().equals(other.earningsWeek, _this.earningsWeek)&&const DeepCollectionEquality().equals(other.schedule, _this.schedule)&&const DeepCollectionEquality().equals(other.toMark, _this.toMark));
 }
 
 
 @override
 int get hashCode {
   final _this = this as PracticeDashboard;
-  return Object.hash(runtimeType,_this.sessionsToday,_this.pendingRequests,_this.rating,_this.weekEarnings,_this.responseRate,_this.engagement,_this.activeClients,_this.newThisMonth,_this.completedRate,_this.attendanceRate,_this.rebookedRate,_this.totalClients,_this.years,_this.acceptingClients,const DeepCollectionEquality().hash(_this.earningsWeek),const DeepCollectionEquality().hash(_this.schedule));
+  return Object.hash(runtimeType,_this.sessionsToday,_this.pendingRequests,_this.rating,_this.weekEarnings,_this.responseRate,_this.engagement,_this.activeClients,_this.newThisMonth,_this.completedRate,_this.attendanceRate,_this.rebookedRate,_this.totalClients,_this.years,_this.acceptingClients,const DeepCollectionEquality().hash(_this.earningsWeek),const DeepCollectionEquality().hash(_this.schedule),const DeepCollectionEquality().hash(_this.toMark));
 }
 
 @override
 String toString() {
   final _this = this as PracticeDashboard;
-  return 'PracticeDashboard(sessionsToday: ${_this.sessionsToday}, pendingRequests: ${_this.pendingRequests}, rating: ${_this.rating}, weekEarnings: ${_this.weekEarnings}, responseRate: ${_this.responseRate}, engagement: ${_this.engagement}, activeClients: ${_this.activeClients}, newThisMonth: ${_this.newThisMonth}, completedRate: ${_this.completedRate}, attendanceRate: ${_this.attendanceRate}, rebookedRate: ${_this.rebookedRate}, totalClients: ${_this.totalClients}, years: ${_this.years}, acceptingClients: ${_this.acceptingClients}, earningsWeek: ${_this.earningsWeek}, schedule: ${_this.schedule})';
+  return 'PracticeDashboard(sessionsToday: ${_this.sessionsToday}, pendingRequests: ${_this.pendingRequests}, rating: ${_this.rating}, weekEarnings: ${_this.weekEarnings}, responseRate: ${_this.responseRate}, engagement: ${_this.engagement}, activeClients: ${_this.activeClients}, newThisMonth: ${_this.newThisMonth}, completedRate: ${_this.completedRate}, attendanceRate: ${_this.attendanceRate}, rebookedRate: ${_this.rebookedRate}, totalClients: ${_this.totalClients}, years: ${_this.years}, acceptingClients: ${_this.acceptingClients}, earningsWeek: ${_this.earningsWeek}, schedule: ${_this.schedule}, toMark: ${_this.toMark})';
 }
 
 
@@ -2643,7 +2663,7 @@ abstract mixin class $PracticeDashboardCopyWith<$Res>  {
   factory $PracticeDashboardCopyWith(PracticeDashboard value, $Res Function(PracticeDashboard) _then) = _$PracticeDashboardCopyWithImpl;
 @useResult
 $Res call({
- int sessionsToday, int pendingRequests, double rating, int weekEarnings, int responseRate, int engagement, int activeClients, int newThisMonth, int completedRate, int attendanceRate, int rebookedRate, int totalClients, int years, bool acceptingClients, List<int> earningsWeek, List<ScheduledSession> schedule
+ int sessionsToday, int pendingRequests, double rating, int weekEarnings, int responseRate, int engagement, int activeClients, int newThisMonth, int completedRate, int attendanceRate, int rebookedRate, int totalClients, int years, bool acceptingClients, List<int> earningsWeek, List<ScheduledSession> schedule, List<ScheduledSession> toMark
 });
 
 
@@ -2660,7 +2680,7 @@ class _$PracticeDashboardCopyWithImpl<$Res>
 
 /// Create a copy of PracticeDashboard
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? sessionsToday = null,Object? pendingRequests = null,Object? rating = null,Object? weekEarnings = null,Object? responseRate = null,Object? engagement = null,Object? activeClients = null,Object? newThisMonth = null,Object? completedRate = null,Object? attendanceRate = null,Object? rebookedRate = null,Object? totalClients = null,Object? years = null,Object? acceptingClients = null,Object? earningsWeek = null,Object? schedule = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sessionsToday = null,Object? pendingRequests = null,Object? rating = null,Object? weekEarnings = null,Object? responseRate = null,Object? engagement = null,Object? activeClients = null,Object? newThisMonth = null,Object? completedRate = null,Object? attendanceRate = null,Object? rebookedRate = null,Object? totalClients = null,Object? years = null,Object? acceptingClients = null,Object? earningsWeek = null,Object? schedule = null,Object? toMark = null,}) {
   return _then(PracticeDashboard(
 sessionsToday: null == sessionsToday ? _self.sessionsToday : sessionsToday // ignore: cast_nullable_to_non_nullable
 as int,pendingRequests: null == pendingRequests ? _self.pendingRequests : pendingRequests // ignore: cast_nullable_to_non_nullable
@@ -2678,6 +2698,7 @@ as int,years: null == years ? _self.years : years // ignore: cast_nullable_to_no
 as int,acceptingClients: null == acceptingClients ? _self.acceptingClients : acceptingClients // ignore: cast_nullable_to_non_nullable
 as bool,earningsWeek: null == earningsWeek ? _self.earningsWeek : earningsWeek // ignore: cast_nullable_to_non_nullable
 as List<int>,schedule: null == schedule ? _self.schedule : schedule // ignore: cast_nullable_to_non_nullable
+as List<ScheduledSession>,toMark: null == toMark ? _self.toMark : toMark // ignore: cast_nullable_to_non_nullable
 as List<ScheduledSession>,
   ));
 }
@@ -2763,10 +2784,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sessionsToday,  int pendingRequests,  double rating,  int weekEarnings,  int responseRate,  int engagement,  int activeClients,  int newThisMonth,  int completedRate,  int attendanceRate,  int rebookedRate,  int totalClients,  int years,  bool acceptingClients,  List<int> earningsWeek,  List<ScheduledSession> schedule)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int sessionsToday,  int pendingRequests,  double rating,  int weekEarnings,  int responseRate,  int engagement,  int activeClients,  int newThisMonth,  int completedRate,  int attendanceRate,  int rebookedRate,  int totalClients,  int years,  bool acceptingClients,  List<int> earningsWeek,  List<ScheduledSession> schedule,  List<ScheduledSession> toMark)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PracticeDashboard() when $default != null:
-return $default(_that.sessionsToday,_that.pendingRequests,_that.rating,_that.weekEarnings,_that.responseRate,_that.engagement,_that.activeClients,_that.newThisMonth,_that.completedRate,_that.attendanceRate,_that.rebookedRate,_that.totalClients,_that.years,_that.acceptingClients,_that.earningsWeek,_that.schedule);case _:
+return $default(_that.sessionsToday,_that.pendingRequests,_that.rating,_that.weekEarnings,_that.responseRate,_that.engagement,_that.activeClients,_that.newThisMonth,_that.completedRate,_that.attendanceRate,_that.rebookedRate,_that.totalClients,_that.years,_that.acceptingClients,_that.earningsWeek,_that.schedule,_that.toMark);case _:
   return orElse();
 
 }
@@ -2784,10 +2805,10 @@ return $default(_that.sessionsToday,_that.pendingRequests,_that.rating,_that.wee
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sessionsToday,  int pendingRequests,  double rating,  int weekEarnings,  int responseRate,  int engagement,  int activeClients,  int newThisMonth,  int completedRate,  int attendanceRate,  int rebookedRate,  int totalClients,  int years,  bool acceptingClients,  List<int> earningsWeek,  List<ScheduledSession> schedule)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int sessionsToday,  int pendingRequests,  double rating,  int weekEarnings,  int responseRate,  int engagement,  int activeClients,  int newThisMonth,  int completedRate,  int attendanceRate,  int rebookedRate,  int totalClients,  int years,  bool acceptingClients,  List<int> earningsWeek,  List<ScheduledSession> schedule,  List<ScheduledSession> toMark)  $default,) {final _that = this;
 switch (_that) {
 case _PracticeDashboard():
-return $default(_that.sessionsToday,_that.pendingRequests,_that.rating,_that.weekEarnings,_that.responseRate,_that.engagement,_that.activeClients,_that.newThisMonth,_that.completedRate,_that.attendanceRate,_that.rebookedRate,_that.totalClients,_that.years,_that.acceptingClients,_that.earningsWeek,_that.schedule);case _:
+return $default(_that.sessionsToday,_that.pendingRequests,_that.rating,_that.weekEarnings,_that.responseRate,_that.engagement,_that.activeClients,_that.newThisMonth,_that.completedRate,_that.attendanceRate,_that.rebookedRate,_that.totalClients,_that.years,_that.acceptingClients,_that.earningsWeek,_that.schedule,_that.toMark);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2804,10 +2825,10 @@ return $default(_that.sessionsToday,_that.pendingRequests,_that.rating,_that.wee
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sessionsToday,  int pendingRequests,  double rating,  int weekEarnings,  int responseRate,  int engagement,  int activeClients,  int newThisMonth,  int completedRate,  int attendanceRate,  int rebookedRate,  int totalClients,  int years,  bool acceptingClients,  List<int> earningsWeek,  List<ScheduledSession> schedule)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int sessionsToday,  int pendingRequests,  double rating,  int weekEarnings,  int responseRate,  int engagement,  int activeClients,  int newThisMonth,  int completedRate,  int attendanceRate,  int rebookedRate,  int totalClients,  int years,  bool acceptingClients,  List<int> earningsWeek,  List<ScheduledSession> schedule,  List<ScheduledSession> toMark)?  $default,) {final _that = this;
 switch (_that) {
 case _PracticeDashboard() when $default != null:
-return $default(_that.sessionsToday,_that.pendingRequests,_that.rating,_that.weekEarnings,_that.responseRate,_that.engagement,_that.activeClients,_that.newThisMonth,_that.completedRate,_that.attendanceRate,_that.rebookedRate,_that.totalClients,_that.years,_that.acceptingClients,_that.earningsWeek,_that.schedule);case _:
+return $default(_that.sessionsToday,_that.pendingRequests,_that.rating,_that.weekEarnings,_that.responseRate,_that.engagement,_that.activeClients,_that.newThisMonth,_that.completedRate,_that.attendanceRate,_that.rebookedRate,_that.totalClients,_that.years,_that.acceptingClients,_that.earningsWeek,_that.schedule,_that.toMark);case _:
   return null;
 
 }
@@ -2819,7 +2840,7 @@ return $default(_that.sessionsToday,_that.pendingRequests,_that.rating,_that.wee
 
 
 class _PracticeDashboard implements PracticeDashboard {
-  const _PracticeDashboard({required this.sessionsToday, required this.pendingRequests, required this.rating, required this.weekEarnings, required this.responseRate, required this.engagement, required this.activeClients, required this.newThisMonth, required this.completedRate, required this.attendanceRate, required this.rebookedRate, required this.totalClients, required this.years, required this.acceptingClients, required  List<int> earningsWeek, required  List<ScheduledSession> schedule}): _earningsWeek = earningsWeek,_schedule = schedule;
+  const _PracticeDashboard({required this.sessionsToday, required this.pendingRequests, required this.rating, required this.weekEarnings, required this.responseRate, required this.engagement, required this.activeClients, required this.newThisMonth, required this.completedRate, required this.attendanceRate, required this.rebookedRate, required this.totalClients, required this.years, required this.acceptingClients, required  List<int> earningsWeek, required  List<ScheduledSession> schedule,  List<ScheduledSession> toMark = const <ScheduledSession>[]}): _earningsWeek = earningsWeek,_schedule = schedule,_toMark = toMark;
   
 
 @override final  int sessionsToday;
@@ -2850,6 +2871,15 @@ class _PracticeDashboard implements PracticeDashboard {
   return EqualUnmodifiableListView(_schedule);
 }
 
+/// Ended sessions waiting for the professional to mark completed / no-show.
+ final  List<ScheduledSession> _toMark;
+/// Ended sessions waiting for the professional to mark completed / no-show.
+@override@JsonKey() List<ScheduledSession> get toMark {
+  if (_toMark is EqualUnmodifiableListView) return _toMark;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_toMark);
+}
+
 
 /// Create a copy of PracticeDashboard
 /// with the given fields replaced by the non-null parameter values.
@@ -2861,18 +2891,18 @@ _$PracticeDashboardCopyWith<_PracticeDashboard> get copyWith => __$PracticeDashb
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PracticeDashboard&&(identical(other.sessionsToday, sessionsToday) || other.sessionsToday == sessionsToday)&&(identical(other.pendingRequests, pendingRequests) || other.pendingRequests == pendingRequests)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.weekEarnings, weekEarnings) || other.weekEarnings == weekEarnings)&&(identical(other.responseRate, responseRate) || other.responseRate == responseRate)&&(identical(other.engagement, engagement) || other.engagement == engagement)&&(identical(other.activeClients, activeClients) || other.activeClients == activeClients)&&(identical(other.newThisMonth, newThisMonth) || other.newThisMonth == newThisMonth)&&(identical(other.completedRate, completedRate) || other.completedRate == completedRate)&&(identical(other.attendanceRate, attendanceRate) || other.attendanceRate == attendanceRate)&&(identical(other.rebookedRate, rebookedRate) || other.rebookedRate == rebookedRate)&&(identical(other.totalClients, totalClients) || other.totalClients == totalClients)&&(identical(other.years, years) || other.years == years)&&(identical(other.acceptingClients, acceptingClients) || other.acceptingClients == acceptingClients)&&const DeepCollectionEquality().equals(other.earningsWeek, _earningsWeek)&&const DeepCollectionEquality().equals(other.schedule, _schedule));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PracticeDashboard&&(identical(other.sessionsToday, sessionsToday) || other.sessionsToday == sessionsToday)&&(identical(other.pendingRequests, pendingRequests) || other.pendingRequests == pendingRequests)&&(identical(other.rating, rating) || other.rating == rating)&&(identical(other.weekEarnings, weekEarnings) || other.weekEarnings == weekEarnings)&&(identical(other.responseRate, responseRate) || other.responseRate == responseRate)&&(identical(other.engagement, engagement) || other.engagement == engagement)&&(identical(other.activeClients, activeClients) || other.activeClients == activeClients)&&(identical(other.newThisMonth, newThisMonth) || other.newThisMonth == newThisMonth)&&(identical(other.completedRate, completedRate) || other.completedRate == completedRate)&&(identical(other.attendanceRate, attendanceRate) || other.attendanceRate == attendanceRate)&&(identical(other.rebookedRate, rebookedRate) || other.rebookedRate == rebookedRate)&&(identical(other.totalClients, totalClients) || other.totalClients == totalClients)&&(identical(other.years, years) || other.years == years)&&(identical(other.acceptingClients, acceptingClients) || other.acceptingClients == acceptingClients)&&const DeepCollectionEquality().equals(other.earningsWeek, _earningsWeek)&&const DeepCollectionEquality().equals(other.schedule, _schedule)&&const DeepCollectionEquality().equals(other.toMark, _toMark));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,sessionsToday,pendingRequests,rating,weekEarnings,responseRate,engagement,activeClients,newThisMonth,completedRate,attendanceRate,rebookedRate,totalClients,years,acceptingClients,const DeepCollectionEquality().hash(_earningsWeek),const DeepCollectionEquality().hash(_schedule));
+    return Object.hash(runtimeType,sessionsToday,pendingRequests,rating,weekEarnings,responseRate,engagement,activeClients,newThisMonth,completedRate,attendanceRate,rebookedRate,totalClients,years,acceptingClients,const DeepCollectionEquality().hash(_earningsWeek),const DeepCollectionEquality().hash(_schedule),const DeepCollectionEquality().hash(_toMark));
 }
 
 @override
 String toString() {
-    return 'PracticeDashboard(sessionsToday: $sessionsToday, pendingRequests: $pendingRequests, rating: $rating, weekEarnings: $weekEarnings, responseRate: $responseRate, engagement: $engagement, activeClients: $activeClients, newThisMonth: $newThisMonth, completedRate: $completedRate, attendanceRate: $attendanceRate, rebookedRate: $rebookedRate, totalClients: $totalClients, years: $years, acceptingClients: $acceptingClients, earningsWeek: $earningsWeek, schedule: $schedule)';
+    return 'PracticeDashboard(sessionsToday: $sessionsToday, pendingRequests: $pendingRequests, rating: $rating, weekEarnings: $weekEarnings, responseRate: $responseRate, engagement: $engagement, activeClients: $activeClients, newThisMonth: $newThisMonth, completedRate: $completedRate, attendanceRate: $attendanceRate, rebookedRate: $rebookedRate, totalClients: $totalClients, years: $years, acceptingClients: $acceptingClients, earningsWeek: $earningsWeek, schedule: $schedule, toMark: $toMark)';
 }
 
 
@@ -2883,7 +2913,7 @@ abstract mixin class _$PracticeDashboardCopyWith<$Res> implements $PracticeDashb
   factory _$PracticeDashboardCopyWith(_PracticeDashboard value, $Res Function(_PracticeDashboard) _then) = __$PracticeDashboardCopyWithImpl;
 @override @useResult
 $Res call({
- int sessionsToday, int pendingRequests, double rating, int weekEarnings, int responseRate, int engagement, int activeClients, int newThisMonth, int completedRate, int attendanceRate, int rebookedRate, int totalClients, int years, bool acceptingClients, List<int> earningsWeek, List<ScheduledSession> schedule
+ int sessionsToday, int pendingRequests, double rating, int weekEarnings, int responseRate, int engagement, int activeClients, int newThisMonth, int completedRate, int attendanceRate, int rebookedRate, int totalClients, int years, bool acceptingClients, List<int> earningsWeek, List<ScheduledSession> schedule, List<ScheduledSession> toMark
 });
 
 
@@ -2900,7 +2930,7 @@ class __$PracticeDashboardCopyWithImpl<$Res>
 
 /// Create a copy of PracticeDashboard
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? sessionsToday = null,Object? pendingRequests = null,Object? rating = null,Object? weekEarnings = null,Object? responseRate = null,Object? engagement = null,Object? activeClients = null,Object? newThisMonth = null,Object? completedRate = null,Object? attendanceRate = null,Object? rebookedRate = null,Object? totalClients = null,Object? years = null,Object? acceptingClients = null,Object? earningsWeek = null,Object? schedule = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? sessionsToday = null,Object? pendingRequests = null,Object? rating = null,Object? weekEarnings = null,Object? responseRate = null,Object? engagement = null,Object? activeClients = null,Object? newThisMonth = null,Object? completedRate = null,Object? attendanceRate = null,Object? rebookedRate = null,Object? totalClients = null,Object? years = null,Object? acceptingClients = null,Object? earningsWeek = null,Object? schedule = null,Object? toMark = null,}) {
   return _then(_PracticeDashboard(
 sessionsToday: null == sessionsToday ? _self.sessionsToday : sessionsToday // ignore: cast_nullable_to_non_nullable
 as int,pendingRequests: null == pendingRequests ? _self.pendingRequests : pendingRequests // ignore: cast_nullable_to_non_nullable
@@ -2918,6 +2948,7 @@ as int,years: null == years ? _self.years : years // ignore: cast_nullable_to_no
 as int,acceptingClients: null == acceptingClients ? _self.acceptingClients : acceptingClients // ignore: cast_nullable_to_non_nullable
 as bool,earningsWeek: null == earningsWeek ? _self._earningsWeek : earningsWeek // ignore: cast_nullable_to_non_nullable
 as List<int>,schedule: null == schedule ? _self._schedule : schedule // ignore: cast_nullable_to_non_nullable
+as List<ScheduledSession>,toMark: null == toMark ? _self._toMark : toMark // ignore: cast_nullable_to_non_nullable
 as List<ScheduledSession>,
   ));
 }

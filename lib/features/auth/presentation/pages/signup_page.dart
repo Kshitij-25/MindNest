@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/core.dart';
+import '../../../settings/presentation/pages/legal_page.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_router.dart';
 import '../../domain/entities/user_role.dart';
@@ -97,9 +98,15 @@ class SignupPage extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          'I agree to MindNest’s Terms of Service and Privacy Policy.',
-                          style: context.text.callout.copyWith(color: c.ink2),
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text('I’m 18 or older and agree to the ', style: context.text.callout.copyWith(color: c.ink2)),
+                            MnLinkButton(label: 'Terms of use', onPressed: () => context.router.push(LegalRoute(doc: LegalDoc.terms))),
+                            Text(' and ', style: context.text.callout.copyWith(color: c.ink2)),
+                            MnLinkButton(label: 'Privacy policy', onPressed: () => context.router.push(LegalRoute(doc: LegalDoc.privacy))),
+                            Text('.', style: context.text.callout.copyWith(color: c.ink2)),
+                          ],
                         ),
                       ),
                     ],

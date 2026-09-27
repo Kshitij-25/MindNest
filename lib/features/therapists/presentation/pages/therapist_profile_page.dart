@@ -8,6 +8,8 @@ import '../../../../core/core.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_router.dart';
 import '../../domain/entities/therapist.dart';
+import '../../../safety/domain/safety.dart';
+import '../../../safety/presentation/safety_actions.dart';
 import '../bloc/therapist_profile_cubit.dart';
 import '../widgets/therapist_widgets.dart';
 
@@ -73,7 +75,7 @@ class _PhoneProfile extends StatelessWidget {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        PortraitPlaceholder(name: t.name),
+                        PortraitPlaceholder(name: t.name, userId: t.id),
                         DecoratedBox(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -126,7 +128,7 @@ class _TabletProfile extends StatelessWidget {
     return MnPage(
       header: MnNavHeader(
         title: t.name,
-        trailing: _SaveButton(t: t),
+        trailing: Row(mainAxisSize: MainAxisSize.min, children: [_SaveButton(t: t), const SizedBox(width: 6), _MoreButton(t: t)]),
       ),
       maxWidth: 1080,
       body: Row(
@@ -143,7 +145,7 @@ class _TabletProfile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      SizedBox(height: 220, child: PortraitPlaceholder(name: t.name)),
+                      SizedBox(height: 220, child: PortraitPlaceholder(name: t.name, userId: t.id)),
                       Padding(
                         padding: const EdgeInsets.all(20),
                         child: Column(
@@ -154,7 +156,7 @@ class _TabletProfile extends StatelessWidget {
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                Text('£${t.price}', style: context.text.title2),
+                                Text(money(t.price), style: context.text.title2),
                                 Text('  per session', style: context.text.foot.copyWith(color: context.colors.ink3)),
                               ],
                             ),
@@ -207,6 +209,33 @@ class _SaveButton extends StatelessWidget {
   }
 }
 
+class _MoreButton extends StatelessWidget {
+  const _MoreButton({required this.t, this.overlay = false});
+  final Therapist t;
+  final bool overlay;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return MnIconButton(
+      icon: MnIcons.more,
+      tooltip: 'More',
+      stroke: 1.9,
+      iconSize: 20,
+      background: overlay ? Colors.white.withValues(alpha: .85) : c.fill,
+      color: overlay ? const Color(0xFF1F2519) : c.ink,
+      onPressed: () async {
+        final blocked = await showSafetyMenu(
+          context,
+          ReportSubject(type: ReportTarget.user, path: 'therapists/${t.id}', ownerId: t.id, ownerName: t.name),
+          reportLabel: 'Report profile',
+        );
+        if (blocked && context.mounted) context.router.maybePop();
+      },
+    );
+  }
+}
+
 class _HeroActions extends StatelessWidget {
   const _HeroActions({required this.t});
   final Therapist t;
@@ -226,7 +255,13 @@ class _HeroActions extends StatelessWidget {
           color: const Color(0xFF1F2519),
           onPressed: () => context.router.maybePop(),
         )),
-        glass(_SaveButton(t: t, overlay: true)),
+        Row(
+          children: [
+            glass(_SaveButton(t: t, overlay: true)),
+            const SizedBox(width: 8),
+            glass(_MoreButton(t: t, overlay: true)),
+          ],
+        ),
       ],
     );
   }
@@ -445,7 +480,7 @@ class _BookBar extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('£${t.price}', style: context.text.title3.copyWith(height: 1)),
+                  Text(money(t.price), style: context.text.title3.copyWith(height: 1)),
                   const SizedBox(height: 2),
                   Text('per session', style: context.text.cap.copyWith(color: c.ink3)),
                 ],

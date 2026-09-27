@@ -75,7 +75,7 @@ class _IdentityCard extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none,
               children: [
-                MnAvatar(name: user.name, size: 84, ring: true, photo: user.isProfessional),
+                MnAvatar(name: user.name, size: 84, ring: true, photo: user.isProfessional, userId: user.id),
                 Positioned(
                   bottom: -2,
                   right: -2,
@@ -285,7 +285,7 @@ class _ProProfile extends StatelessWidget {
                 (MnIcons.calendar, 'Manage availability', () => openSection(context, const ProCalendarRoute(), ProTab.calendar)),
                 (MnIcons.users, 'Clients & notes', () => openSection(context, const ProClientsRoute(), ProTab.clients)),
                 (MnIcons.award, 'Credentials & verification', () => context.router.push(const ProCredentialsRoute())),
-                (MnIcons.trend, 'Earnings & payouts', () => openSection(context, const ProEarningsRoute(), ProTab.earnings)),
+                (MnIcons.trend, 'Earnings & payments', () => openSection(context, const ProEarningsRoute(), ProTab.earnings)),
                 (MnIcons.edit, 'Edit profile', () => context.router.push(const EditProfileRoute())),
                 (MnIcons.sliders, 'Settings', () => context.router.push(const SettingsRoute())),
               ]),

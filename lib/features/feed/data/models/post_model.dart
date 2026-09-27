@@ -76,10 +76,11 @@ class PostModel {
 
 @JsonSerializable()
 class CommentModel {
-  CommentModel({required this.id, required this.name, required this.createdAt, required this.text, this.likes = 0, this.liked = false});
+  CommentModel({required this.id, this.authorId = '', required this.name, required this.createdAt, required this.text, this.likes = 0, this.liked = false});
   factory CommentModel.fromJson(Map<String, dynamic> json) => _$CommentModelFromJson(json);
 
   final String id;
+  final String authorId;
   final String name;
   final DateTime createdAt;
   final String text;
@@ -87,5 +88,5 @@ class CommentModel {
   bool liked;
 
   Map<String, dynamic> toJson() => _$CommentModelToJson(this);
-  PostComment toEntity() => PostComment(id: id, author: name, createdAt: createdAt, text: text, likes: likes, liked: liked);
+  PostComment toEntity() => PostComment(id: id, authorId: authorId, author: name, createdAt: createdAt, text: text, likes: likes, liked: liked);
 }

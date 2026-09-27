@@ -56,12 +56,13 @@ extension ChatThreadEventPatterns on ChatThreadEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ChatThreadOpened value)?  opened,TResult Function( ChatThreadSent value)?  sent,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ChatThreadOpened value)?  opened,TResult Function( ChatThreadSent value)?  sent,TResult Function( ChatThreadAttachmentSent value)?  attachmentSent,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ChatThreadOpened() when opened != null:
 return opened(_that);case ChatThreadSent() when sent != null:
-return sent(_that);case _:
+return sent(_that);case ChatThreadAttachmentSent() when attachmentSent != null:
+return attachmentSent(_that);case _:
   return orElse();
 
 }
@@ -79,12 +80,13 @@ return sent(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ChatThreadOpened value)  opened,required TResult Function( ChatThreadSent value)  sent,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ChatThreadOpened value)  opened,required TResult Function( ChatThreadSent value)  sent,required TResult Function( ChatThreadAttachmentSent value)  attachmentSent,}){
 final _that = this;
 switch (_that) {
 case ChatThreadOpened():
 return opened(_that);case ChatThreadSent():
-return sent(_that);}
+return sent(_that);case ChatThreadAttachmentSent():
+return attachmentSent(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -98,12 +100,13 @@ return sent(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ChatThreadOpened value)?  opened,TResult? Function( ChatThreadSent value)?  sent,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ChatThreadOpened value)?  opened,TResult? Function( ChatThreadSent value)?  sent,TResult? Function( ChatThreadAttachmentSent value)?  attachmentSent,}){
 final _that = this;
 switch (_that) {
 case ChatThreadOpened() when opened != null:
 return opened(_that);case ChatThreadSent() when sent != null:
-return sent(_that);case _:
+return sent(_that);case ChatThreadAttachmentSent() when attachmentSent != null:
+return attachmentSent(_that);case _:
   return null;
 
 }
@@ -120,11 +123,12 @@ return sent(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? conversationId,  String? participantId)?  opened,TResult Function( String text)?  sent,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? conversationId,  String? participantId)?  opened,TResult Function( String text)?  sent,TResult Function( AttachmentKind kind,  String name,  Uint8List bytes)?  attachmentSent,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ChatThreadOpened() when opened != null:
 return opened(_that.conversationId,_that.participantId);case ChatThreadSent() when sent != null:
-return sent(_that.text);case _:
+return sent(_that.text);case ChatThreadAttachmentSent() when attachmentSent != null:
+return attachmentSent(_that.kind,_that.name,_that.bytes);case _:
   return orElse();
 
 }
@@ -142,11 +146,12 @@ return sent(_that.text);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? conversationId,  String? participantId)  opened,required TResult Function( String text)  sent,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? conversationId,  String? participantId)  opened,required TResult Function( String text)  sent,required TResult Function( AttachmentKind kind,  String name,  Uint8List bytes)  attachmentSent,}) {final _that = this;
 switch (_that) {
 case ChatThreadOpened():
 return opened(_that.conversationId,_that.participantId);case ChatThreadSent():
-return sent(_that.text);}
+return sent(_that.text);case ChatThreadAttachmentSent():
+return attachmentSent(_that.kind,_that.name,_that.bytes);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -160,11 +165,12 @@ return sent(_that.text);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? conversationId,  String? participantId)?  opened,TResult? Function( String text)?  sent,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? conversationId,  String? participantId)?  opened,TResult? Function( String text)?  sent,TResult? Function( AttachmentKind kind,  String name,  Uint8List bytes)?  attachmentSent,}) {final _that = this;
 switch (_that) {
 case ChatThreadOpened() when opened != null:
 return opened(_that.conversationId,_that.participantId);case ChatThreadSent() when sent != null:
-return sent(_that.text);case _:
+return sent(_that.text);case ChatThreadAttachmentSent() when attachmentSent != null:
+return attachmentSent(_that.kind,_that.name,_that.bytes);case _:
   return null;
 
 }
@@ -311,9 +317,81 @@ as String,
 }
 
 /// @nodoc
+
+
+class ChatThreadAttachmentSent implements ChatThreadEvent {
+  const ChatThreadAttachmentSent({required this.kind, required this.name, required this.bytes});
+  
+
+ final  AttachmentKind kind;
+ final  String name;
+ final  Uint8List bytes;
+
+/// Create a copy of ChatThreadEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ChatThreadAttachmentSentCopyWith<ChatThreadAttachmentSent> get copyWith => _$ChatThreadAttachmentSentCopyWithImpl<ChatThreadAttachmentSent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatThreadAttachmentSent&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.bytes, bytes));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,kind,name,const DeepCollectionEquality().hash(bytes));
+}
+
+@override
+String toString() {
+    return 'ChatThreadEvent.attachmentSent(kind: $kind, name: $name, bytes: $bytes)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ChatThreadAttachmentSentCopyWith<$Res> implements $ChatThreadEventCopyWith<$Res> {
+  factory $ChatThreadAttachmentSentCopyWith(ChatThreadAttachmentSent value, $Res Function(ChatThreadAttachmentSent) _then) = _$ChatThreadAttachmentSentCopyWithImpl;
+@useResult
+$Res call({
+ AttachmentKind kind, String name, Uint8List bytes
+});
+
+
+
+
+}
+/// @nodoc
+class _$ChatThreadAttachmentSentCopyWithImpl<$Res>
+    implements $ChatThreadAttachmentSentCopyWith<$Res> {
+  _$ChatThreadAttachmentSentCopyWithImpl(this._self, this._then);
+
+  final ChatThreadAttachmentSent _self;
+  final $Res Function(ChatThreadAttachmentSent) _then;
+
+/// Create a copy of ChatThreadEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? name = null,Object? bytes = null,}) {
+  return _then(ChatThreadAttachmentSent(
+kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as AttachmentKind,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,bytes: null == bytes ? _self.bytes : bytes // ignore: cast_nullable_to_non_nullable
+as Uint8List,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$ChatThreadState {
 
- LoadStatus get status; Conversation? get conversation; List<ChatMessage> get messages; bool get otherTyping; String? get error;
+ LoadStatus get status; Conversation? get conversation; List<ChatMessage> get messages; bool get otherTyping; bool get uploading; String? get error;
 /// Create a copy of ChatThreadState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -325,20 +403,20 @@ $ChatThreadStateCopyWith<ChatThreadState> get copyWith => _$ChatThreadStateCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as ChatThreadState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatThreadState&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.conversation, _this.conversation) || other.conversation == _this.conversation)&&const DeepCollectionEquality().equals(other.messages, _this.messages)&&(identical(other.otherTyping, _this.otherTyping) || other.otherTyping == _this.otherTyping)&&(identical(other.error, _this.error) || other.error == _this.error));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatThreadState&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.conversation, _this.conversation) || other.conversation == _this.conversation)&&const DeepCollectionEquality().equals(other.messages, _this.messages)&&(identical(other.otherTyping, _this.otherTyping) || other.otherTyping == _this.otherTyping)&&(identical(other.uploading, _this.uploading) || other.uploading == _this.uploading)&&(identical(other.error, _this.error) || other.error == _this.error));
 }
 
 
 @override
 int get hashCode {
   final _this = this as ChatThreadState;
-  return Object.hash(runtimeType,_this.status,_this.conversation,const DeepCollectionEquality().hash(_this.messages),_this.otherTyping,_this.error);
+  return Object.hash(runtimeType,_this.status,_this.conversation,const DeepCollectionEquality().hash(_this.messages),_this.otherTyping,_this.uploading,_this.error);
 }
 
 @override
 String toString() {
   final _this = this as ChatThreadState;
-  return 'ChatThreadState(status: ${_this.status}, conversation: ${_this.conversation}, messages: ${_this.messages}, otherTyping: ${_this.otherTyping}, error: ${_this.error})';
+  return 'ChatThreadState(status: ${_this.status}, conversation: ${_this.conversation}, messages: ${_this.messages}, otherTyping: ${_this.otherTyping}, uploading: ${_this.uploading}, error: ${_this.error})';
 }
 
 
@@ -349,7 +427,7 @@ abstract mixin class $ChatThreadStateCopyWith<$Res>  {
   factory $ChatThreadStateCopyWith(ChatThreadState value, $Res Function(ChatThreadState) _then) = _$ChatThreadStateCopyWithImpl;
 @useResult
 $Res call({
- LoadStatus status, Conversation? conversation, List<ChatMessage> messages, bool otherTyping, String? error
+ LoadStatus status, Conversation? conversation, List<ChatMessage> messages, bool otherTyping, bool uploading, String? error
 });
 
 
@@ -366,12 +444,13 @@ class _$ChatThreadStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatThreadState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? conversation = freezed,Object? messages = null,Object? otherTyping = null,Object? error = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? conversation = freezed,Object? messages = null,Object? otherTyping = null,Object? uploading = null,Object? error = freezed,}) {
   return _then(ChatThreadState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as LoadStatus,conversation: freezed == conversation ? _self.conversation : conversation // ignore: cast_nullable_to_non_nullable
 as Conversation?,messages: null == messages ? _self.messages : messages // ignore: cast_nullable_to_non_nullable
 as List<ChatMessage>,otherTyping: null == otherTyping ? _self.otherTyping : otherTyping // ignore: cast_nullable_to_non_nullable
+as bool,uploading: null == uploading ? _self.uploading : uploading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
@@ -470,10 +549,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LoadStatus status,  Conversation? conversation,  List<ChatMessage> messages,  bool otherTyping,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LoadStatus status,  Conversation? conversation,  List<ChatMessage> messages,  bool otherTyping,  bool uploading,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatThreadState() when $default != null:
-return $default(_that.status,_that.conversation,_that.messages,_that.otherTyping,_that.error);case _:
+return $default(_that.status,_that.conversation,_that.messages,_that.otherTyping,_that.uploading,_that.error);case _:
   return orElse();
 
 }
@@ -491,10 +570,10 @@ return $default(_that.status,_that.conversation,_that.messages,_that.otherTyping
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LoadStatus status,  Conversation? conversation,  List<ChatMessage> messages,  bool otherTyping,  String? error)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LoadStatus status,  Conversation? conversation,  List<ChatMessage> messages,  bool otherTyping,  bool uploading,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _ChatThreadState():
-return $default(_that.status,_that.conversation,_that.messages,_that.otherTyping,_that.error);case _:
+return $default(_that.status,_that.conversation,_that.messages,_that.otherTyping,_that.uploading,_that.error);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -511,10 +590,10 @@ return $default(_that.status,_that.conversation,_that.messages,_that.otherTyping
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LoadStatus status,  Conversation? conversation,  List<ChatMessage> messages,  bool otherTyping,  String? error)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LoadStatus status,  Conversation? conversation,  List<ChatMessage> messages,  bool otherTyping,  bool uploading,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatThreadState() when $default != null:
-return $default(_that.status,_that.conversation,_that.messages,_that.otherTyping,_that.error);case _:
+return $default(_that.status,_that.conversation,_that.messages,_that.otherTyping,_that.uploading,_that.error);case _:
   return null;
 
 }
@@ -526,7 +605,7 @@ return $default(_that.status,_that.conversation,_that.messages,_that.otherTyping
 
 
 class _ChatThreadState implements ChatThreadState {
-  const _ChatThreadState({this.status = LoadStatus.initial, this.conversation,  List<ChatMessage> messages = const <ChatMessage>[], this.otherTyping = false, this.error}): _messages = messages;
+  const _ChatThreadState({this.status = LoadStatus.initial, this.conversation,  List<ChatMessage> messages = const <ChatMessage>[], this.otherTyping = false, this.uploading = false, this.error}): _messages = messages;
   
 
 @override@JsonKey() final  LoadStatus status;
@@ -539,6 +618,7 @@ class _ChatThreadState implements ChatThreadState {
 }
 
 @override@JsonKey() final  bool otherTyping;
+@override@JsonKey() final  bool uploading;
 @override final  String? error;
 
 /// Create a copy of ChatThreadState
@@ -551,18 +631,18 @@ _$ChatThreadStateCopyWith<_ChatThreadState> get copyWith => __$ChatThreadStateCo
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatThreadState&&(identical(other.status, status) || other.status == status)&&(identical(other.conversation, conversation) || other.conversation == conversation)&&const DeepCollectionEquality().equals(other.messages, _messages)&&(identical(other.otherTyping, otherTyping) || other.otherTyping == otherTyping)&&(identical(other.error, error) || other.error == error));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatThreadState&&(identical(other.status, status) || other.status == status)&&(identical(other.conversation, conversation) || other.conversation == conversation)&&const DeepCollectionEquality().equals(other.messages, _messages)&&(identical(other.otherTyping, otherTyping) || other.otherTyping == otherTyping)&&(identical(other.uploading, uploading) || other.uploading == uploading)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,status,conversation,const DeepCollectionEquality().hash(_messages),otherTyping,error);
+    return Object.hash(runtimeType,status,conversation,const DeepCollectionEquality().hash(_messages),otherTyping,uploading,error);
 }
 
 @override
 String toString() {
-    return 'ChatThreadState(status: $status, conversation: $conversation, messages: $messages, otherTyping: $otherTyping, error: $error)';
+    return 'ChatThreadState(status: $status, conversation: $conversation, messages: $messages, otherTyping: $otherTyping, uploading: $uploading, error: $error)';
 }
 
 
@@ -573,7 +653,7 @@ abstract mixin class _$ChatThreadStateCopyWith<$Res> implements $ChatThreadState
   factory _$ChatThreadStateCopyWith(_ChatThreadState value, $Res Function(_ChatThreadState) _then) = __$ChatThreadStateCopyWithImpl;
 @override @useResult
 $Res call({
- LoadStatus status, Conversation? conversation, List<ChatMessage> messages, bool otherTyping, String? error
+ LoadStatus status, Conversation? conversation, List<ChatMessage> messages, bool otherTyping, bool uploading, String? error
 });
 
 
@@ -590,12 +670,13 @@ class __$ChatThreadStateCopyWithImpl<$Res>
 
 /// Create a copy of ChatThreadState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? conversation = freezed,Object? messages = null,Object? otherTyping = null,Object? error = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? conversation = freezed,Object? messages = null,Object? otherTyping = null,Object? uploading = null,Object? error = freezed,}) {
   return _then(_ChatThreadState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as LoadStatus,conversation: freezed == conversation ? _self.conversation : conversation // ignore: cast_nullable_to_non_nullable
 as Conversation?,messages: null == messages ? _self._messages : messages // ignore: cast_nullable_to_non_nullable
 as List<ChatMessage>,otherTyping: null == otherTyping ? _self.otherTyping : otherTyping // ignore: cast_nullable_to_non_nullable
+as bool,uploading: null == uploading ? _self.uploading : uploading // ignore: cast_nullable_to_non_nullable
 as bool,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

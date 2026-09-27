@@ -612,7 +612,7 @@ $PostAuthorCopyWith<$Res> get author {
 /// @nodoc
 mixin _$PostComment {
 
- String get id; String get author; DateTime get createdAt; String get text; int get likes; bool get liked;
+ String get id; String get authorId; String get author; DateTime get createdAt; String get text; int get likes; bool get liked;
 /// Create a copy of PostComment
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -624,20 +624,20 @@ $PostCommentCopyWith<PostComment> get copyWith => _$PostCommentCopyWithImpl<Post
 @override
 bool operator ==(Object other) {
   final _this = this as PostComment;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PostComment&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.author, _this.author) || other.author == _this.author)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.text, _this.text) || other.text == _this.text)&&(identical(other.likes, _this.likes) || other.likes == _this.likes)&&(identical(other.liked, _this.liked) || other.liked == _this.liked));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PostComment&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.authorId, _this.authorId) || other.authorId == _this.authorId)&&(identical(other.author, _this.author) || other.author == _this.author)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.text, _this.text) || other.text == _this.text)&&(identical(other.likes, _this.likes) || other.likes == _this.likes)&&(identical(other.liked, _this.liked) || other.liked == _this.liked));
 }
 
 
 @override
 int get hashCode {
   final _this = this as PostComment;
-  return Object.hash(runtimeType,_this.id,_this.author,_this.createdAt,_this.text,_this.likes,_this.liked);
+  return Object.hash(runtimeType,_this.id,_this.authorId,_this.author,_this.createdAt,_this.text,_this.likes,_this.liked);
 }
 
 @override
 String toString() {
   final _this = this as PostComment;
-  return 'PostComment(id: ${_this.id}, author: ${_this.author}, createdAt: ${_this.createdAt}, text: ${_this.text}, likes: ${_this.likes}, liked: ${_this.liked})';
+  return 'PostComment(id: ${_this.id}, authorId: ${_this.authorId}, author: ${_this.author}, createdAt: ${_this.createdAt}, text: ${_this.text}, likes: ${_this.likes}, liked: ${_this.liked})';
 }
 
 
@@ -648,7 +648,7 @@ abstract mixin class $PostCommentCopyWith<$Res>  {
   factory $PostCommentCopyWith(PostComment value, $Res Function(PostComment) _then) = _$PostCommentCopyWithImpl;
 @useResult
 $Res call({
- String id, String author, DateTime createdAt, String text, int likes, bool liked
+ String id, String authorId, String author, DateTime createdAt, String text, int likes, bool liked
 });
 
 
@@ -665,9 +665,10 @@ class _$PostCommentCopyWithImpl<$Res>
 
 /// Create a copy of PostComment
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? author = null,Object? createdAt = null,Object? text = null,Object? likes = null,Object? liked = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? authorId = null,Object? author = null,Object? createdAt = null,Object? text = null,Object? likes = null,Object? liked = null,}) {
   return _then(PostComment(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,authorId: null == authorId ? _self.authorId : authorId // ignore: cast_nullable_to_non_nullable
 as String,author: null == author ? _self.author : author // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
@@ -758,10 +759,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String author,  DateTime createdAt,  String text,  int likes,  bool liked)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String authorId,  String author,  DateTime createdAt,  String text,  int likes,  bool liked)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PostComment() when $default != null:
-return $default(_that.id,_that.author,_that.createdAt,_that.text,_that.likes,_that.liked);case _:
+return $default(_that.id,_that.authorId,_that.author,_that.createdAt,_that.text,_that.likes,_that.liked);case _:
   return orElse();
 
 }
@@ -779,10 +780,10 @@ return $default(_that.id,_that.author,_that.createdAt,_that.text,_that.likes,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String author,  DateTime createdAt,  String text,  int likes,  bool liked)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String authorId,  String author,  DateTime createdAt,  String text,  int likes,  bool liked)  $default,) {final _that = this;
 switch (_that) {
 case _PostComment():
-return $default(_that.id,_that.author,_that.createdAt,_that.text,_that.likes,_that.liked);case _:
+return $default(_that.id,_that.authorId,_that.author,_that.createdAt,_that.text,_that.likes,_that.liked);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -799,10 +800,10 @@ return $default(_that.id,_that.author,_that.createdAt,_that.text,_that.likes,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String author,  DateTime createdAt,  String text,  int likes,  bool liked)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String authorId,  String author,  DateTime createdAt,  String text,  int likes,  bool liked)?  $default,) {final _that = this;
 switch (_that) {
 case _PostComment() when $default != null:
-return $default(_that.id,_that.author,_that.createdAt,_that.text,_that.likes,_that.liked);case _:
+return $default(_that.id,_that.authorId,_that.author,_that.createdAt,_that.text,_that.likes,_that.liked);case _:
   return null;
 
 }
@@ -814,10 +815,11 @@ return $default(_that.id,_that.author,_that.createdAt,_that.text,_that.likes,_th
 
 
 class _PostComment implements PostComment {
-  const _PostComment({required this.id, required this.author, required this.createdAt, required this.text, this.likes = 0, this.liked = false});
+  const _PostComment({required this.id, this.authorId = '', required this.author, required this.createdAt, required this.text, this.likes = 0, this.liked = false});
   
 
 @override final  String id;
+@override@JsonKey() final  String authorId;
 @override final  String author;
 @override final  DateTime createdAt;
 @override final  String text;
@@ -834,18 +836,18 @@ _$PostCommentCopyWith<_PostComment> get copyWith => __$PostCommentCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PostComment&&(identical(other.id, id) || other.id == id)&&(identical(other.author, author) || other.author == author)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.text, text) || other.text == text)&&(identical(other.likes, likes) || other.likes == likes)&&(identical(other.liked, liked) || other.liked == liked));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PostComment&&(identical(other.id, id) || other.id == id)&&(identical(other.authorId, authorId) || other.authorId == authorId)&&(identical(other.author, author) || other.author == author)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.text, text) || other.text == text)&&(identical(other.likes, likes) || other.likes == likes)&&(identical(other.liked, liked) || other.liked == liked));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,author,createdAt,text,likes,liked);
+    return Object.hash(runtimeType,id,authorId,author,createdAt,text,likes,liked);
 }
 
 @override
 String toString() {
-    return 'PostComment(id: $id, author: $author, createdAt: $createdAt, text: $text, likes: $likes, liked: $liked)';
+    return 'PostComment(id: $id, authorId: $authorId, author: $author, createdAt: $createdAt, text: $text, likes: $likes, liked: $liked)';
 }
 
 
@@ -856,7 +858,7 @@ abstract mixin class _$PostCommentCopyWith<$Res> implements $PostCommentCopyWith
   factory _$PostCommentCopyWith(_PostComment value, $Res Function(_PostComment) _then) = __$PostCommentCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String author, DateTime createdAt, String text, int likes, bool liked
+ String id, String authorId, String author, DateTime createdAt, String text, int likes, bool liked
 });
 
 
@@ -873,9 +875,10 @@ class __$PostCommentCopyWithImpl<$Res>
 
 /// Create a copy of PostComment
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? author = null,Object? createdAt = null,Object? text = null,Object? likes = null,Object? liked = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? authorId = null,Object? author = null,Object? createdAt = null,Object? text = null,Object? likes = null,Object? liked = null,}) {
   return _then(_PostComment(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,authorId: null == authorId ? _self.authorId : authorId // ignore: cast_nullable_to_non_nullable
 as String,author: null == author ? _self.author : author // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable

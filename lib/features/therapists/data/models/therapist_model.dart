@@ -45,7 +45,7 @@ class TherapistModel {
       reviews: readInt(d['reviews']),
       years: readInt(d['years']),
       verified: d['verified'] as bool? ?? false,
-      price: readInt(d['price'], 80),
+      price: readInt(d['price'], 1500),
       location: d['location'] as String? ?? 'Remote',
       next: nextAvailableLabel(hours, accepting: accepting),
       langs: readStrings(d['langs']),

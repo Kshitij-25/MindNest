@@ -42,7 +42,10 @@ class SessionsBloc extends Bloc<SessionsEvent, SessionsState> {
         (u) => emit(state.copyWith(
           status: LoadStatus.success,
           upcoming: u,
-          past: past.getOrElse((_) => const []).where((a) => a.status == AppointmentStatus.completed).toList(),
+          past: past
+              .getOrElse((_) => const [])
+              .where((a) => a.status == AppointmentStatus.completed || a.status == AppointmentStatus.noShow || a.awaitingOutcome)
+              .toList(),
         )),
       );
     });

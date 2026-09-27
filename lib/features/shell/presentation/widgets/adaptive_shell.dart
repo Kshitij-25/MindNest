@@ -345,13 +345,13 @@ class _Sidebar extends StatelessWidget {
             Padding(
               padding: EdgeInsets.fromLTRB(12, 12, 12, MediaQuery.paddingOf(context).bottom + 12),
               child: compact
-                  ? Center(child: MnAvatar(name: user.name, size: 40, photo: true))
+                  ? Center(child: MnAvatar(name: user.name, size: 40, photo: true, userId: user.id))
                   : Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(color: c.fill, borderRadius: BorderRadius.circular(15)),
                       child: Row(
                         children: [
-                          MnAvatar(name: user.name, size: 40, photo: true),
+                          MnAvatar(name: user.name, size: 40, photo: true, userId: user.id),
                           const SizedBox(width: 11),
                           Expanded(
                             child: Column(

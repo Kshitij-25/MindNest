@@ -85,6 +85,10 @@ class ChatMessageModel {
     required this.text,
     required this.sentAt,
     this.read = false,
+    this.attachmentId,
+    this.attachmentKind,
+    this.attachmentName,
+    this.attachmentSize,
   });
   factory ChatMessageModel.fromJson(Map<String, dynamic> json) =>
       _$ChatMessageModelFromJson(json);
@@ -94,6 +98,10 @@ class ChatMessageModel {
   final String text;
   final DateTime sentAt;
   bool read;
+  final String? attachmentId;
+  final String? attachmentKind;
+  final String? attachmentName;
+  final int? attachmentSize;
 
   Map<String, dynamic> toJson() => _$ChatMessageModelToJson(this);
   ChatMessage toEntity() => ChatMessage(
@@ -102,5 +110,13 @@ class ChatMessageModel {
     text: text,
     sentAt: sentAt,
     read: read,
+    attachment: attachmentId == null
+        ? null
+        : ChatAttachment(
+            id: attachmentId!,
+            kind: attachmentKind == 'pdf' ? AttachmentKind.pdf : AttachmentKind.image,
+            name: attachmentName ?? 'Attachment',
+            size: attachmentSize ?? 0,
+          ),
   );
 }

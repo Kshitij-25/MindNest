@@ -67,6 +67,7 @@ const _$PostStatusEnumMap = {
 
 CommentModel _$CommentModelFromJson(Map<String, dynamic> json) => CommentModel(
   id: json['id'] as String,
+  authorId: json['authorId'] as String? ?? '',
   name: json['name'] as String,
   createdAt: DateTime.parse(json['createdAt'] as String),
   text: json['text'] as String,
@@ -77,6 +78,7 @@ CommentModel _$CommentModelFromJson(Map<String, dynamic> json) => CommentModel(
 Map<String, dynamic> _$CommentModelToJson(CommentModel instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'authorId': instance.authorId,
       'name': instance.name,
       'createdAt': instance.createdAt.toIso8601String(),
       'text': instance.text,

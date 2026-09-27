@@ -5,6 +5,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/firebase/collections.dart';
 import '../../../../core/firebase/session.dart';
 import '../models/therapist_model.dart';
+import '../../../safety/data/safety_data_source.dart';
 
 abstract interface class TherapistDataSource {
   Future<List<TherapistModel>> therapists();
@@ -17,16 +18,18 @@ abstract interface class TherapistDataSource {
 /// Public directory in `therapists/`; only verified professionals are listed.
 @LazySingleton(as: TherapistDataSource)
 class FirestoreTherapistDataSource implements TherapistDataSource {
-  FirestoreTherapistDataSource(this._db, this._session);
+  FirestoreTherapistDataSource(this._db, this._session, this._safety);
   final FirebaseFirestore _db;
   final FirebaseSession _session;
+  final SafetyDataSource _safety;
 
   CollectionReference<Map<String, dynamic>> get _saved => _db.userCol(_session.uid, 'savedTherapists');
 
   @override
   Future<List<TherapistModel>> therapists() async {
     final snap = await _db.collection(Col.therapists).where('verified', isEqualTo: true).get();
-    return snap.docs.map(TherapistModel.fromFirestore).toList()
+    final blocked = await _safety.blockedIds();
+    return snap.docs.where((d) => !blocked.contains(d.id)).map(TherapistModel.fromFirestore).toList()
       ..sort((a, b) => b.rating.compareTo(a.rating));
   }
 

@@ -12,31 +12,31 @@ const ago = (h) => Timestamp.fromDate(new Date(Date.now() - h * 36e5));
 const pros = [
   {
     email: 'amara@demo.mindnest.app', name: 'Dr. Amara Okafor', title: 'Clinical Psychologist', spec: 'Anxiety & Stress',
-    tags: ['Anxiety', 'Stress', 'CBT'], rating: 4.9, reviews: 214, years: 11, price: 90, location: 'Remote · London',
-    langs: ['English', 'Yoruba'], hours: hours(),
+    tags: ['Anxiety', 'Stress', 'CBT'], rating: 4.9, reviews: 214, years: 11, price: 1800, location: 'Remote · Bengaluru',
+    langs: ['English', 'Hindi'], hours: hours(),
     about: 'I help people untangle anxious thinking and rebuild a steadier relationship with everyday life. My approach is warm, structured, and paced to you.',
-    quals: ['PhD Clinical Psychology, UCL', 'HCPC Registered', 'Certified CBT Practitioner'],
+    quals: ['PhD Clinical Psychology, NIMHANS', 'RCI Licensed Clinical Psychologist', 'Certified CBT Practitioner'],
   },
   {
     email: 'daniel@demo.mindnest.app', name: 'Daniel Mercer', title: 'Psychotherapist', spec: 'Depression & Mood',
-    tags: ['Depression', 'Mood', 'Mindfulness'], rating: 4.8, reviews: 156, years: 8, price: 75, location: 'Remote · Manchester',
+    tags: ['Depression', 'Mood', 'Mindfulness'], rating: 4.8, reviews: 156, years: 8, price: 1500, location: 'Remote · Mumbai',
     langs: ['English'], types: ['Video', 'Chat'], hours: hours([3]),
     about: 'A calm, non-judgemental space to work through low mood and find small footholds back toward the things that matter to you.',
-    quals: ['MSc Psychotherapy', 'BACP Accredited', 'Mindfulness-Based CT'],
+    quals: ['MA Psychology, TISS', 'Diploma in Psychotherapy', 'Mindfulness-Based CT'],
   },
   {
     email: 'priya@demo.mindnest.app', name: 'Dr. Priya Nair', title: 'Counselling Psychologist', spec: 'Sleep & Burnout',
-    tags: ['Sleep', 'Burnout', 'Work stress'], rating: 5.0, reviews: 98, years: 13, price: 110, location: 'Remote · Edinburgh',
-    langs: ['English', 'Hindi'], types: ['Video'], hours: hours([1, 5]),
+    tags: ['Sleep', 'Burnout', 'Work stress'], rating: 5.0, reviews: 98, years: 13, price: 2200, location: 'Remote · Kochi',
+    langs: ['English', 'Hindi', 'Malayalam'], types: ['Video'], hours: hours([1, 5]),
     about: 'I work with high-functioning burnout and sleep difficulties, blending CBT-I with compassion-focused techniques.',
-    quals: ['DPsych Counselling Psychology', 'HCPC Registered', 'CBT-I Certified'],
+    quals: ['MPhil Clinical Psychology, AIIMS Delhi', 'RCI Licensed Clinical Psychologist', 'CBT-I Certified'],
   },
   {
     email: 'sofia@demo.mindnest.app', name: 'Sofia Almeida', title: 'Therapist', spec: 'Relationships',
-    tags: ['Relationships', 'Self-esteem'], rating: 4.7, reviews: 132, years: 6, price: 70, location: 'Remote · Lisbon',
-    langs: ['English', 'Portuguese'], hours: hours([2]),
+    tags: ['Relationships', 'Self-esteem'], rating: 4.7, reviews: 132, years: 6, price: 1400, location: 'Remote · Goa',
+    langs: ['English', 'Konkani'], hours: hours([2]),
     about: 'Relationship and self-worth work in a gentle, collaborative style. We move at a pace that feels safe for you.',
-    quals: ['MA Integrative Counselling', 'BACP Registered'],
+    quals: ['MSc Counselling Psychology', 'Certified Couples Therapist'],
   },
 ];
 
@@ -115,7 +115,7 @@ async function seedDemoClient() {
   const me = u.uid, pro = uids[0], proName = pros[0].name;
   const day = (d, h = 9, m = 0) => { const t = new Date(); t.setHours(h, m, 0, 0); t.setDate(t.getDate() + d); return Timestamp.fromDate(t); };
   await db.doc(`users/${me}`).set({ name: 'Maya Chen', email: 'maya@demo.mindnest.app', role: 'client', onboarded: true,
-    verification: 'none', title: null, phone: '+44 7700 900892', bio: 'Learning to slow down and be kinder to myself.' });
+    verification: 'none', title: null, phone: '+91 98765 00892', bio: 'Learning to slow down and be kinder to myself.' });
   await db.doc(`users/${me}/private/assessment`).set({ mood: 3, stress: 6, anxiety: 2, sleep: 3, goals: ['Reduce anxiety', 'Sleep better'] });
 
   const levels = [3, 4, 4, 3, 2, 4, 5, 4, 3, 4, 4, 5, 5, 4, 3, 2, 3, 4, 5, 4, 4, 3, 4, 2, 4, 5, 4, 4];
@@ -135,11 +135,18 @@ async function seedDemoClient() {
 
   const appt = (id, d, h, status, extra = {}) => db.doc(`appointments/${id}`).set({
     clientId: me, clientName: 'Maya Chen', therapistId: pro, therapistName: proName, startsAt: day(d, h), type: 'video', minutes: 50,
-    status, recurrence: 'weekly', reminders: ['24h', '1h'], price: 90, reason: 'Anxiety & work stress', note: '', newClient: false,
+    status, recurrence: 'weekly', reminders: ['24h', '1h'], price: 1800, reason: 'Anxiety & work stress', note: '', newClient: false,
     createdAt: day(d - 3), ...(status !== 'pending' ? { respondedAt: day(d - 2) } : {}), ...extra });
   await appt('seed-up1', 2, 16, 'accepted');
   await appt('seed-req', 4, 11, 'pending', { note: 'Could we also talk about sleep next time?', recurrence: 'oneTime' });
-  for (const w of [1, 2, 3, 4]) await appt(`seed-past${w}`, -7 * w, 16, 'accepted');
+  // Past: one to review, two paid, one no-show — plus one that just ended
+  // and is waiting for the professional to mark it.
+  const done = (paid) => ({ completedBy: 'therapist', completedAt: day(-1), paid, ...(paid ? { paidAt: day(-1) } : {}) });
+  await appt('seed-past1', -7, 16, 'completed', done(false));
+  await appt('seed-past2', -14, 16, 'completed', done(true));
+  await appt('seed-past3', -21, 16, 'noShow', { completedBy: 'therapist', completedAt: day(-20) });
+  await appt('seed-past4', -28, 16, 'completed', done(true));
+  await appt('seed-mark', -1, new Date().getHours() + 3, 'accepted', { recurrence: 'oneTime' });
   for (const [id, d, h] of [['seed-up1', 2, 16], ['seed-req', 4, 11]]) {
     const t = day(d, h).toDate();
     const key = `${t.getFullYear()}${String(t.getMonth() + 1).padStart(2, '0')}${String(t.getDate()).padStart(2, '0')}${String(t.getHours()).padStart(2, '0')}00`;

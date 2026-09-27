@@ -41,7 +41,10 @@ import '../../features/sessions/domain/entities/appointment.dart';
 import '../../features/sessions/presentation/pages/booking_page.dart';
 import '../../features/sessions/presentation/pages/booking_success_page.dart';
 import '../../features/sessions/presentation/pages/sessions_page.dart';
+import '../../features/safety/presentation/pages/blocked_users_page.dart';
 import '../../features/settings/presentation/pages/accessibility_page.dart';
+import '../../features/settings/presentation/pages/delete_account_page.dart';
+import '../../features/settings/presentation/pages/legal_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/shell/presentation/pages/client_shell_page.dart';
 import '../../features/shell/presentation/pages/pro_shell_page.dart';
@@ -83,6 +86,7 @@ class AppRouter extends RootStackRouter {
         LoginRoute.name,
         SignupRoute.name,
         ForgotPasswordRoute.name,
+        LegalRoute.name,
       }.contains(resolver.route.name);
       if (open || _auth.cachedUser != null) {
         resolver.next();
@@ -160,6 +164,9 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: EditProfileRoute.page, path: '/profile/edit'),
     AutoRoute(page: SettingsRoute.page, path: '/settings'),
     AutoRoute(page: AccessibilityRoute.page, path: '/settings/accessibility'),
+    AutoRoute(page: DeleteAccountRoute.page, path: '/settings/delete-account'),
+    AutoRoute(page: LegalRoute.page, path: '/legal'),
+    AutoRoute(page: BlockedUsersRoute.page, path: '/settings/blocked'),
 
     // Professional stack pages
     AutoRoute(page: ProCredentialsRoute.page, path: '/practice/credentials'),

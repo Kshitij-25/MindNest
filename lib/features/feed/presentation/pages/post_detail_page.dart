@@ -7,6 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/core.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../safety/domain/safety.dart';
+import '../../../safety/presentation/safety_actions.dart';
 import '../bloc/post_detail_cubit.dart';
 import '../widgets/comment_sheet.dart';
 import '../widgets/post_widgets.dart';
@@ -63,12 +66,32 @@ class _PostDetailViewState extends State<_PostDetailView> {
                 MnNavHeader(
                   transparent: true,
                   onBack: () => context.router.pop(p),
-                  trailing: MnIconButton(
-                    icon: MnIcons.share,
-                    tooltip: 'Share',
-                    iconSize: 18,
-                    stroke: 1.9,
-                    onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link copied'))),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      MnIconButton(
+                        icon: MnIcons.share,
+                        tooltip: 'Share',
+                        iconSize: 18,
+                        stroke: 1.9,
+                        onPressed: p == null ? null : () => sharePost(context, p),
+                      ),
+                      if (p != null && p.author.id != context.read<AuthBloc>().state.user?.id)
+                        MnIconButton(
+                          icon: MnIcons.more,
+                          tooltip: 'More',
+                          iconSize: 18,
+                          stroke: 1.9,
+                          onPressed: () async {
+                            final blocked = await showSafetyMenu(
+                              context,
+                              ReportSubject(type: ReportTarget.post, path: 'posts/${p.id}', ownerId: p.author.id, ownerName: p.author.name),
+                              reportLabel: 'Report article',
+                            );
+                            if (blocked && context.mounted) context.router.pop();
+                          },
+                        ),
+                    ],
                   ),
                 ),
                 Expanded(
@@ -104,7 +127,7 @@ class _PostDetailViewState extends State<_PostDetailView> {
                                     padding: const EdgeInsets.all(16),
                                     child: Row(
                                       children: [
-                                        MnAvatar(name: p.author.name, size: 44, photo: true),
+                                        MnAvatar(name: p.author.name, size: 44, photo: true, userId: p.author.id),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(

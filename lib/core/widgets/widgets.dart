@@ -13,3 +13,4 @@ export 'mn_layout.dart';
 export 'mn_text_field.dart';
 export 'mood_face.dart';
 export 'pressable.dart';
+export 'user_photo.dart';

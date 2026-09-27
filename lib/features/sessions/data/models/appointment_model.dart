@@ -19,33 +19,32 @@ class AppointmentModel {
     this.status = AppointmentStatus.pending,
     this.recurrence = Recurrence.oneTime,
     this.reminders = const ['24h', '1h'],
+    this.reviewed = false,
   });
 
-  /// Maps a booking doc to the client's view: `declined` reads as cancelled,
-  /// and an accepted session that has ended reads as completed.
-  factory AppointmentModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> s) {
+  /// Maps a booking doc to the client's view: `declined` reads as cancelled.
+  /// [status] overrides the stored one (e.g. just auto-completed).
+  factory AppointmentModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> s, {String? status}) {
     final d = s.data()!;
     final startsAt = readDate(d['startsAt']);
     final minutes = readInt(d['minutes'], 50);
-    var status = switch (d['status']) {
+    final mapped = switch (status ?? d['status']) {
       'accepted' => AppointmentStatus.accepted,
       'completed' => AppointmentStatus.completed,
+      'noShow' => AppointmentStatus.noShow,
       'cancelled' || 'declined' => AppointmentStatus.cancelled,
       _ => AppointmentStatus.pending,
     };
-    if (status == AppointmentStatus.accepted &&
-        startsAt.add(Duration(minutes: minutes)).isBefore(DateTime.now())) {
-      status = AppointmentStatus.completed;
-    }
     return AppointmentModel(
       id: s.id,
       therapistId: d['therapistId'] as String,
       startsAt: startsAt,
       type: SessionType.values.asNameMap()[d['type']] ?? SessionType.video,
       minutes: minutes,
-      status: status,
+      status: mapped,
       recurrence: Recurrence.values.asNameMap()[d['recurrence']] ?? Recurrence.oneTime,
       reminders: readStrings(d['reminders']),
+      reviewed: d['reviewed'] == true,
     );
   }
 
@@ -59,6 +58,7 @@ class AppointmentModel {
   final AppointmentStatus status;
   final Recurrence recurrence;
   final List<String> reminders;
+  final bool reviewed;
 
   Map<String, dynamic> toJson() => _$AppointmentModelToJson(this);
 
@@ -71,6 +71,7 @@ class AppointmentModel {
         status: status ?? this.status,
         recurrence: recurrence,
         reminders: reminders,
+        reviewed: reviewed,
       );
 
   Appointment toEntity(Therapist therapist) => Appointment(
@@ -82,5 +83,6 @@ class AppointmentModel {
         status: status,
         recurrence: recurrence,
         reminders: {for (final r in Reminder.values) if (reminders.contains(r.key)) r},
+        reviewed: reviewed,
       );
 }

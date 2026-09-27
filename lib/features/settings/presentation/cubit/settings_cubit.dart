@@ -35,7 +35,6 @@ class SettingsCubit extends Cubit<AppPreferences> {
   void setSessionReminders(bool v) => _update(state.copyWith(sessionReminders: v));
   void setMessageAlerts(bool v) => _update(state.copyWith(messageAlerts: v));
   void setContentUpdates(bool v) => _update(state.copyWith(contentUpdates: v));
-  void setFaceIdLock(bool v) => _update(state.copyWith(faceIdLock: v));
 
   void _update(AppPreferences next) {
     emit(next);

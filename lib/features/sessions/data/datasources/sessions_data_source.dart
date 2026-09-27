@@ -5,6 +5,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/firebase/collections.dart';
 import '../../../../core/firebase/inbox.dart';
 import '../../../../core/firebase/session.dart';
+import '../../../../core/firebase/session_outcome.dart';
 import '../../../therapists/data/models/working_hours.dart';
 import '../models/appointment_model.dart';
 
@@ -12,6 +13,7 @@ abstract interface class SessionsDataSource {
   Future<List<AppointmentModel>> appointments();
   Future<AppointmentModel> create(AppointmentModel model);
   Future<void> cancel(String id);
+  Future<void> review(String appointmentId, {required int rating, required String text});
   Future<Map<DateTime, List<(DateTime, bool)>>> availability(String therapistId, DateTime from, int days);
 }
 
@@ -30,7 +32,8 @@ class FirestoreSessionsDataSource implements SessionsDataSource {
   @override
   Future<List<AppointmentModel>> appointments() async {
     final snap = await _db.appointments.where('clientId', isEqualTo: _session.uid).get();
-    return snap.docs.map(AppointmentModel.fromFirestore).toList();
+    final completed = await autoCompleteOverdue(_db, snap.docs);
+    return [for (final d in snap.docs) AppointmentModel.fromFirestore(d, status: completed.contains(d.id) ? 'completed' : null)];
   }
 
   @override
@@ -64,7 +67,7 @@ class FirestoreSessionsDataSource implements SessionsDataSource {
         'status': 'pending',
         'recurrence': m.recurrence.name,
         'reminders': m.reminders,
-        'price': readInt(pro['price'], 80),
+        'price': readInt(pro['price'], 1500),
         'reason': goals.isEmpty ? 'First consultation' : goals.take(2).join(' & '),
         'note': '',
         'newClient': previous.docs.isEmpty,
@@ -85,7 +88,7 @@ class FirestoreSessionsDataSource implements SessionsDataSource {
       body: '$clientName requested a ${m.type.label.toLowerCase()} session.',
       targetId: ref.id,
     );
-    await batch.commit();
+    await Inbox.commit(batch);
     return AppointmentModel(
       id: ref.id,
       therapistId: m.therapistId,
@@ -117,7 +120,7 @@ class FirestoreSessionsDataSource implements SessionsDataSource {
       body: '${d['clientName'] ?? 'A client'} cancelled their session.',
       targetId: id,
     );
-    await batch.commit();
+    await Inbox.commit(batch);
   }
 
   @override
@@ -141,5 +144,39 @@ class FirestoreSessionsDataSource implements SessionsDataSource {
             if (t.isAfter(now)) (t, taken.contains(slotKey(t))),
         ],
     };
+  }
+
+  /// One review per completed session, stored at
+  /// `therapists/{id}/reviews/{appointmentId}`. The therapist's rating and
+  /// count are updated in the same transaction; rules check the maths.
+  @override
+  Future<void> review(String appointmentId, {required int rating, required String text}) async {
+    final apptRef = _db.appointments.doc(appointmentId);
+    await _db.runTransaction((tx) async {
+      final appt = await tx.get(apptRef);
+      if (!appt.exists) throw const NotFoundException();
+      final a = appt.data()!;
+      if (a['status'] != 'completed') throw const ServerException('You can review a session once it’s completed.');
+      if (a['reviewed'] == true) throw const ServerException('You’ve already reviewed this session.');
+      final proRef = _db.therapist(a['therapistId'] as String);
+      final pro = (await tx.get(proRef)).data() ?? const {};
+      final count = readInt(pro['reviews']);
+      final avg = (pro['rating'] as num?)?.toDouble() ?? 0;
+      final firstName = (a['clientName'] as String? ?? '').trim().split(' ').first;
+      tx
+        ..set(proRef.collection('reviews').doc(appointmentId), {
+          'authorId': _session.uid,
+          'name': firstName.isEmpty ? 'Client' : firstName,
+          'rating': rating,
+          'text': text.trim(),
+          'createdAt': FieldValue.serverTimestamp(),
+        })
+        ..update(proRef, {
+          'rating': ((avg * count + rating) / (count + 1) * 100).round() / 100,
+          'reviews': count + 1,
+          'lastReviewId': appointmentId,
+        })
+        ..update(apptRef, {'reviewed': true});
+    });
   }
 }

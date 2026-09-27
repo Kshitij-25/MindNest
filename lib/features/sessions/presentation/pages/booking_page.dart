@@ -273,7 +273,7 @@ class _ConfirmSheet extends StatelessWidget {
           ('Time', formatTime(s.slot!)),
           ('Type', '${s.type.label} session · 50 min'),
           if (s.recurrence != Recurrence.oneTime) ('Repeats', s.recurrence.label),
-          ('Total', '£${t.price}${s.recurrence != Recurrence.oneTime ? ' / session' : ''}'),
+          ('Total', '${money(t.price)}${s.recurrence != Recurrence.oneTime ? ' / session' : ''}'),
         ];
         return Padding(
           padding: const EdgeInsets.fromLTRB(22, 4, 22, 22),
@@ -318,7 +318,7 @@ class _ConfirmSheet extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Your request is sent to ${t.firstName} to accept.',
+                        'Your request is sent to ${t.firstName} to accept. You pay ${t.firstName} directly; there\'s no payment in the app.',
                         style: context.text.foot.copyWith(color: c.ink3),
                       ),
                     ),

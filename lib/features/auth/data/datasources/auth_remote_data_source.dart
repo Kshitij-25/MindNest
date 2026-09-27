@@ -122,7 +122,7 @@ class FirebaseAuthRemoteDataSource implements AuthRemoteDataSource {
         'reviews': 0,
         'years': 0,
         'verified': false,
-        'price': 80,
+        'price': 1500,
         'location': 'Remote',
         'langs': ['English'],
         'about': '',

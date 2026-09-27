@@ -77,6 +77,10 @@
 			</array>
 		</dict>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>MindNest uses the camera to take your profile photo or share a photo in a chat.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MindNest uses your photos to set your profile picture or share an image in a chat.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

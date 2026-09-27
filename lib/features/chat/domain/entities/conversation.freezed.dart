@@ -887,7 +887,7 @@ as String,
 /// @nodoc
 mixin _$ChatMessage {
 
- String get id; bool get fromMe; String get text; DateTime get sentAt; bool get read;
+ String get id; bool get fromMe; String get text; DateTime get sentAt; bool get read; ChatAttachment? get attachment;
 /// Create a copy of ChatMessage
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -899,20 +899,20 @@ $ChatMessageCopyWith<ChatMessage> get copyWith => _$ChatMessageCopyWithImpl<Chat
 @override
 bool operator ==(Object other) {
   final _this = this as ChatMessage;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatMessage&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.fromMe, _this.fromMe) || other.fromMe == _this.fromMe)&&(identical(other.text, _this.text) || other.text == _this.text)&&(identical(other.sentAt, _this.sentAt) || other.sentAt == _this.sentAt)&&(identical(other.read, _this.read) || other.read == _this.read));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatMessage&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.fromMe, _this.fromMe) || other.fromMe == _this.fromMe)&&(identical(other.text, _this.text) || other.text == _this.text)&&(identical(other.sentAt, _this.sentAt) || other.sentAt == _this.sentAt)&&(identical(other.read, _this.read) || other.read == _this.read)&&(identical(other.attachment, _this.attachment) || other.attachment == _this.attachment));
 }
 
 
 @override
 int get hashCode {
   final _this = this as ChatMessage;
-  return Object.hash(runtimeType,_this.id,_this.fromMe,_this.text,_this.sentAt,_this.read);
+  return Object.hash(runtimeType,_this.id,_this.fromMe,_this.text,_this.sentAt,_this.read,_this.attachment);
 }
 
 @override
 String toString() {
   final _this = this as ChatMessage;
-  return 'ChatMessage(id: ${_this.id}, fromMe: ${_this.fromMe}, text: ${_this.text}, sentAt: ${_this.sentAt}, read: ${_this.read})';
+  return 'ChatMessage(id: ${_this.id}, fromMe: ${_this.fromMe}, text: ${_this.text}, sentAt: ${_this.sentAt}, read: ${_this.read}, attachment: ${_this.attachment})';
 }
 
 
@@ -923,11 +923,11 @@ abstract mixin class $ChatMessageCopyWith<$Res>  {
   factory $ChatMessageCopyWith(ChatMessage value, $Res Function(ChatMessage) _then) = _$ChatMessageCopyWithImpl;
 @useResult
 $Res call({
- String id, bool fromMe, String text, DateTime sentAt, bool read
+ String id, bool fromMe, String text, DateTime sentAt, bool read, ChatAttachment? attachment
 });
 
 
-
+$ChatAttachmentCopyWith<$Res>? get attachment;
 
 }
 /// @nodoc
@@ -940,17 +940,30 @@ class _$ChatMessageCopyWithImpl<$Res>
 
 /// Create a copy of ChatMessage
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? fromMe = null,Object? text = null,Object? sentAt = null,Object? read = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? fromMe = null,Object? text = null,Object? sentAt = null,Object? read = null,Object? attachment = freezed,}) {
   return _then(ChatMessage(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,fromMe: null == fromMe ? _self.fromMe : fromMe // ignore: cast_nullable_to_non_nullable
 as bool,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,sentAt: null == sentAt ? _self.sentAt : sentAt // ignore: cast_nullable_to_non_nullable
 as DateTime,read: null == read ? _self.read : read // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,attachment: freezed == attachment ? _self.attachment : attachment // ignore: cast_nullable_to_non_nullable
+as ChatAttachment?,
   ));
 }
+/// Create a copy of ChatMessage
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ChatAttachmentCopyWith<$Res>? get attachment {
+    if (_self.attachment == null) {
+    return null;
+  }
 
+  return $ChatAttachmentCopyWith<$Res>(_self.attachment!, (value) {
+    return _then(_self.copyWith(attachment: value));
+  });
+}
 }
 
 
@@ -1032,10 +1045,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  bool fromMe,  String text,  DateTime sentAt,  bool read)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  bool fromMe,  String text,  DateTime sentAt,  bool read,  ChatAttachment? attachment)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ChatMessage() when $default != null:
-return $default(_that.id,_that.fromMe,_that.text,_that.sentAt,_that.read);case _:
+return $default(_that.id,_that.fromMe,_that.text,_that.sentAt,_that.read,_that.attachment);case _:
   return orElse();
 
 }
@@ -1053,10 +1066,10 @@ return $default(_that.id,_that.fromMe,_that.text,_that.sentAt,_that.read);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  bool fromMe,  String text,  DateTime sentAt,  bool read)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  bool fromMe,  String text,  DateTime sentAt,  bool read,  ChatAttachment? attachment)  $default,) {final _that = this;
 switch (_that) {
 case _ChatMessage():
-return $default(_that.id,_that.fromMe,_that.text,_that.sentAt,_that.read);case _:
+return $default(_that.id,_that.fromMe,_that.text,_that.sentAt,_that.read,_that.attachment);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1073,10 +1086,10 @@ return $default(_that.id,_that.fromMe,_that.text,_that.sentAt,_that.read);case _
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  bool fromMe,  String text,  DateTime sentAt,  bool read)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  bool fromMe,  String text,  DateTime sentAt,  bool read,  ChatAttachment? attachment)?  $default,) {final _that = this;
 switch (_that) {
 case _ChatMessage() when $default != null:
-return $default(_that.id,_that.fromMe,_that.text,_that.sentAt,_that.read);case _:
+return $default(_that.id,_that.fromMe,_that.text,_that.sentAt,_that.read,_that.attachment);case _:
   return null;
 
 }
@@ -1088,7 +1101,7 @@ return $default(_that.id,_that.fromMe,_that.text,_that.sentAt,_that.read);case _
 
 
 class _ChatMessage implements ChatMessage {
-  const _ChatMessage({required this.id, required this.fromMe, required this.text, required this.sentAt, this.read = false});
+  const _ChatMessage({required this.id, required this.fromMe, required this.text, required this.sentAt, this.read = false, this.attachment});
   
 
 @override final  String id;
@@ -1096,6 +1109,7 @@ class _ChatMessage implements ChatMessage {
 @override final  String text;
 @override final  DateTime sentAt;
 @override@JsonKey() final  bool read;
+@override final  ChatAttachment? attachment;
 
 /// Create a copy of ChatMessage
 /// with the given fields replaced by the non-null parameter values.
@@ -1107,18 +1121,18 @@ _$ChatMessageCopyWith<_ChatMessage> get copyWith => __$ChatMessageCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.fromMe, fromMe) || other.fromMe == fromMe)&&(identical(other.text, text) || other.text == text)&&(identical(other.sentAt, sentAt) || other.sentAt == sentAt)&&(identical(other.read, read) || other.read == read));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.fromMe, fromMe) || other.fromMe == fromMe)&&(identical(other.text, text) || other.text == text)&&(identical(other.sentAt, sentAt) || other.sentAt == sentAt)&&(identical(other.read, read) || other.read == read)&&(identical(other.attachment, attachment) || other.attachment == attachment));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,fromMe,text,sentAt,read);
+    return Object.hash(runtimeType,id,fromMe,text,sentAt,read,attachment);
 }
 
 @override
 String toString() {
-    return 'ChatMessage(id: $id, fromMe: $fromMe, text: $text, sentAt: $sentAt, read: $read)';
+    return 'ChatMessage(id: $id, fromMe: $fromMe, text: $text, sentAt: $sentAt, read: $read, attachment: $attachment)';
 }
 
 
@@ -1129,11 +1143,11 @@ abstract mixin class _$ChatMessageCopyWith<$Res> implements $ChatMessageCopyWith
   factory _$ChatMessageCopyWith(_ChatMessage value, $Res Function(_ChatMessage) _then) = __$ChatMessageCopyWithImpl;
 @override @useResult
 $Res call({
- String id, bool fromMe, String text, DateTime sentAt, bool read
+ String id, bool fromMe, String text, DateTime sentAt, bool read, ChatAttachment? attachment
 });
 
 
-
+@override $ChatAttachmentCopyWith<$Res>? get attachment;
 
 }
 /// @nodoc
@@ -1146,14 +1160,300 @@ class __$ChatMessageCopyWithImpl<$Res>
 
 /// Create a copy of ChatMessage
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? fromMe = null,Object? text = null,Object? sentAt = null,Object? read = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? fromMe = null,Object? text = null,Object? sentAt = null,Object? read = null,Object? attachment = freezed,}) {
   return _then(_ChatMessage(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,fromMe: null == fromMe ? _self.fromMe : fromMe // ignore: cast_nullable_to_non_nullable
 as bool,text: null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String,sentAt: null == sentAt ? _self.sentAt : sentAt // ignore: cast_nullable_to_non_nullable
 as DateTime,read: null == read ? _self.read : read // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,attachment: freezed == attachment ? _self.attachment : attachment // ignore: cast_nullable_to_non_nullable
+as ChatAttachment?,
+  ));
+}
+
+/// Create a copy of ChatMessage
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ChatAttachmentCopyWith<$Res>? get attachment {
+    if (_self.attachment == null) {
+    return null;
+  }
+
+  return $ChatAttachmentCopyWith<$Res>(_self.attachment!, (value) {
+    return _then(_self.copyWith(attachment: value));
+  });
+}
+}
+
+/// @nodoc
+mixin _$ChatAttachment {
+
+ String get id; AttachmentKind get kind; String get name; int get size;
+/// Create a copy of ChatAttachment
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ChatAttachmentCopyWith<ChatAttachment> get copyWith => _$ChatAttachmentCopyWithImpl<ChatAttachment>(this as ChatAttachment, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ChatAttachment;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatAttachment&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.size, _this.size) || other.size == _this.size));
+}
+
+
+@override
+int get hashCode {
+  final _this = this as ChatAttachment;
+  return Object.hash(runtimeType,_this.id,_this.kind,_this.name,_this.size);
+}
+
+@override
+String toString() {
+  final _this = this as ChatAttachment;
+  return 'ChatAttachment(id: ${_this.id}, kind: ${_this.kind}, name: ${_this.name}, size: ${_this.size})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ChatAttachmentCopyWith<$Res>  {
+  factory $ChatAttachmentCopyWith(ChatAttachment value, $Res Function(ChatAttachment) _then) = _$ChatAttachmentCopyWithImpl;
+@useResult
+$Res call({
+ String id, AttachmentKind kind, String name, int size
+});
+
+
+
+
+}
+/// @nodoc
+class _$ChatAttachmentCopyWithImpl<$Res>
+    implements $ChatAttachmentCopyWith<$Res> {
+  _$ChatAttachmentCopyWithImpl(this._self, this._then);
+
+  final ChatAttachment _self;
+  final $Res Function(ChatAttachment) _then;
+
+/// Create a copy of ChatAttachment
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? name = null,Object? size = null,}) {
+  return _then(ChatAttachment(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as AttachmentKind,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ChatAttachment].
+extension ChatAttachmentPatterns on ChatAttachment {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ChatAttachment value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ChatAttachment() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ChatAttachment value)  $default,){
+final _that = this;
+switch (_that) {
+case _ChatAttachment():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ChatAttachment value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ChatAttachment() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  AttachmentKind kind,  String name,  int size)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ChatAttachment() when $default != null:
+return $default(_that.id,_that.kind,_that.name,_that.size);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  AttachmentKind kind,  String name,  int size)  $default,) {final _that = this;
+switch (_that) {
+case _ChatAttachment():
+return $default(_that.id,_that.kind,_that.name,_that.size);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  AttachmentKind kind,  String name,  int size)?  $default,) {final _that = this;
+switch (_that) {
+case _ChatAttachment() when $default != null:
+return $default(_that.id,_that.kind,_that.name,_that.size);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _ChatAttachment implements ChatAttachment {
+  const _ChatAttachment({required this.id, required this.kind, required this.name, required this.size});
+  
+
+@override final  String id;
+@override final  AttachmentKind kind;
+@override final  String name;
+@override final  int size;
+
+/// Create a copy of ChatAttachment
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ChatAttachmentCopyWith<_ChatAttachment> get copyWith => __$ChatAttachmentCopyWithImpl<_ChatAttachment>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatAttachment&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.name, name) || other.name == name)&&(identical(other.size, size) || other.size == size));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,kind,name,size);
+}
+
+@override
+String toString() {
+    return 'ChatAttachment(id: $id, kind: $kind, name: $name, size: $size)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ChatAttachmentCopyWith<$Res> implements $ChatAttachmentCopyWith<$Res> {
+  factory _$ChatAttachmentCopyWith(_ChatAttachment value, $Res Function(_ChatAttachment) _then) = __$ChatAttachmentCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, AttachmentKind kind, String name, int size
+});
+
+
+
+
+}
+/// @nodoc
+class __$ChatAttachmentCopyWithImpl<$Res>
+    implements _$ChatAttachmentCopyWith<$Res> {
+  __$ChatAttachmentCopyWithImpl(this._self, this._then);
+
+  final _ChatAttachment _self;
+  final $Res Function(_ChatAttachment) _then;
+
+/// Create a copy of ChatAttachment
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? name = null,Object? size = null,}) {
+  return _then(_ChatAttachment(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as AttachmentKind,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

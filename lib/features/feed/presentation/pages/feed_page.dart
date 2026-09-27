@@ -31,7 +31,8 @@ class _FeedView extends StatelessWidget {
   Future<void> _open(BuildContext context, Post p, {bool comments = false}) async {
     final bloc = context.read<FeedBloc>();
     final updated = await context.router.push<Post>(PostDetailRoute(postId: p.id, openComments: comments));
-    if (updated != null) bloc.add(FeedEvent.postUpdated(updated));
+    // No result means the author was blocked from the detail page.
+    bloc.add(updated == null ? FeedEvent.load(savedOnly: savedOnly) : FeedEvent.postUpdated(updated));
   }
 
   @override

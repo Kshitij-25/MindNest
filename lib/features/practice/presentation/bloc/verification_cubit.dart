@@ -26,10 +26,11 @@ abstract class VerificationState with _$VerificationState {
 
 @injectable
 class VerificationCubit extends Cubit<VerificationState> {
-  VerificationCubit(this._get, this._set, this._submit) : super(const VerificationState());
+  VerificationCubit(this._get, this._upload, this._remove, this._submit) : super(const VerificationState());
 
   final GetVerificationDocuments _get;
-  final SetDocumentUploaded _set;
+  final UploadDocument _upload;
+  final RemoveDocument _remove;
   final SubmitVerification _submit;
 
   Future<void> load() async {
@@ -37,13 +38,28 @@ class VerificationCubit extends Cubit<VerificationState> {
     r.fold((f) => emit(state.copyWith(error: f.message)), (d) => emit(state.copyWith(documents: d)));
   }
 
-  Future<void> toggle(VerificationDocument doc) async {
-    emit(state.copyWith(uploading: doc.kind));
-    await _set(SetDocumentParams(doc.kind, !doc.uploaded));
-    emit(state.copyWith(
-      uploading: null,
-      documents: [for (final d in state.documents) d.kind == doc.kind ? d.copyWith(uploaded: !d.uploaded) : d],
-    ));
+  Future<void> upload(DocumentKind kind, DocumentFile file) async {
+    emit(state.copyWith(uploading: kind, error: null));
+    final r = await _upload(UploadDocumentParams(kind, file));
+    r.fold(
+      (f) => emit(state.copyWith(uploading: null, error: f.message)),
+      (_) => emit(state.copyWith(
+        uploading: null,
+        documents: [for (final d in state.documents) d.kind == kind ? d.copyWith(uploaded: true, fileName: file.name) : d],
+      )),
+    );
+  }
+
+  Future<void> remove(DocumentKind kind) async {
+    emit(state.copyWith(uploading: kind, error: null));
+    final r = await _remove(kind);
+    r.fold(
+      (f) => emit(state.copyWith(uploading: null, error: f.message)),
+      (_) => emit(state.copyWith(
+        uploading: null,
+        documents: [for (final d in state.documents) d.kind == kind ? d.copyWith(uploaded: false, fileName: null) : d],
+      )),
+    );
   }
 
   Future<void> submit() async {

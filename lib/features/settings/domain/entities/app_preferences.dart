@@ -16,6 +16,5 @@ abstract class AppPreferences with _$AppPreferences {
     @Default(true) bool sessionReminders,
     @Default(true) bool messageAlerts,
     @Default(false) bool contentUpdates,
-    @Default(true) bool faceIdLock,
   }) = _AppPreferences;
 }

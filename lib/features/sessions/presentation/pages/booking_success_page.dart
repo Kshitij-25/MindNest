@@ -63,7 +63,7 @@ class BookingSuccessPage extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          SizedBox(width: 46, height: 46, child: PortraitPlaceholder(name: t.name, radius: 13)),
+                          SizedBox(width: 46, height: 46, child: PortraitPlaceholder(name: t.name, radius: 13, userId: t.id)),
                           const SizedBox(width: 12),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

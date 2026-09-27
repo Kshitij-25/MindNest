@@ -34,7 +34,6 @@ class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
         sessionReminders: m['sessionReminders'] as bool? ?? true,
         messageAlerts: m['messageAlerts'] as bool? ?? true,
         contentUpdates: m['contentUpdates'] as bool? ?? false,
-        faceIdLock: m['faceIdLock'] as bool? ?? true,
       );
     } catch (_) {
       throw const CacheException();
@@ -54,7 +53,6 @@ class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
         'sessionReminders': p.sessionReminders,
         'messageAlerts': p.messageAlerts,
         'contentUpdates': p.contentUpdates,
-        'faceIdLock': p.faceIdLock,
       }),
     );
     if (!ok) throw const CacheException();
