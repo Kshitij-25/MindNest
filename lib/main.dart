@@ -4,13 +4,13 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'app/app.dart';
-import 'core/di/injection.dart';
-import 'core/di/user_scope.dart';
-import 'core/push/push_service.dart';
-import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/settings/presentation/cubit/settings_cubit.dart';
-import 'firebase_options.dart';
+import 'package:mindnest/app/app.dart';
+import 'package:mindnest/core/di/injection.dart';
+import 'package:mindnest/core/di/user_scope.dart';
+import 'package:mindnest/core/push/push_service.dart';
+import 'package:mindnest/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:mindnest/features/settings/presentation/cubit/settings_cubit.dart';
+import 'package:mindnest/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

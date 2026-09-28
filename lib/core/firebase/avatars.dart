@@ -19,7 +19,8 @@ class AvatarStore {
   final _cache = <String, Future<Uint8List?>>{};
   final changes = ValueNotifier<int>(0);
 
-  DocumentReference<Map<String, dynamic>> _doc(String uid) => _db.collection('avatars').doc(uid);
+  DocumentReference<Map<String, dynamic>> _doc(String uid) =>
+      _db.collection('avatars').doc(uid);
 
   Future<Uint8List?> load(String uid) => _cache[uid] ??= _fetch(uid);
 
@@ -35,7 +36,8 @@ class AvatarStore {
 
   Future<void> set(String uid, Uint8List jpeg) async {
     if (jpeg.length > maxBytes) throw ArgumentError('Photo is too large');
-    await _doc(uid).set({'data': Blob(jpeg), 'updatedAt': FieldValue.serverTimestamp()});
+    await _doc(uid)
+        .set({'data': Blob(jpeg), 'updatedAt': FieldValue.serverTimestamp()});
     _cache[uid] = Future.value(jpeg);
     changes.value++;
   }
