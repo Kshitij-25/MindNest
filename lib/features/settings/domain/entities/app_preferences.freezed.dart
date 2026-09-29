@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 mixin _$AppPreferences {
 
  ThemeMode get themeMode;/// Dynamic type multiplier on top of the OS setting (0.85 – 1.3).
- double get textScale; bool get reduceMotion; bool get highContrast; bool get dailyReminders; bool get sessionReminders; bool get messageAlerts; bool get contentUpdates; bool get faceIdLock;
+ double get textScale; bool get reduceMotion; bool get highContrast; bool get dailyReminders; bool get sessionReminders; bool get messageAlerts; bool get contentUpdates;
 /// Create a copy of AppPreferences
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,20 +28,20 @@ $AppPreferencesCopyWith<AppPreferences> get copyWith => _$AppPreferencesCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as AppPreferences;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppPreferences&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.textScale, _this.textScale) || other.textScale == _this.textScale)&&(identical(other.reduceMotion, _this.reduceMotion) || other.reduceMotion == _this.reduceMotion)&&(identical(other.highContrast, _this.highContrast) || other.highContrast == _this.highContrast)&&(identical(other.dailyReminders, _this.dailyReminders) || other.dailyReminders == _this.dailyReminders)&&(identical(other.sessionReminders, _this.sessionReminders) || other.sessionReminders == _this.sessionReminders)&&(identical(other.messageAlerts, _this.messageAlerts) || other.messageAlerts == _this.messageAlerts)&&(identical(other.contentUpdates, _this.contentUpdates) || other.contentUpdates == _this.contentUpdates)&&(identical(other.faceIdLock, _this.faceIdLock) || other.faceIdLock == _this.faceIdLock));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppPreferences&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.textScale, _this.textScale) || other.textScale == _this.textScale)&&(identical(other.reduceMotion, _this.reduceMotion) || other.reduceMotion == _this.reduceMotion)&&(identical(other.highContrast, _this.highContrast) || other.highContrast == _this.highContrast)&&(identical(other.dailyReminders, _this.dailyReminders) || other.dailyReminders == _this.dailyReminders)&&(identical(other.sessionReminders, _this.sessionReminders) || other.sessionReminders == _this.sessionReminders)&&(identical(other.messageAlerts, _this.messageAlerts) || other.messageAlerts == _this.messageAlerts)&&(identical(other.contentUpdates, _this.contentUpdates) || other.contentUpdates == _this.contentUpdates));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AppPreferences;
-  return Object.hash(runtimeType,_this.themeMode,_this.textScale,_this.reduceMotion,_this.highContrast,_this.dailyReminders,_this.sessionReminders,_this.messageAlerts,_this.contentUpdates,_this.faceIdLock);
+  return Object.hash(runtimeType,_this.themeMode,_this.textScale,_this.reduceMotion,_this.highContrast,_this.dailyReminders,_this.sessionReminders,_this.messageAlerts,_this.contentUpdates);
 }
 
 @override
 String toString() {
   final _this = this as AppPreferences;
-  return 'AppPreferences(themeMode: ${_this.themeMode}, textScale: ${_this.textScale}, reduceMotion: ${_this.reduceMotion}, highContrast: ${_this.highContrast}, dailyReminders: ${_this.dailyReminders}, sessionReminders: ${_this.sessionReminders}, messageAlerts: ${_this.messageAlerts}, contentUpdates: ${_this.contentUpdates}, faceIdLock: ${_this.faceIdLock})';
+  return 'AppPreferences(themeMode: ${_this.themeMode}, textScale: ${_this.textScale}, reduceMotion: ${_this.reduceMotion}, highContrast: ${_this.highContrast}, dailyReminders: ${_this.dailyReminders}, sessionReminders: ${_this.sessionReminders}, messageAlerts: ${_this.messageAlerts}, contentUpdates: ${_this.contentUpdates})';
 }
 
 
@@ -52,7 +52,7 @@ abstract mixin class $AppPreferencesCopyWith<$Res>  {
   factory $AppPreferencesCopyWith(AppPreferences value, $Res Function(AppPreferences) _then) = _$AppPreferencesCopyWithImpl;
 @useResult
 $Res call({
- ThemeMode themeMode, double textScale, bool reduceMotion, bool highContrast, bool dailyReminders, bool sessionReminders, bool messageAlerts, bool contentUpdates, bool faceIdLock
+ ThemeMode themeMode, double textScale, bool reduceMotion, bool highContrast, bool dailyReminders, bool sessionReminders, bool messageAlerts, bool contentUpdates
 });
 
 
@@ -69,7 +69,7 @@ class _$AppPreferencesCopyWithImpl<$Res>
 
 /// Create a copy of AppPreferences
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? themeMode = null,Object? textScale = null,Object? reduceMotion = null,Object? highContrast = null,Object? dailyReminders = null,Object? sessionReminders = null,Object? messageAlerts = null,Object? contentUpdates = null,Object? faceIdLock = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? themeMode = null,Object? textScale = null,Object? reduceMotion = null,Object? highContrast = null,Object? dailyReminders = null,Object? sessionReminders = null,Object? messageAlerts = null,Object? contentUpdates = null,}) {
   return _then(AppPreferences(
 themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
 as ThemeMode,textScale: null == textScale ? _self.textScale : textScale // ignore: cast_nullable_to_non_nullable
@@ -79,7 +79,6 @@ as bool,dailyReminders: null == dailyReminders ? _self.dailyReminders : dailyRem
 as bool,sessionReminders: null == sessionReminders ? _self.sessionReminders : sessionReminders // ignore: cast_nullable_to_non_nullable
 as bool,messageAlerts: null == messageAlerts ? _self.messageAlerts : messageAlerts // ignore: cast_nullable_to_non_nullable
 as bool,contentUpdates: null == contentUpdates ? _self.contentUpdates : contentUpdates // ignore: cast_nullable_to_non_nullable
-as bool,faceIdLock: null == faceIdLock ? _self.faceIdLock : faceIdLock // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -165,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ThemeMode themeMode,  double textScale,  bool reduceMotion,  bool highContrast,  bool dailyReminders,  bool sessionReminders,  bool messageAlerts,  bool contentUpdates,  bool faceIdLock)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ThemeMode themeMode,  double textScale,  bool reduceMotion,  bool highContrast,  bool dailyReminders,  bool sessionReminders,  bool messageAlerts,  bool contentUpdates)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppPreferences() when $default != null:
-return $default(_that.themeMode,_that.textScale,_that.reduceMotion,_that.highContrast,_that.dailyReminders,_that.sessionReminders,_that.messageAlerts,_that.contentUpdates,_that.faceIdLock);case _:
+return $default(_that.themeMode,_that.textScale,_that.reduceMotion,_that.highContrast,_that.dailyReminders,_that.sessionReminders,_that.messageAlerts,_that.contentUpdates);case _:
   return orElse();
 
 }
@@ -186,10 +185,10 @@ return $default(_that.themeMode,_that.textScale,_that.reduceMotion,_that.highCon
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ThemeMode themeMode,  double textScale,  bool reduceMotion,  bool highContrast,  bool dailyReminders,  bool sessionReminders,  bool messageAlerts,  bool contentUpdates,  bool faceIdLock)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ThemeMode themeMode,  double textScale,  bool reduceMotion,  bool highContrast,  bool dailyReminders,  bool sessionReminders,  bool messageAlerts,  bool contentUpdates)  $default,) {final _that = this;
 switch (_that) {
 case _AppPreferences():
-return $default(_that.themeMode,_that.textScale,_that.reduceMotion,_that.highContrast,_that.dailyReminders,_that.sessionReminders,_that.messageAlerts,_that.contentUpdates,_that.faceIdLock);case _:
+return $default(_that.themeMode,_that.textScale,_that.reduceMotion,_that.highContrast,_that.dailyReminders,_that.sessionReminders,_that.messageAlerts,_that.contentUpdates);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +205,10 @@ return $default(_that.themeMode,_that.textScale,_that.reduceMotion,_that.highCon
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ThemeMode themeMode,  double textScale,  bool reduceMotion,  bool highContrast,  bool dailyReminders,  bool sessionReminders,  bool messageAlerts,  bool contentUpdates,  bool faceIdLock)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ThemeMode themeMode,  double textScale,  bool reduceMotion,  bool highContrast,  bool dailyReminders,  bool sessionReminders,  bool messageAlerts,  bool contentUpdates)?  $default,) {final _that = this;
 switch (_that) {
 case _AppPreferences() when $default != null:
-return $default(_that.themeMode,_that.textScale,_that.reduceMotion,_that.highContrast,_that.dailyReminders,_that.sessionReminders,_that.messageAlerts,_that.contentUpdates,_that.faceIdLock);case _:
+return $default(_that.themeMode,_that.textScale,_that.reduceMotion,_that.highContrast,_that.dailyReminders,_that.sessionReminders,_that.messageAlerts,_that.contentUpdates);case _:
   return null;
 
 }
@@ -221,7 +220,7 @@ return $default(_that.themeMode,_that.textScale,_that.reduceMotion,_that.highCon
 
 
 class _AppPreferences implements AppPreferences {
-  const _AppPreferences({this.themeMode = ThemeMode.system, this.textScale = 1.0, this.reduceMotion = false, this.highContrast = false, this.dailyReminders = true, this.sessionReminders = true, this.messageAlerts = true, this.contentUpdates = false, this.faceIdLock = true});
+  const _AppPreferences({this.themeMode = ThemeMode.system, this.textScale = 1.0, this.reduceMotion = false, this.highContrast = false, this.dailyReminders = true, this.sessionReminders = true, this.messageAlerts = true, this.contentUpdates = false});
   
 
 @override@JsonKey() final  ThemeMode themeMode;
@@ -233,7 +232,6 @@ class _AppPreferences implements AppPreferences {
 @override@JsonKey() final  bool sessionReminders;
 @override@JsonKey() final  bool messageAlerts;
 @override@JsonKey() final  bool contentUpdates;
-@override@JsonKey() final  bool faceIdLock;
 
 /// Create a copy of AppPreferences
 /// with the given fields replaced by the non-null parameter values.
@@ -245,18 +243,18 @@ _$AppPreferencesCopyWith<_AppPreferences> get copyWith => __$AppPreferencesCopyW
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppPreferences&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.reduceMotion, reduceMotion) || other.reduceMotion == reduceMotion)&&(identical(other.highContrast, highContrast) || other.highContrast == highContrast)&&(identical(other.dailyReminders, dailyReminders) || other.dailyReminders == dailyReminders)&&(identical(other.sessionReminders, sessionReminders) || other.sessionReminders == sessionReminders)&&(identical(other.messageAlerts, messageAlerts) || other.messageAlerts == messageAlerts)&&(identical(other.contentUpdates, contentUpdates) || other.contentUpdates == contentUpdates)&&(identical(other.faceIdLock, faceIdLock) || other.faceIdLock == faceIdLock));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppPreferences&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.textScale, textScale) || other.textScale == textScale)&&(identical(other.reduceMotion, reduceMotion) || other.reduceMotion == reduceMotion)&&(identical(other.highContrast, highContrast) || other.highContrast == highContrast)&&(identical(other.dailyReminders, dailyReminders) || other.dailyReminders == dailyReminders)&&(identical(other.sessionReminders, sessionReminders) || other.sessionReminders == sessionReminders)&&(identical(other.messageAlerts, messageAlerts) || other.messageAlerts == messageAlerts)&&(identical(other.contentUpdates, contentUpdates) || other.contentUpdates == contentUpdates));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,themeMode,textScale,reduceMotion,highContrast,dailyReminders,sessionReminders,messageAlerts,contentUpdates,faceIdLock);
+    return Object.hash(runtimeType,themeMode,textScale,reduceMotion,highContrast,dailyReminders,sessionReminders,messageAlerts,contentUpdates);
 }
 
 @override
 String toString() {
-    return 'AppPreferences(themeMode: $themeMode, textScale: $textScale, reduceMotion: $reduceMotion, highContrast: $highContrast, dailyReminders: $dailyReminders, sessionReminders: $sessionReminders, messageAlerts: $messageAlerts, contentUpdates: $contentUpdates, faceIdLock: $faceIdLock)';
+    return 'AppPreferences(themeMode: $themeMode, textScale: $textScale, reduceMotion: $reduceMotion, highContrast: $highContrast, dailyReminders: $dailyReminders, sessionReminders: $sessionReminders, messageAlerts: $messageAlerts, contentUpdates: $contentUpdates)';
 }
 
 
@@ -267,7 +265,7 @@ abstract mixin class _$AppPreferencesCopyWith<$Res> implements $AppPreferencesCo
   factory _$AppPreferencesCopyWith(_AppPreferences value, $Res Function(_AppPreferences) _then) = __$AppPreferencesCopyWithImpl;
 @override @useResult
 $Res call({
- ThemeMode themeMode, double textScale, bool reduceMotion, bool highContrast, bool dailyReminders, bool sessionReminders, bool messageAlerts, bool contentUpdates, bool faceIdLock
+ ThemeMode themeMode, double textScale, bool reduceMotion, bool highContrast, bool dailyReminders, bool sessionReminders, bool messageAlerts, bool contentUpdates
 });
 
 
@@ -284,7 +282,7 @@ class __$AppPreferencesCopyWithImpl<$Res>
 
 /// Create a copy of AppPreferences
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? themeMode = null,Object? textScale = null,Object? reduceMotion = null,Object? highContrast = null,Object? dailyReminders = null,Object? sessionReminders = null,Object? messageAlerts = null,Object? contentUpdates = null,Object? faceIdLock = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? themeMode = null,Object? textScale = null,Object? reduceMotion = null,Object? highContrast = null,Object? dailyReminders = null,Object? sessionReminders = null,Object? messageAlerts = null,Object? contentUpdates = null,}) {
   return _then(_AppPreferences(
 themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
 as ThemeMode,textScale: null == textScale ? _self.textScale : textScale // ignore: cast_nullable_to_non_nullable
@@ -294,7 +292,6 @@ as bool,dailyReminders: null == dailyReminders ? _self.dailyReminders : dailyRem
 as bool,sessionReminders: null == sessionReminders ? _self.sessionReminders : sessionReminders // ignore: cast_nullable_to_non_nullable
 as bool,messageAlerts: null == messageAlerts ? _self.messageAlerts : messageAlerts // ignore: cast_nullable_to_non_nullable
 as bool,contentUpdates: null == contentUpdates ? _self.contentUpdates : contentUpdates // ignore: cast_nullable_to_non_nullable
-as bool,faceIdLock: null == faceIdLock ? _self.faceIdLock : faceIdLock // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

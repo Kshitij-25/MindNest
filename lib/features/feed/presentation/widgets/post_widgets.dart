@@ -3,6 +3,14 @@ import 'package:flutter/material.dart';
 import '../../../../core/core.dart';
 import '../../domain/entities/post.dart';
 
+/// Opens the share sheet with the post's title, author and web link.
+Future<void> sharePost(BuildContext context, Post post) => ExternalLinks.share(
+  context,
+  text: '"${post.title}" by ${post.author.name} on MindNest',
+  subject: post.title,
+  uri: LinkConfig.post(post.id),
+);
+
 class PostAuthorRow extends StatelessWidget {
   const PostAuthorRow({super.key, required this.post, this.size = 42});
   final Post post;
@@ -13,7 +21,7 @@ class PostAuthorRow extends StatelessWidget {
     final c = context.colors;
     return Row(
       children: [
-        MnAvatar(name: post.author.name, size: size, photo: true),
+        MnAvatar(name: post.author.name, size: size, photo: true, userId: post.author.id),
         const SizedBox(width: 11),
         Expanded(
           child: Column(
@@ -91,7 +99,7 @@ class PostActionsBar extends StatelessWidget {
         const SizedBox(width: 20),
         btn(MnIcons.chat2, count: post.comments, onTap: onComment, label: 'Comments'),
         const SizedBox(width: 20),
-        btn(MnIcons.share, onTap: onShare ?? () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Link copied'))), label: 'Share'),
+        btn(MnIcons.share, onTap: onShare ?? () => sharePost(context, post), label: 'Share'),
         const Spacer(),
         btn(MnIcons.bookmark, active: post.saved, color: c.primary, onTap: onSave, label: post.saved ? 'Remove from saved' : 'Save'),
       ],
@@ -228,7 +236,7 @@ class FeaturedPostCard extends StatelessWidget {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    MnAvatar(name: post.author.name, size: 34, photo: true),
+                    MnAvatar(name: post.author.name, size: 34, photo: true, userId: post.author.id),
                     const SizedBox(width: 10),
                     Text(post.author.name, style: context.text.sub.copyWith(fontWeight: FontWeight.w600)),
                     Text('  · ${post.readMinutes} min read', style: context.text.cap.copyWith(color: c.ink3)),

@@ -8,10 +8,27 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/entities/app_preferences.dart';
 import '../cubit/settings_cubit.dart';
 import '../widgets/settings_widgets.dart';
+import 'legal_page.dart';
 
 @RoutePage()
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
+
+  static Future<void> _requestDataExport(BuildContext context) async {
+    final ok = await Adaptive.confirm(
+      context,
+      title: 'Request a copy of your data?',
+      message: 'We\'ll open an email to our support team. Your export is sent to your account email.',
+      confirmLabel: 'Continue',
+    );
+    if (!ok || !context.mounted) return;
+    final email = context.read<AuthBloc>().state.user?.email ?? '';
+    await ExternalLinks.email(
+      context,
+      subject: 'Data export request',
+      body: 'Please send me a copy of my MindNest data.\n\nAccount email: $email',
+    );
+  }
 
   static Future<void> signOut(BuildContext context) async {
     final ok = await Adaptive.confirm(
@@ -90,24 +107,39 @@ class SettingsPage extends StatelessWidget {
               MnGroup(
                 title: 'Privacy & security',
                 children: [
-                  _toggleRow(context, MnIcons.lock, context.isIOS ? 'Face ID lock' : 'Biometric lock', p.faceIdLock, cubit.setFaceIdLock),
-                  MnListRow(title: 'Privacy policy', leading: const SettingIcon(icon: MnIcons.shield), onTap: () {}),
-                  MnListRow(title: 'Data & export', leading: const SettingIcon(icon: MnIcons.doc), onTap: () {}),
+                  MnListRow(
+                    title: 'Privacy policy',
+                    leading: const SettingIcon(icon: MnIcons.shield),
+                    onTap: () => context.router.push(LegalRoute(doc: LegalDoc.privacy)),
+                  ),
+                  MnListRow(
+                    title: 'Terms of use',
+                    leading: const SettingIcon(icon: MnIcons.doc),
+                    onTap: () => context.router.push(LegalRoute(doc: LegalDoc.terms)),
+                  ),
+                  MnListRow(title: 'Data & export', leading: const SettingIcon(icon: MnIcons.doc), onTap: () => _requestDataExport(context)),
+                  MnListRow(
+                    title: 'Blocked users',
+                    leading: const SettingIcon(icon: MnIcons.block),
+                    onTap: () => context.router.push(const BlockedUsersRoute()),
+                  ),
+                  MnListRow(
+                    title: 'Delete account',
+                    leading: const SettingIcon(icon: MnIcons.trash),
+                    onTap: () => context.router.push(const DeleteAccountRoute()),
+                  ),
                 ],
               ),
               const SizedBox(height: 22),
               MnGroup(
                 title: 'Support',
                 children: [
-                  MnListRow(title: 'Help centre', leading: const SettingIcon(icon: MnIcons.info), onTap: () {}),
-                  MnListRow(title: 'Contact us', leading: const SettingIcon(icon: MnIcons.message), onTap: () {}),
+                  MnListRow(title: 'Help centre', leading: const SettingIcon(icon: MnIcons.info), onTap: () => ExternalLinks.open(context, LinkConfig.helpCentre)),
+                  MnListRow(title: 'Contact us', leading: const SettingIcon(icon: MnIcons.message), onTap: () => ExternalLinks.email(context, subject: 'MindNest support')),
                 ],
               ),
               const SizedBox(height: 22),
-              CrisisCard(
-                onCall: () => ScaffoldMessenger.of(context)
-                    .showSnackBar(const SnackBar(content: Text('Connecting you to 24/7 support…'))),
-              ),
+              CrisisCard(onCall: () => showCrisisSheet(context)),
               const SizedBox(height: 18),
               MnButton(
                 label: 'Log out',

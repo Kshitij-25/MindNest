@@ -29,7 +29,9 @@ class ProDashboardPage extends StatelessWidget {
         BlocProvider.value(value: getIt<DashboardCubit>()..load()),
         BlocProvider.value(value: getIt<RequestsBloc>()),
       ],
-      child: BlocBuilder<DashboardCubit, DashboardState>(
+      child: BlocConsumer<DashboardCubit, DashboardState>(
+        listenWhen: (a, b) => b.error != null && a.error != b.error && b.data != null,
+        listener: (context, s) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s.error!))),
         builder: (context, s) {
           final d = s.data;
           if (d == null) return const Scaffold(body: LoadingView());
@@ -85,7 +87,7 @@ class _Phone extends StatelessWidget {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    MnAvatar(name: user?.name ?? '', size: 46, photo: true),
+                    MnAvatar(name: user?.name ?? '', size: 46, photo: true, userId: user?.id),
                     Positioned(
                       bottom: -2,
                       right: -2,
@@ -131,6 +133,7 @@ class _Phone extends StatelessWidget {
             delay: const Duration(milliseconds: 120),
             child: RequestsBanner(count: pending, onTap: () => goToTab(context, ProTab.requests)),
           ),
+          if (d.toMark.isNotEmpty) ...[const SizedBox(height: 22), SessionOutcomeCard(sessions: d.toMark)],
           const SizedBox(height: 22),
           SectionHeader(
             title: 'Today’s sessions',
@@ -207,6 +210,7 @@ class _TabletState extends State<_Tablet> {
     final main = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (d.toMark.isNotEmpty) ...[SessionOutcomeCard(sessions: d.toMark), const SizedBox(height: 20)],
         MnCard(
           radius: 22,
           padding: const EdgeInsets.all(22),

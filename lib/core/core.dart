@@ -11,3 +11,4 @@ export 'utils/load_status.dart';
 export 'utils/topics.dart';
 export 'widgets/widgets.dart';
 export 'utils/formatters.dart';
+export 'utils/external_links.dart';

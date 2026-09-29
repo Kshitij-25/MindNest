@@ -7,4 +7,5 @@ abstract interface class SessionsRepository {
   ResultFuture<List<BookingDay>> getBookingDays(String therapistId, {int days = 14});
   ResultFuture<Appointment> book(BookingRequest request);
   ResultFuture<void> cancel(String appointmentId);
+  ResultFuture<void> review(String appointmentId, {required int rating, required String text});
 }

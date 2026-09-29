@@ -11,7 +11,7 @@ AppUserModel _$AppUserModelFromJson(Map<String, dynamic> json) => AppUserModel(
   name: json['name'] as String,
   email: json['email'] as String,
   role: $enumDecode(_$UserRoleEnumMap, json['role']),
-  maskedPhone: json['maskedPhone'] as String? ?? '+44 ••• ••892',
+  maskedPhone: json['maskedPhone'] as String? ?? '+91 ••••• ••892',
   onboarded: json['onboarded'] as bool? ?? false,
   verification:
       $enumDecodeNullable(_$VerificationStatusEnumMap, json['verification']) ??

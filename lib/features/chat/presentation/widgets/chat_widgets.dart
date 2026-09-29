@@ -6,7 +6,11 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/core.dart';
 import '../../domain/entities/conversation.dart';
+import '../../../../core/media/media_picker.dart';
+import '../../../safety/domain/safety.dart';
+import '../../../safety/presentation/safety_actions.dart';
 import '../bloc/chat_thread_bloc.dart';
+import 'attachment_view.dart';
 
 String conversationTime(DateTime t) {
   final now = DateTime.now();
@@ -62,6 +66,7 @@ class ConversationTile extends StatelessWidget {
                 size: dense ? 48 : 54,
                 photo: true,
                 online: cv.participant.online,
+                userId: cv.participant.id,
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -159,10 +164,12 @@ class ConversationTile extends StatelessWidget {
 class MessageBubble extends StatelessWidget {
   const MessageBubble({
     super.key,
+    required this.conversationId,
     required this.message,
     required this.showStatus,
     this.maxWidthFactor = .78,
   });
+  final String conversationId;
   final ChatMessage message;
   final bool showStatus;
   final double maxWidthFactor;
@@ -187,10 +194,9 @@ class MessageBubble extends StatelessWidget {
                   maxWidth: box.maxWidth * maxWidthFactor,
                 ),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 15,
-                    vertical: 11,
-                  ),
+                  padding: message.attachment == null
+                      ? const EdgeInsets.symmetric(horizontal: 15, vertical: 11)
+                      : const EdgeInsets.all(4),
                   decoration: BoxDecoration(
                     color: me ? c.primary : c.surface,
                     borderRadius: BorderRadius.only(
@@ -209,14 +215,16 @@ class MessageBubble extends StatelessWidget {
                           ]
                         : MnShadows.sm(c),
                   ),
-                  child: Text(
-                    message.text,
-                    style: TextStyle(
-                      fontSize: 15.5,
-                      height: 1.4,
-                      color: me ? c.onPrimary : c.ink,
-                    ),
-                  ),
+                  child: message.attachment != null
+                      ? AttachmentView(conversationId: conversationId, attachment: message.attachment!, fromMe: me)
+                      : Text(
+                          message.text,
+                          style: TextStyle(
+                            fontSize: 15.5,
+                            height: 1.4,
+                            color: me ? c.onPrimary : c.ink,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -291,9 +299,32 @@ class _ChatThreadViewState extends State<ChatThreadView> {
     }
   });
 
-  void _comingSoon(String what) => ScaffoldMessenger.of(
-    context,
-  ).showSnackBar(SnackBar(content: Text('$what calls will be available soon')));
+  /// Photo (camera or library, compressed) or a PDF of up to 900 KB.
+  Future<void> _attach() async {
+    final bloc = context.read<ChatThreadBloc>();
+    final choice = await Adaptive.actionSheet<String>(
+      context,
+      actions: const [
+        AdaptiveAction(label: 'Photo', value: 'photo', icon: Icons.image_outlined),
+        AdaptiveAction(label: 'PDF document', value: 'pdf', icon: Icons.description_outlined),
+      ],
+    );
+    if (choice == null || !mounted) return;
+    if (choice == 'photo') {
+      final jpeg = await pickPhoto(context, maxSide: 1280, quality: 70);
+      if (jpeg == null) return;
+      bloc.add(ChatThreadEvent.attachmentSent(kind: AttachmentKind.image, name: 'photo.jpg', bytes: jpeg));
+    } else {
+      final pdf = await pickPdf();
+      if (pdf == null) return;
+      bloc.add(ChatThreadEvent.attachmentSent(kind: AttachmentKind.pdf, name: pdf.name, bytes: pdf.bytes));
+    }
+  }
+
+  // TODO(calls): restore with the call buttons in the header.
+  // void _comingSoon(String what) => ScaffoldMessenger.of(
+  //   context,
+  // ).showSnackBar(SnackBar(content: Text('$what calls will be available soon')));
 
   @override
   Widget build(BuildContext context) {
@@ -301,8 +332,12 @@ class _ChatThreadViewState extends State<ChatThreadView> {
     return BlocConsumer<ChatThreadBloc, ChatThreadState>(
       listenWhen: (a, b) =>
           a.messages.length != b.messages.length ||
-          a.otherTyping != b.otherTyping,
-      listener: (_, _) => _toBottom(),
+          a.otherTyping != b.otherTyping ||
+          (b.error != null && a.error != b.error),
+      listener: (context, s) {
+        _toBottom();
+        if (s.error != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s.error!)));
+      },
       builder: (context, s) {
         final conv = s.conversation;
         if (conv == null) {
@@ -371,6 +406,7 @@ class _ChatThreadViewState extends State<ChatThreadView> {
             ),
           for (final (i, m) in s.messages.indexed)
             MessageBubble(
+              conversationId: conv.id,
               message: m,
               showStatus: i == s.messages.length - 1,
               maxWidthFactor: widget.embedded ? .64 : .78,
@@ -433,6 +469,7 @@ class _ChatThreadViewState extends State<ChatThreadView> {
                         name: p.name,
                         size: widget.embedded ? 44 : 40,
                         photo: true,
+                        userId: p.id,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -474,21 +511,36 @@ class _ChatThreadViewState extends State<ChatThreadView> {
                           ],
                         ),
                       ),
+                      // TODO(calls): voice/video calling needs a paid SDK (e.g. Agora, Twilio). Re-enable when one is integrated.
+                      // MnIconButton(
+                      //   icon: MnIcons.phone,
+                      //   tooltip: 'Voice call',
+                      //   iconSize: 19,
+                      //   stroke: 1.9,
+                      //   onPressed: () => _comingSoon('Voice'),
+                      // ),
+                      // MnIconButton(
+                      //   icon: MnIcons.video,
+                      //   tooltip: 'Video call',
+                      //   iconSize: 20,
+                      //   stroke: 1.9,
+                      //   background: widget.embedded ? c.primary : null,
+                      //   color: widget.embedded ? c.onPrimary : null,
+                      //   onPressed: () => _comingSoon('Video'),
+                      // ),
                       MnIconButton(
-                        icon: MnIcons.phone,
-                        tooltip: 'Voice call',
+                        icon: MnIcons.more,
+                        tooltip: 'More',
                         iconSize: 19,
                         stroke: 1.9,
-                        onPressed: () => _comingSoon('Voice'),
-                      ),
-                      MnIconButton(
-                        icon: MnIcons.video,
-                        tooltip: 'Video call',
-                        iconSize: 20,
-                        stroke: 1.9,
-                        background: widget.embedded ? c.primary : null,
-                        color: widget.embedded ? c.onPrimary : null,
-                        onPressed: () => _comingSoon('Video'),
+                        onPressed: () async {
+                          final blocked = await showSafetyMenu(
+                            context,
+                            ReportSubject(type: ReportTarget.user, path: 'conversations/${s.conversation?.id}', ownerId: p.id, ownerName: p.name),
+                            reportLabel: 'Report ${p.name}',
+                          );
+                          if (blocked && context.mounted && widget.showBack) Navigator.of(context).maybePop();
+                        },
                       ),
                     ],
                   ),
@@ -526,26 +578,14 @@ class _ChatThreadViewState extends State<ChatThreadView> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  MnIconButton(
-                    icon: MnIcons.plus,
-                    tooltip: 'Attach',
-                    stroke: 2,
-                    onPressed: () => Adaptive.actionSheet<String>(
-                      context,
-                      actions: const [
-                        AdaptiveAction(
-                          label: 'Photo',
-                          value: 'photo',
-                          icon: Icons.image_outlined,
+                  s.uploading
+                      ? const SizedBox(width: 44, height: 44, child: Center(child: AdaptiveLoader(size: 20)))
+                      : MnIconButton(
+                          icon: MnIcons.plus,
+                          tooltip: 'Attach',
+                          stroke: 2,
+                          onPressed: _attach,
                         ),
-                        AdaptiveAction(
-                          label: 'Document',
-                          value: 'doc',
-                          icon: Icons.description_outlined,
-                        ),
-                      ],
-                    ),
-                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Container(

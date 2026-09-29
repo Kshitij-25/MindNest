@@ -14,6 +14,7 @@ import '../../features/settings/presentation/cubit/settings_cubit.dart';
 import '../../firebase_options.dart';
 import '../firebase/collections.dart';
 import '../router/app_router.dart';
+import 'push_sender.dart';
 
 @pragma('vm:entry-point')
 Future<void> _onBackgroundMessage(RemoteMessage message) async {
@@ -32,8 +33,10 @@ void registerBackgroundPushHandler() {
 /// * Registers this device's FCM token under `users/{uid}/fcmTokens/{token}`
 ///   so a server (Cloud Function in `functions/`) can target the user.
 /// * Shows FCM messages that arrive while the app is in the foreground.
-/// * Without a server (Spark plan) it also raises a local notification for
-///   new inbox items while the app is alive in the background.
+/// * Subscribes to `user_<uid>_<type>` topics for the notification types
+///   the user has switched on; [PushSender] targets those topics.
+/// * If the push sender isn't configured, it instead raises a local
+///   notification for new inbox items while the app is alive in the background.
 /// * Tapping any notification opens the Notifications screen.
 @lazySingleton
 class PushService with WidgetsBindingObserver {
@@ -54,7 +57,9 @@ class PushService with WidgetsBindingObserver {
     priority: Priority.high,
   );
 
-  StreamSubscription<Object?>? _authSub, _tokenSub, _inboxSub;
+  StreamSubscription<Object?>? _authSub, _tokenSub, _inboxSub, _prefsSub;
+  String? _topicsUid;
+  static const _types = ['message', 'booking', 'content', 'mood'];
   AppLifecycleState _lifecycle = AppLifecycleState.resumed;
   String? _token;
   bool _started = false;
@@ -95,6 +100,7 @@ class PushService with WidgetsBindingObserver {
   Future<void> _onUser(User? user) async {
     await _inboxSub?.cancel();
     await _tokenSub?.cancel();
+    await _prefsSub?.cancel();
     if (user == null) return;
     try {
       final perm = await _messaging.requestPermission();
@@ -110,10 +116,26 @@ class PushService with WidgetsBindingObserver {
         await _saveToken(user.uid, await _messaging.getToken());
       }
       _tokenSub = _messaging.onTokenRefresh.listen((t) => _saveToken(user.uid, t));
+      await _syncTopics(user.uid);
+      _prefsSub = _settings.stream.listen((_) => _syncTopics(user.uid));
     } catch (e) {
       debugPrint('Push registration failed: $e');
     }
-    _watchInbox(user.uid);
+    if (!PushSender.isConfigured) _watchInbox(user.uid);
+  }
+
+  /// Subscribes this device to the topics for the enabled notification types.
+  Future<void> _syncTopics(String uid) async {
+    if (Platform.isIOS && await _messaging.getAPNSToken() == null) return;
+    _topicsUid = uid;
+    for (final type in _types) {
+      final topic = PushSender.topic(uid, type);
+      try {
+        _wants(type) ? await _messaging.subscribeToTopic(topic) : await _messaging.unsubscribeFromTopic(topic);
+      } catch (e) {
+        debugPrint('Topic sync failed for $topic: $e');
+      }
+    }
   }
 
   Future<void> _saveToken(String uid, String? token) async {
@@ -125,8 +147,17 @@ class PushService with WidgetsBindingObserver {
     });
   }
 
-  /// Removes this device's token; call while still signed in.
+  /// Removes this device's token and topic subscriptions; call while still
+  /// signed in.
   Future<void> unregister() async {
+    await _prefsSub?.cancel();
+    final topicsUid = _topicsUid;
+    _topicsUid = null;
+    if (topicsUid != null) {
+      for (final type in _types) {
+        await _messaging.unsubscribeFromTopic(PushSender.topic(topicsUid, type)).catchError((_) {});
+      }
+    }
     final uid = _auth.currentUser?.uid;
     final token = _token;
     if (uid == null || token == null) return;
@@ -185,5 +216,6 @@ class PushService with WidgetsBindingObserver {
     _authSub?.cancel();
     _tokenSub?.cancel();
     _inboxSub?.cancel();
+    _prefsSub?.cancel();
   }
 }

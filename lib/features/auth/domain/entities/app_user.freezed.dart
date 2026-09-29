@@ -219,7 +219,7 @@ return $default(_that.id,_that.name,_that.email,_that.role,_that.maskedPhone,_th
 
 
 class _AppUser extends AppUser {
-  const _AppUser({required this.id, required this.name, required this.email, required this.role, this.maskedPhone = '+44 ••• ••892', this.onboarded = false, this.verification = VerificationStatus.none, this.title}): super._();
+  const _AppUser({required this.id, required this.name, required this.email, required this.role, this.maskedPhone = '+91 ••••• ••892', this.onboarded = false, this.verification = VerificationStatus.none, this.title}): super._();
   
 
 @override final  String id;

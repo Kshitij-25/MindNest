@@ -61,6 +61,10 @@ ChatMessageModel _$ChatMessageModelFromJson(Map<String, dynamic> json) =>
       text: json['text'] as String,
       sentAt: DateTime.parse(json['sentAt'] as String),
       read: json['read'] as bool? ?? false,
+      attachmentId: json['attachmentId'] as String?,
+      attachmentKind: json['attachmentKind'] as String?,
+      attachmentName: json['attachmentName'] as String?,
+      attachmentSize: (json['attachmentSize'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$ChatMessageModelToJson(ChatMessageModel instance) =>
@@ -70,4 +74,8 @@ Map<String, dynamic> _$ChatMessageModelToJson(ChatMessageModel instance) =>
       'text': instance.text,
       'sentAt': instance.sentAt.toIso8601String(),
       'read': instance.read,
+      'attachmentId': instance.attachmentId,
+      'attachmentKind': instance.attachmentKind,
+      'attachmentName': instance.attachmentName,
+      'attachmentSize': instance.attachmentSize,
     };

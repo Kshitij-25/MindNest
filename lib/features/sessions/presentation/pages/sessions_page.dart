@@ -10,6 +10,7 @@ import '../../domain/entities/appointment.dart';
 import '../bloc/sessions_bloc.dart';
 import '../widgets/appointment_card.dart';
 import '../widgets/cancel_sheet.dart';
+import '../widgets/review_sheet.dart';
 
 @RoutePage()
 class SessionsPage extends StatelessWidget {
@@ -168,7 +169,7 @@ class _UpcomingCard extends StatelessWidget {
               children: [
                 DateBlock(date: a.startsAt),
                 const SizedBox(width: 16),
-                MnAvatar(name: a.therapist.name, size: 52, photo: true),
+                MnAvatar(name: a.therapist.name, size: 52, photo: true, userId: a.therapist.id),
                 const SizedBox(width: 14),
                 info,
                 const SizedBox(width: 12),
@@ -212,7 +213,7 @@ class _PastRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
-          MnAvatar(name: a.therapist.name, size: 40, photo: true),
+          MnAvatar(name: a.therapist.name, size: 40, photo: true, userId: a.therapist.id),
           const SizedBox(width: 14),
           Expanded(
             child: Column(
@@ -226,13 +227,32 @@ class _PastRow extends StatelessWidget {
               ],
             ),
           ),
-          if (context.isTablet) ...[const MnBadge(label: 'Completed', tone: MnBadgeTone.accept), const SizedBox(width: 12)],
-          MnButton.secondary(
-            label: 'Book again',
-            size: MnButtonSize.small,
-            expand: false,
-            onPressed: () => context.router.push(BookingRoute(therapistId: a.therapist.id)),
-          ),
+          if (context.isTablet || a.status != AppointmentStatus.completed) ...[
+            switch (a.status) {
+              AppointmentStatus.noShow => const MnBadge(label: 'Missed', tone: MnBadgeTone.clay),
+              AppointmentStatus.completed => const MnBadge(label: 'Completed', tone: MnBadgeTone.accept),
+              _ => const MnBadge(label: 'Awaiting confirmation', tone: MnBadgeTone.neutral),
+            },
+            const SizedBox(width: 12),
+          ],
+          if (a.canReview)
+            MnButton(
+              label: 'Rate',
+              icon: MnIcons.star,
+              size: MnButtonSize.small,
+              expand: false,
+              onPressed: () async {
+                final bloc = context.read<SessionsBloc>();
+                if (await showReviewSheet(context, a)) bloc.add(const SessionsEvent.load());
+              },
+            )
+          else if (a.status == AppointmentStatus.completed)
+            MnButton.secondary(
+              label: 'Book again',
+              size: MnButtonSize.small,
+              expand: false,
+              onPressed: () => context.router.push(BookingRoute(therapistId: a.therapist.id)),
+            ),
         ],
       ),
     );

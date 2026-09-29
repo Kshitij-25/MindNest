@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
@@ -80,4 +82,31 @@ class WatchConversation {
 
   Stream<ThreadUpdate> call(String conversationId) =>
       _repo.watch(conversationId);
+}
+
+class SendAttachmentParams {
+  const SendAttachmentParams(this.conversationId, {required this.kind, required this.name, required this.bytes});
+  final String conversationId;
+  final AttachmentKind kind;
+  final String name;
+  final Uint8List bytes;
+}
+
+@injectable
+class SendAttachment implements UseCase<ChatMessage, SendAttachmentParams> {
+  const SendAttachment(this._repo);
+  final ChatRepository _repo;
+
+  @override
+  ResultFuture<ChatMessage> call(SendAttachmentParams p) =>
+      _repo.sendAttachment(p.conversationId, kind: p.kind, name: p.name, bytes: p.bytes);
+}
+
+/// Loads an attachment's bytes (cached for the session).
+@injectable
+class LoadAttachment {
+  const LoadAttachment(this._repo);
+  final ChatRepository _repo;
+
+  ResultFuture<Uint8List> call(String conversationId, String attachmentId) => _repo.attachment(conversationId, attachmentId);
 }

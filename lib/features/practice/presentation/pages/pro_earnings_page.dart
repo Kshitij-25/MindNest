@@ -17,7 +17,9 @@ class ProEarningsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<EarningsCubit>()..load(),
-      child: BlocBuilder<EarningsCubit, EarningsState>(
+      child: BlocConsumer<EarningsCubit, EarningsState>(
+        listenWhen: (a, b) => b.error != null && a.error != b.error,
+        listener: (context, s) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s.error!))),
         builder: (context, s) {
           final c = context.colors;
           final e = s.data;
@@ -36,46 +38,53 @@ class ProEarningsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('AVAILABLE TO WITHDRAW',
+                Text('OUTSTANDING',
                     style: TextStyle(color: Colors.white.withValues(alpha: .8), fontWeight: FontWeight.w700, fontSize: 13, letterSpacing: .5)),
                 const SizedBox(height: 6),
-                Text(money(e.available), style: const TextStyle(color: Colors.white, fontSize: 46, fontWeight: FontWeight.w800, height: 1)),
+                Text(money(e.outstanding), style: const TextStyle(color: Colors.white, fontSize: 46, fontWeight: FontWeight.w800, height: 1)),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     MnIcon(MnIcons.info, size: 15, color: Colors.white.withValues(alpha: .85)),
                     const SizedBox(width: 8),
-                    Text('Next automatic payout in ${e.nextPayoutDays} days',
-                        style: TextStyle(color: Colors.white.withValues(alpha: .85), fontSize: 14)),
+                    Expanded(
+                      child: Text(
+                        e.outstandingSessions == 0
+                            ? 'All sessions paid · ${money(e.collected)} collected this year'
+                            : '${e.outstandingSessions} unpaid ${e.outstandingSessions == 1 ? 'session' : 'sessions'} · ${money(e.collected)} collected this year',
+                        style: TextStyle(color: Colors.white.withValues(alpha: .85), fontSize: 14),
+                      ),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 18),
-                Pressable(
-                  onTap: () async {
-                    final ok = await Adaptive.confirm(
-                      context,
-                      title: 'Withdraw ${money(e.available)}?',
-                      message: 'Funds usually arrive in 1–2 business days.',
-                      confirmLabel: 'Withdraw',
-                    );
-                    if (ok && context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Withdrawal requested')));
-                    }
-                  },
-                  child: Container(
-                    height: 40,
-                    padding: const EdgeInsets.symmetric(horizontal: 22),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(MnRadii.xs)),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const MnIcon(MnIcons.arrowR, size: 17, color: MnColors.moss700, stroke: 2.2),
-                        const SizedBox(width: 8),
-                        const Text('Withdraw funds', style: TextStyle(color: MnColors.moss700, fontWeight: FontWeight.w600, fontSize: 15)),
-                      ],
-                    ),
-                  ),
-                ),
+                // TODO(payments): withdrawals need a payments/payouts SDK (e.g. Stripe Connect). Re-enable when one is integrated.
+                // const SizedBox(height: 18),
+                // Pressable(
+                //   onTap: () async {
+                //     final ok = await Adaptive.confirm(
+                //       context,
+                //       title: 'Withdraw ${money(e.available)}?',
+                //       message: 'Funds usually arrive in 1–2 business days.',
+                //       confirmLabel: 'Withdraw',
+                //     );
+                //     if (ok && context.mounted) {
+                //       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Withdrawal requested')));
+                //     }
+                //   },
+                //   child: Container(
+                //     height: 40,
+                //     padding: const EdgeInsets.symmetric(horizontal: 22),
+                //     decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(MnRadii.xs)),
+                //     child: Row(
+                //       mainAxisSize: MainAxisSize.min,
+                //       children: [
+                //         const MnIcon(MnIcons.arrowR, size: 17, color: MnColors.moss700, stroke: 2.2),
+                //         const SizedBox(width: 8),
+                //         const Text('Withdraw funds', style: TextStyle(color: MnColors.moss700, fontWeight: FontWeight.w600, fontSize: 15)),
+                //       ],
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           );
@@ -154,7 +163,7 @@ class ProEarningsPage extends StatelessWidget {
                           key: ValueKey(s.period),
                           values: s.period == EarningsPeriod.month
                               ? e.months.map((m) => m.toDouble()).toList()
-                              : const [14200, 15800, 16900, 18420],
+                              : const [284000, 316000, 338000, 368400],
                           height: 190,
                           color: c.green,
                           labels: s.period == EarningsPeriod.month
@@ -172,27 +181,53 @@ class ProEarningsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Recent transactions', style: context.text.title3),
+                Text('Session payments', style: context.text.title3),
+                const SizedBox(height: 4),
+                Text('Tap a session to mark it paid or unpaid.', style: context.text.cap.copyWith(color: c.ink3)),
                 const SizedBox(height: 8),
+                if (e.transactions.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text('Completed sessions will appear here.', style: context.text.callout.copyWith(color: c.ink3)),
+                  ),
                 for (final (i, t) in e.transactions.indexed) ...[
                   if (i > 0) const Hairline(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Row(
-                      children: [
-                        MnAvatar(name: t.clientName, size: 40, photo: true),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  Pressable(
+                    onTap: () => context.read<EarningsCubit>().setPaid(t.id, !t.paid),
+                    semanticLabel: '${t.clientName}, ${money(t.amount)}, ${t.paid ? 'paid' : 'unpaid'}. Tap to mark ${t.paid ? 'unpaid' : 'paid'}',
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Row(
+                        children: [
+                          MnAvatar(name: t.clientName, size: 40, photo: true),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(t.clientName, style: context.text.sub.copyWith(fontWeight: FontWeight.w700)),
+                                Text('${t.description} · ${DateFormat('d MMM').format(t.date)}', style: context.text.cap.copyWith(color: c.ink3)),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(t.clientName, style: context.text.sub.copyWith(fontWeight: FontWeight.w700)),
-                              Text('${t.description} · ${DateFormat('d MMM').format(t.date)}', style: context.text.cap.copyWith(color: c.ink3)),
+                              Text(money(t.amount), style: context.text.headline.copyWith(color: t.paid ? c.green : c.ink)),
+                              const SizedBox(height: 2),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  MnIcon(t.paid ? MnIcons.check : MnIcons.clock, size: 13, color: t.paid ? c.green : c.clay, stroke: 2.2),
+                                  const SizedBox(width: 4),
+                                  Text(t.paid ? 'Paid' : 'Unpaid',
+                                      style: context.text.cap.copyWith(color: t.paid ? c.green : c.clay, fontWeight: FontWeight.w600)),
+                                ],
+                              ),
                             ],
                           ),
-                        ),
-                        Text('+${money(t.amount)}', style: context.text.headline.copyWith(color: c.green)),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -218,7 +253,7 @@ class ProEarningsPage extends StatelessWidget {
                     children: [
                       MnIcon(MnIcons.info, size: 17, color: c.ink3),
                       const SizedBox(width: 10),
-                      Expanded(child: Text('Payouts processed every Friday via Stripe.', style: context.text.cap.copyWith(color: c.ink2))),
+                      Expanded(child: Text('Clients pay you directly for now. Mark each session paid once you\'ve received it.', style: context.text.cap.copyWith(color: c.ink2))),
                     ],
                   ),
                 ),
@@ -234,7 +269,7 @@ class ProEarningsPage extends StatelessWidget {
                 ? Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      LargeTitle(title: 'Earnings & payouts'),
+                      LargeTitle(title: 'Earnings & payments'),
                       const SizedBox(height: 20),
                       IntrinsicHeight(
                         child: Row(

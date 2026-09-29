@@ -48,3 +48,6 @@ app.*.map.json
 .widget_preview/
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
+
+# FCM sender service-account key (see lib/core/push/push_sender.dart)
+fcm-sender*.json

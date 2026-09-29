@@ -13,7 +13,7 @@ abstract class TherapistFilter with _$TherapistFilter {
     @Default('') String query,
     @Default('All') String specialty,
     @Default(<String>[]) List<String> specializations,
-    @Default(150) int maxPrice,
+    @Default(5000) int maxPrice,
     @Default('Any') String minRating,
     @Default('Any') String sessionType,
   }) = _TherapistFilter;
@@ -23,5 +23,5 @@ abstract class TherapistFilter with _$TherapistFilter {
   double get minRatingValue => minRating == 'Any' ? 0 : double.parse(minRating.replaceAll('+', ''));
 
   int get activeCount =>
-      (specializations.isNotEmpty ? 1 : 0) + (maxPrice < 150 ? 1 : 0) + (minRating != 'Any' ? 1 : 0) + (sessionType != 'Any' ? 1 : 0);
+      (specializations.isNotEmpty ? 1 : 0) + (maxPrice < 5000 ? 1 : 0) + (minRating != 'Any' ? 1 : 0) + (sessionType != 'Any' ? 1 : 0);
 }

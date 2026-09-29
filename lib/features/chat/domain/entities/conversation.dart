@@ -45,5 +45,20 @@ abstract class ChatMessage with _$ChatMessage {
     required String text,
     required DateTime sentAt,
     @Default(false) bool read,
+    ChatAttachment? attachment,
   }) = _ChatMessage;
+}
+
+enum AttachmentKind { image, pdf }
+
+/// A photo or PDF sent in a chat. The bytes live separately (loaded on
+/// demand) so opening a thread stays fast.
+@freezed
+abstract class ChatAttachment with _$ChatAttachment {
+  const factory ChatAttachment({
+    required String id,
+    required AttachmentKind kind,
+    required String name,
+    required int size,
+  }) = _ChatAttachment;
 }

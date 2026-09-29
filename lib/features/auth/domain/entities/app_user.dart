@@ -13,7 +13,7 @@ abstract class AppUser with _$AppUser {
     required String name,
     required String email,
     required UserRole role,
-    @Default('+44 ••• ••892') String maskedPhone,
+    @Default('+91 ••••• ••892') String maskedPhone,
     @Default(false) bool onboarded,
     @Default(VerificationStatus.none) VerificationStatus verification,
     String? title,

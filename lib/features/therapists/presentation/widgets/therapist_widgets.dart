@@ -5,30 +5,36 @@ import '../../domain/entities/therapist.dart';
 
 /// Diagonal-striped portrait placeholder tinted by name (`PhotoPlaceholder`).
 class PortraitPlaceholder extends StatelessWidget {
-  const PortraitPlaceholder({super.key, required this.name, this.radius = 0});
+  const PortraitPlaceholder({super.key, required this.name, this.radius = 0, this.userId});
   final String name;
   final double radius;
+
+  /// Shows this therapist's profile photo when they've set one.
+  final String? userId;
 
   @override
   Widget build(BuildContext context) {
     final hue = avatarHue(name);
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: CustomPaint(
-        painter: _StripePainter(hue),
-        child: LayoutBuilder(
-          builder: (context, box) {
-            final s = box.biggest.shortestSide * .38;
-            return Center(
-              child: Container(
-                width: s,
-                height: s,
-                decoration: BoxDecoration(color: hue.withValues(alpha: .33), shape: BoxShape.circle),
-                alignment: Alignment.center,
-                child: MnIcon(MnIcons.user, size: s * .6, color: hue, stroke: 1.6),
-              ),
-            );
-          },
+      child: UserPhoto(
+        userId: userId,
+        fallback: CustomPaint(
+          painter: _StripePainter(hue),
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final s = box.biggest.shortestSide * .38;
+              return Center(
+                child: Container(
+                  width: s,
+                  height: s,
+                  decoration: BoxDecoration(color: hue.withValues(alpha: .33), shape: BoxShape.circle),
+                  alignment: Alignment.center,
+                  child: MnIcon(MnIcons.user, size: s * .6, color: hue, stroke: 1.6),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -115,7 +121,7 @@ class TherapistCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(width: 72, height: 72, child: PortraitPlaceholder(name: t.name, radius: 18)),
+              SizedBox(width: 72, height: 72, child: PortraitPlaceholder(name: t.name, radius: 18, userId: t.id)),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -206,7 +212,7 @@ class TherapistMiniCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  PortraitPlaceholder(name: t.name, radius: 16),
+                  PortraitPlaceholder(name: t.name, radius: 16, userId: t.id),
                   if (t.verified)
                     Positioned(
                       top: 8,
@@ -258,7 +264,7 @@ class TherapistGridCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              MnAvatar(name: t.name, size: 46, photo: true),
+              MnAvatar(name: t.name, size: 46, photo: true, userId: t.id),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -298,7 +304,7 @@ class TherapistSummaryRow extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
-          SizedBox(width: 48, height: 48, child: PortraitPlaceholder(name: therapist.name, radius: 14)),
+          SizedBox(width: 48, height: 48, child: PortraitPlaceholder(name: therapist.name, radius: 14, userId: therapist.id)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(

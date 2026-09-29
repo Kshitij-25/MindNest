@@ -46,6 +46,7 @@ abstract class Post with _$Post {
 abstract class PostComment with _$PostComment {
   const factory PostComment({
     required String id,
+    @Default('') String authorId,
     required String author,
     required DateTime createdAt,
     required String text,

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'practice_entities.freezed.dart';
@@ -6,6 +8,14 @@ part 'practice_entities.freezed.dart';
 
 enum DocumentKind { licence, photoId, qualifications }
 
+/// A file the professional picked for verification.
+class DocumentFile {
+  const DocumentFile({required this.name, required this.bytes, required this.isPdf});
+  final String name;
+  final Uint8List bytes;
+  final bool isPdf;
+}
+
 @freezed
 abstract class VerificationDocument with _$VerificationDocument {
   const factory VerificationDocument({
@@ -13,6 +23,7 @@ abstract class VerificationDocument with _$VerificationDocument {
     required String title,
     required String description,
     @Default(false) bool uploaded,
+    String? fileName,
   }) = _VerificationDocument;
 }
 
@@ -108,25 +119,35 @@ abstract class ClientDetail with _$ClientDetail {
 
 @freezed
 abstract class Transaction with _$Transaction {
-  const factory Transaction({required String clientName, required String description, required DateTime date, required int amount}) =
-      _Transaction;
+  const factory Transaction({
+    required String id,
+    required String clientName,
+    required String description,
+    required DateTime date,
+    required int amount,
+    @Default(false) bool paid,
+  }) = _Transaction;
 }
 
 @freezed
 abstract class Earnings with _$Earnings {
   const factory Earnings({
-    required int available,
+    /// Completed sessions the client hasn't paid for yet.
+    required int outstanding,
+    required int outstandingSessions,
+    /// Paid sessions this year.
+    required int collected,
     required int yearTotal,
     required int sessions,
     required int averageRate,
     required int thisWeek,
     required int weekChangePercent,
-    required int nextPayoutDays,
     /// Mon..Sun amounts for the current week.
     required List<int> week,
     /// Last 8 months, oldest first.
     required List<int> months,
     required List<String> monthLabels,
+    /// Unpaid sessions first (oldest first), then the most recent paid ones.
     required List<Transaction> transactions,
     /// Share by session type (label → percent).
     required Map<String, int> byType,
@@ -152,5 +173,7 @@ abstract class PracticeDashboard with _$PracticeDashboard {
     required bool acceptingClients,
     required List<int> earningsWeek,
     required List<ScheduledSession> schedule,
+    /// Ended sessions waiting for the professional to mark completed / no-show.
+    @Default(<ScheduledSession>[]) List<ScheduledSession> toMark,
   }) = _PracticeDashboard;
 }

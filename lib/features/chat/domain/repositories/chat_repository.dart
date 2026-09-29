@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../../../../core/usecase/usecase.dart';
 import '../entities/conversation.dart';
 
@@ -23,6 +25,13 @@ abstract interface class ChatRepository {
   ResultFuture<String> conversationWith(String participantId);
   ResultFuture<List<ChatMessage>> getMessages(String conversationId);
   ResultFuture<ChatMessage> send(String conversationId, String text);
+  ResultFuture<ChatMessage> sendAttachment(
+    String conversationId, {
+    required AttachmentKind kind,
+    required String name,
+    required Uint8List bytes,
+  });
+  ResultFuture<Uint8List> attachment(String conversationId, String attachmentId);
   ResultFuture<void> markRead(String conversationId);
   Stream<ThreadUpdate> watch(String conversationId);
 }

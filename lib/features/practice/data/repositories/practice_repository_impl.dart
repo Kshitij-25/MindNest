@@ -15,7 +15,10 @@ class PracticeRepositoryImpl implements PracticeRepository {
   ResultFuture<List<VerificationDocument>> getDocuments() => guard(_ds.documents);
 
   @override
-  ResultFuture<void> setDocumentUploaded(DocumentKind kind, bool uploaded) => guard(() => _ds.setUploaded(kind, uploaded));
+  ResultFuture<void> uploadDocument(DocumentKind kind, DocumentFile file) => guard(() => _ds.upload(kind, file));
+
+  @override
+  ResultFuture<void> removeDocument(DocumentKind kind) => guard(() => _ds.removeUpload(kind));
 
   @override
   ResultFuture<void> submitVerification() => guard(_ds.submitVerification);
@@ -50,4 +53,11 @@ class PracticeRepositoryImpl implements PracticeRepository {
 
   @override
   ResultFuture<Earnings> getEarnings() => guard(_ds.earnings);
+
+  @override
+  ResultFuture<void> setSessionPaid(String appointmentId, bool paid) => guard(() => _ds.setPaid(appointmentId, paid));
+
+  @override
+  ResultFuture<void> setSessionOutcome(String appointmentId, {required bool attended}) =>
+      guard(() => _ds.setOutcome(appointmentId, attended: attended));
 }

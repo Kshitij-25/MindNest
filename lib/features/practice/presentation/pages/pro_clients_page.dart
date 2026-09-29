@@ -117,7 +117,7 @@ class _ClientTile extends StatelessWidget {
         decoration: BoxDecoration(color: selected ? c.primaryTint : Colors.transparent, borderRadius: BorderRadius.circular(14)),
         child: Row(
           children: [
-            MnAvatar(name: client.name, size: 46, photo: true, online: client.online),
+            MnAvatar(name: client.name, size: 46, photo: true, online: client.online, userId: client.id),
             const SizedBox(width: 12),
             Expanded(
               child: Column(

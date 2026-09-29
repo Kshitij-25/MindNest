@@ -3,7 +3,8 @@ import '../entities/practice_entities.dart';
 
 abstract interface class PracticeRepository {
   ResultFuture<List<VerificationDocument>> getDocuments();
-  ResultFuture<void> setDocumentUploaded(DocumentKind kind, bool uploaded);
+  ResultFuture<void> uploadDocument(DocumentKind kind, DocumentFile file);
+  ResultFuture<void> removeDocument(DocumentKind kind);
   ResultFuture<void> submitVerification();
 
   ResultFuture<PracticeDashboard> getDashboard();
@@ -20,4 +21,6 @@ abstract interface class PracticeRepository {
   ResultFuture<void> toggleClientGoal(String clientId, String goalId);
 
   ResultFuture<Earnings> getEarnings();
+  ResultFuture<void> setSessionPaid(String appointmentId, bool paid);
+  ResultFuture<void> setSessionOutcome(String appointmentId, {required bool attended});
 }

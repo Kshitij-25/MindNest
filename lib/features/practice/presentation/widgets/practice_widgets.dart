@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/core.dart';
 import '../../domain/entities/practice_entities.dart';
-
-final _money = NumberFormat.currency(locale: 'en_GB', symbol: '£', decimalDigits: 0);
-String money(num v) => _money.format(v);
+import '../bloc/dashboard_cubit.dart';
 
 String whenLabel(DateTime d) {
   final now = DateTime.now();
@@ -59,7 +58,7 @@ class ScheduleRow extends StatelessWidget {
               ),
             ),
             Container(width: 1, margin: const EdgeInsets.symmetric(horizontal: 12), color: c.hairline),
-            MnAvatar(name: s.clientName, size: 42, photo: true),
+            MnAvatar(name: s.clientName, size: 42, photo: true, userId: s.clientId),
             const SizedBox(width: 13),
             Expanded(
               child: Column(
@@ -139,6 +138,68 @@ class MetricBar extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           MnProgressBar(value: percent / 100, height: 7, color: color),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ended sessions the professional still needs to mark. Anything left
+/// unmarked is completed automatically 24 hours after it ends.
+class SessionOutcomeCard extends StatelessWidget {
+  const SessionOutcomeCard({super.key, required this.sessions});
+  final List<ScheduledSession> sessions;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final cubit = context.read<DashboardCubit>();
+    return MnCard(
+      radius: 22,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Did these sessions happen?', style: context.text.title3),
+          const SizedBox(height: 4),
+          Text('Only completed sessions count toward earnings. Unmarked ones are completed automatically after 24 hours.',
+              style: context.text.cap.copyWith(color: c.ink3)),
+          for (final (i, s) in sessions.indexed) ...[
+            if (i > 0) const Hairline() else const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                children: [
+                  MnAvatar(name: s.clientName, size: 38, userId: s.clientId),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s.clientName, style: context.text.sub.copyWith(fontWeight: FontWeight.w700)),
+                        Text('${s.type} · ${DateFormat('EEE d MMM, h:mm a').format(s.startsAt)}',
+                            style: context.text.cap.copyWith(color: c.ink3)),
+                      ],
+                    ),
+                  ),
+                  MnButton(
+                    label: 'No-show',
+                    variant: MnButtonVariant.ghost,
+                    size: MnButtonSize.small,
+                    expand: false,
+                    onPressed: () => cubit.markSession(s.id, attended: false),
+                  ),
+                  const SizedBox(width: 6),
+                  MnButton(
+                    label: 'Done',
+                    size: MnButtonSize.small,
+                    expand: false,
+                    onPressed: () => cubit.markSession(s.id, attended: true),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );

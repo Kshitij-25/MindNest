@@ -26,6 +26,7 @@ AppointmentModel _$AppointmentModelFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const ['24h', '1h'],
+      reviewed: json['reviewed'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$AppointmentModelToJson(AppointmentModel instance) =>
@@ -38,6 +39,7 @@ Map<String, dynamic> _$AppointmentModelToJson(AppointmentModel instance) =>
       'status': _$AppointmentStatusEnumMap[instance.status]!,
       'recurrence': _$RecurrenceEnumMap[instance.recurrence]!,
       'reminders': instance.reminders,
+      'reviewed': instance.reviewed,
     };
 
 const _$SessionTypeEnumMap = {
@@ -50,6 +52,7 @@ const _$AppointmentStatusEnumMap = {
   AppointmentStatus.pending: 'pending',
   AppointmentStatus.accepted: 'accepted',
   AppointmentStatus.completed: 'completed',
+  AppointmentStatus.noShow: 'noShow',
   AppointmentStatus.cancelled: 'cancelled',
 };
 

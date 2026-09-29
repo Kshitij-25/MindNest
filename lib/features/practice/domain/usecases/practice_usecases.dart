@@ -15,20 +15,26 @@ class GetVerificationDocuments implements UseCase<List<VerificationDocument>, No
   ResultFuture<List<VerificationDocument>> call(NoParams _) => _r.getDocuments();
 }
 
-class SetDocumentParams extends Equatable {
-  const SetDocumentParams(this.kind, this.uploaded);
+class UploadDocumentParams {
+  const UploadDocumentParams(this.kind, this.file);
   final DocumentKind kind;
-  final bool uploaded;
-  @override
-  List<Object?> get props => [kind, uploaded];
+  final DocumentFile file;
 }
 
 @injectable
-class SetDocumentUploaded implements UseCase<void, SetDocumentParams> {
-  const SetDocumentUploaded(this._r);
+class UploadDocument implements UseCase<void, UploadDocumentParams> {
+  const UploadDocument(this._r);
   final PracticeRepository _r;
   @override
-  ResultFuture<void> call(SetDocumentParams p) => _r.setDocumentUploaded(p.kind, p.uploaded);
+  ResultFuture<void> call(UploadDocumentParams p) => _r.uploadDocument(p.kind, p.file);
+}
+
+@injectable
+class RemoveDocument implements UseCase<void, DocumentKind> {
+  const RemoveDocument(this._r);
+  final PracticeRepository _r;
+  @override
+  ResultFuture<void> call(DocumentKind kind) => _r.removeDocument(kind);
 }
 
 @injectable
@@ -144,4 +150,36 @@ class GetEarnings implements UseCase<Earnings, NoParams> {
   final PracticeRepository _r;
   @override
   ResultFuture<Earnings> call(NoParams _) => _r.getEarnings();
+}
+
+class SetSessionPaidParams extends Equatable {
+  const SetSessionPaidParams(this.appointmentId, this.paid);
+  final String appointmentId;
+  final bool paid;
+  @override
+  List<Object?> get props => [appointmentId, paid];
+}
+
+@injectable
+class SetSessionPaid implements UseCase<void, SetSessionPaidParams> {
+  const SetSessionPaid(this._r);
+  final PracticeRepository _r;
+  @override
+  ResultFuture<void> call(SetSessionPaidParams p) => _r.setSessionPaid(p.appointmentId, p.paid);
+}
+
+class SessionOutcomeParams extends Equatable {
+  const SessionOutcomeParams(this.appointmentId, {required this.attended});
+  final String appointmentId;
+  final bool attended;
+  @override
+  List<Object?> get props => [appointmentId, attended];
+}
+
+@injectable
+class SetSessionOutcome implements UseCase<void, SessionOutcomeParams> {
+  const SetSessionOutcome(this._r);
+  final PracticeRepository _r;
+  @override
+  ResultFuture<void> call(SessionOutcomeParams p) => _r.setSessionOutcome(p.appointmentId, attended: p.attended);
 }

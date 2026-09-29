@@ -5,6 +5,7 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/firebase/collections.dart';
 import '../../../../core/firebase/inbox.dart';
 import '../../../../core/firebase/session.dart';
+import '../../../../core/firebase/session_outcome.dart';
 import '../../domain/entities/practice_entities.dart';
 
 /// Practitioner API over Firestore. Requests, schedule, clients and earnings
@@ -12,7 +13,8 @@ import '../../domain/entities/practice_entities.dart';
 /// live privately under `therapists/{me}/clients/{clientId}`.
 abstract interface class PracticeDataSource {
   Future<List<VerificationDocument>> documents();
-  Future<void> setUploaded(DocumentKind kind, bool uploaded);
+  Future<void> upload(DocumentKind kind, DocumentFile file);
+  Future<void> removeUpload(DocumentKind kind);
   Future<void> submitVerification();
 
   Future<PracticeDashboard> dashboard();
@@ -29,11 +31,13 @@ abstract interface class PracticeDataSource {
   Future<void> toggleGoal(String clientId, String goalId);
 
   Future<Earnings> earnings();
+  Future<void> setPaid(String appointmentId, bool paid);
+  Future<void> setOutcome(String appointmentId, {required bool attended});
 }
 
 /// A booking as the practitioner sees it.
 class _Appt {
-  _Appt(DocumentSnapshot<Map<String, dynamic>> s)
+  _Appt(DocumentSnapshot<Map<String, dynamic>> s, {String? status})
       : id = s.id,
         clientId = s.data()!['clientId'] as String,
         clientName = s.data()!['clientName'] as String? ?? 'Client',
@@ -42,22 +46,27 @@ class _Appt {
         respondedAt = s.data()!['respondedAt'] == null ? null : readDate(s.data()!['respondedAt']),
         minutes = readInt(s.data()!['minutes'], 50),
         type = s.data()!['type'] as String? ?? 'video',
-        status = s.data()!['status'] as String? ?? 'pending',
+        status = status ?? s.data()!['status'] as String? ?? 'pending',
         recurrence = s.data()!['recurrence'] as String? ?? 'oneTime',
         price = readInt(s.data()!['price']),
         reason = s.data()!['reason'] as String? ?? 'Session request',
         note = s.data()!['note'] as String? ?? '',
-        newClient = s.data()!['newClient'] as bool? ?? true;
+        newClient = s.data()!['newClient'] as bool? ?? true,
+        paid = s.data()!['paid'] as bool? ?? false;
 
   final String id, clientId, clientName, type, status, recurrence, reason, note;
   final DateTime startsAt, createdAt;
   final DateTime? respondedAt;
   final int minutes, price;
-  final bool newClient;
+  final bool newClient, paid;
 
   String get typeLabel => type.isEmpty ? 'Video' : '${type[0].toUpperCase()}${type.substring(1)}';
-  bool get accepted => status == 'accepted' || status == 'completed';
-  bool get done => accepted && startsAt.add(Duration(minutes: minutes)).isBefore(DateTime.now());
+  bool get accepted => status == 'accepted' || status == 'completed' || status == 'noShow';
+  bool get ended => startsAt.add(Duration(minutes: minutes)).isBefore(DateTime.now());
+  /// Held and confirmed — the only sessions that count as earned.
+  bool get done => status == 'completed';
+  /// Over, but the professional hasn't said whether it happened yet.
+  bool get awaitingOutcome => status == 'accepted' && ended;
   bool get cancelled => status == 'cancelled' || status == 'declined';
 
   ScheduledSession toSession({String? label}) => ScheduledSession(
@@ -85,7 +94,8 @@ class FirestorePracticeDataSource implements PracticeDataSource {
 
   Future<List<_Appt>> _appointments() async {
     final snap = await _db.appointments.where('therapistId', isEqualTo: _me).get();
-    return snap.docs.map(_Appt.new).toList();
+    final completed = await autoCompleteOverdue(_db, snap.docs);
+    return [for (final d in snap.docs) _Appt(d, status: completed.contains(d.id) ? 'completed' : null)];
   }
 
   bool _sameDay(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
@@ -94,29 +104,66 @@ class FirestorePracticeDataSource implements PracticeDataSource {
   int _pct(num part, num whole, [int fallback = 0]) => whole == 0 ? fallback : (part * 100 / whole).round();
 
   // ─── Verification ────────────────────────────────────────────
-  // Without Cloud Storage (Spark plan) this records which documents the
-  // professional has provided; files are exchanged with the review team
-  // out of band. Swap `setUploaded` for a Storage upload on Blaze.
+  // No Cloud Storage on the Spark plan, so files are stored in Firestore:
+  // `users/{me}/verificationFiles/{kind}` holds the metadata and
+  // `…/chunks/{i}` holds the bytes in ≤900 KB pieces (a document maxes out
+  // at 1 MiB). Owner-only by rules; reviewers download them with
+  // `npm run verification -- <email>` in tool/firebase.
+
+  static const _chunkSize = 900 * 1024;
+  static const maxUploadBytes = 5 * 1024 * 1024;
+
+  CollectionReference<Map<String, dynamic>> get _files => _db.userCol(_me, 'verificationFiles');
 
   @override
   Future<List<VerificationDocument>> documents() async {
-    final d = (await _verification.get()).data() ?? const {};
-    bool has(DocumentKind k) => d[k.name] as bool? ?? false;
+    final files = {for (final f in (await _files.get()).docs) f.id: f.data()};
+    bool has(DocumentKind k) => files.containsKey(k.name);
+    String? name(DocumentKind k) => files[k.name]?['name'] as String?;
     return [
-      VerificationDocument(kind: DocumentKind.licence, title: 'Practising licence', description: 'HCPC / BACP registration', uploaded: has(DocumentKind.licence)),
-      VerificationDocument(kind: DocumentKind.photoId, title: 'Photo ID', description: 'Passport or driving licence', uploaded: has(DocumentKind.photoId)),
+      VerificationDocument(kind: DocumentKind.licence, title: 'Professional registration', description: 'RCI CRR number or equivalent licence', uploaded: has(DocumentKind.licence), fileName: name(DocumentKind.licence)),
+      VerificationDocument(kind: DocumentKind.photoId, title: 'Photo ID', description: 'PAN card, passport or driving licence', uploaded: has(DocumentKind.photoId), fileName: name(DocumentKind.photoId)),
       VerificationDocument(
         kind: DocumentKind.qualifications,
         title: 'Qualifications',
         description: 'Degree & training certificates',
         uploaded: has(DocumentKind.qualifications),
+        fileName: name(DocumentKind.qualifications),
       ),
     ];
   }
 
   @override
-  Future<void> setUploaded(DocumentKind kind, bool uploaded) =>
-      _verification.set({kind.name: uploaded, 'updatedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+  Future<void> upload(DocumentKind kind, DocumentFile file) async {
+    final bytes = file.bytes;
+    if (bytes.length > maxUploadBytes) throw const ServerException('That file is over 5 MB. Try a smaller scan or photo.');
+    await removeUpload(kind);
+    final meta = _files.doc(kind.name);
+    final chunks = (bytes.length / _chunkSize).ceil();
+    for (var i = 0; i < chunks; i++) {
+      final end = (i + 1) * _chunkSize > bytes.length ? bytes.length : (i + 1) * _chunkSize;
+      await meta.collection('chunks').doc('$i').set({'data': Blob(bytes.sublist(i * _chunkSize, end))});
+    }
+    // Metadata last, so a document only counts as uploaded once it's whole.
+    await meta.set({
+      'name': file.name,
+      'mime': file.isPdf ? 'application/pdf' : 'image/jpeg',
+      'size': bytes.length,
+      'chunks': chunks,
+      'uploadedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Future<void> removeUpload(DocumentKind kind) async {
+    final meta = _files.doc(kind.name);
+    final chunks = await meta.collection('chunks').get();
+    final batch = _db.batch()..delete(meta);
+    for (final c in chunks.docs) {
+      batch.delete(c.reference);
+    }
+    await batch.commit();
+  }
 
   @override
   Future<void> submitVerification() async {
@@ -172,6 +219,8 @@ class FirestorePracticeDataSource implements PracticeDataSource {
       years: readInt(pro['years']),
       acceptingClients: pro['acceptingClients'] as bool? ?? true,
       earningsWeek: week,
+      toMark: all.where((a) => a.awaitingOutcome).map((a) => a.toSession()).toList()
+        ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
       schedule: accepted.where((a) => a.startsAt.isAfter(now.subtract(const Duration(hours: 1))) && a.startsAt.isBefore(end)).map((a) => a.toSession()).toList()
         ..sort((a, b) => a.startsAt.compareTo(b.startsAt)),
     );
@@ -278,7 +327,7 @@ class FirestorePracticeDataSource implements PracticeDataSource {
           : '$proName can’t make that time. Try another slot or therapist.',
       targetId: a.id,
     );
-    await batch.commit();
+    await Inbox.commit(batch);
     return _request(a).copyWith(status: status);
   }
 
@@ -359,8 +408,8 @@ class FirestorePracticeDataSource implements PracticeDataSource {
 
   // ─── Earnings ────────────────────────────────────────────────
   // Earned = accepted sessions that have taken place, at the booked price.
-  // Payouts run weekly on Fridays; "available" is what has accrued since the
-  // last one.
+  // Clients pay the professional directly (no in-app payments yet), and the
+  // professional marks each session paid; unpaid ones are "outstanding".
 
   @override
   Future<Earnings> earnings() async {
@@ -368,9 +417,8 @@ class FirestorePracticeDataSource implements PracticeDataSource {
     final now = DateTime.now();
     final monday = _monday(now);
     final lastMonday = monday.subtract(const Duration(days: 7));
-    final daysToFriday = (DateTime.friday - now.weekday) % 7;
-    final lastPayout = _day(now).subtract(Duration(days: (now.weekday - DateTime.friday) % 7));
     int sum(Iterable<_Appt> l) => l.fold(0, (s, a) => s + a.price);
+    final unpaid = done.where((a) => !a.paid).toList();
 
     final thisWeek = sum(done.where((a) => !a.startsAt.isBefore(monday)));
     final prevWeek = sum(done.where((a) => !a.startsAt.isBefore(lastMonday) && a.startsAt.isBefore(monday)));
@@ -382,13 +430,14 @@ class FirestorePracticeDataSource implements PracticeDataSource {
     }
 
     return Earnings(
-      available: sum(done.where((a) => !a.startsAt.isBefore(lastPayout))),
+      outstanding: sum(unpaid),
+      outstandingSessions: unpaid.length,
+      collected: sum(done.where((a) => a.paid && a.startsAt.year == now.year)),
       yearTotal: sum(done.where((a) => a.startsAt.year == now.year)),
       sessions: done.length,
       averageRate: done.isEmpty ? 0 : (sum(done) / done.length).round(),
       thisWeek: thisWeek,
       weekChangePercent: _pct(thisWeek - prevWeek, prevWeek),
-      nextPayoutDays: daysToFriday == 0 ? 7 : daysToFriday,
       week: [
         for (var i = 0; i < 7; i++) sum(done.where((a) => _sameDay(a.startsAt, monday.add(Duration(days: i))))),
       ],
@@ -397,10 +446,39 @@ class FirestorePracticeDataSource implements PracticeDataSource {
       ],
       monthLabels: [for (final m in monthStarts) _months[m.month - 1]],
       transactions: [
-        for (final a in done.take(10))
-          Transaction(clientName: a.clientName, description: '${a.typeLabel} · ${a.minutes} min', date: a.startsAt, amount: a.price),
+        for (final a in [...unpaid.reversed, ...done.where((a) => a.paid).take(10)])
+          Transaction(
+            id: a.id,
+            clientName: a.clientName,
+            description: '${a.typeLabel} · ${a.minutes} min',
+            date: a.startsAt,
+            amount: a.price,
+            paid: a.paid,
+          ),
       ],
       byType: {for (final e in byType.entries) e.key: _pct(e.value, done.length)},
     );
+  }
+
+  @override
+  Future<void> setPaid(String appointmentId, bool paid) async {
+    try {
+      await _db.appointments.doc(appointmentId).update({'paid': paid, 'paidAt': paid ? FieldValue.serverTimestamp() : null});
+    } on FirebaseException catch (e) {
+      throw ServerException(e.message ?? 'Couldn\'t update payment status.');
+    }
+  }
+
+  @override
+  Future<void> setOutcome(String appointmentId, {required bool attended}) async {
+    try {
+      await _db.appointments.doc(appointmentId).update({
+        'status': attended ? 'completed' : 'noShow',
+        'completedBy': 'therapist',
+        'completedAt': FieldValue.serverTimestamp(),
+      });
+    } on FirebaseException catch (e) {
+      throw ServerException(e.message ?? 'Couldn\'t update the session.');
+    }
   }
 }

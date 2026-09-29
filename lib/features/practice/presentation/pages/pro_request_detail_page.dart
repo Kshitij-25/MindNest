@@ -48,7 +48,7 @@ class ProRequestDetailPage extends StatelessWidget {
                     padding: const EdgeInsets.all(22),
                     child: Column(
                       children: [
-                        MnAvatar(name: r.clientName, size: 76, photo: true),
+                        MnAvatar(name: r.clientName, size: 76, photo: true, userId: r.clientId),
                         const SizedBox(height: 14),
                         Text(r.clientName, style: context.text.title3),
                         const SizedBox(height: 2),

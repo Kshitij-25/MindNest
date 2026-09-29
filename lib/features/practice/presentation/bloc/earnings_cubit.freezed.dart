@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$EarningsState {
 
- Earnings? get data; EarningsPeriod get period;
+ Earnings? get data; EarningsPeriod get period; String? get error;
 /// Create a copy of EarningsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $EarningsStateCopyWith<EarningsState> get copyWith => _$EarningsStateCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as EarningsState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EarningsState&&(identical(other.data, _this.data) || other.data == _this.data)&&(identical(other.period, _this.period) || other.period == _this.period));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EarningsState&&(identical(other.data, _this.data) || other.data == _this.data)&&(identical(other.period, _this.period) || other.period == _this.period)&&(identical(other.error, _this.error) || other.error == _this.error));
 }
 
 
 @override
 int get hashCode {
   final _this = this as EarningsState;
-  return Object.hash(runtimeType,_this.data,_this.period);
+  return Object.hash(runtimeType,_this.data,_this.period,_this.error);
 }
 
 @override
 String toString() {
   final _this = this as EarningsState;
-  return 'EarningsState(data: ${_this.data}, period: ${_this.period})';
+  return 'EarningsState(data: ${_this.data}, period: ${_this.period}, error: ${_this.error})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $EarningsStateCopyWith<$Res>  {
   factory $EarningsStateCopyWith(EarningsState value, $Res Function(EarningsState) _then) = _$EarningsStateCopyWithImpl;
 @useResult
 $Res call({
- Earnings? data, EarningsPeriod period
+ Earnings? data, EarningsPeriod period, String? error
 });
 
 
@@ -68,11 +68,12 @@ class _$EarningsStateCopyWithImpl<$Res>
 
 /// Create a copy of EarningsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? data = freezed,Object? period = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? data = freezed,Object? period = null,Object? error = freezed,}) {
   return _then(EarningsState(
 data: freezed == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
 as Earnings?,period: null == period ? _self.period : period // ignore: cast_nullable_to_non_nullable
-as EarningsPeriod,
+as EarningsPeriod,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of EarningsState
@@ -169,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Earnings? data,  EarningsPeriod period)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Earnings? data,  EarningsPeriod period,  String? error)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EarningsState() when $default != null:
-return $default(_that.data,_that.period);case _:
+return $default(_that.data,_that.period,_that.error);case _:
   return orElse();
 
 }
@@ -190,10 +191,10 @@ return $default(_that.data,_that.period);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Earnings? data,  EarningsPeriod period)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Earnings? data,  EarningsPeriod period,  String? error)  $default,) {final _that = this;
 switch (_that) {
 case _EarningsState():
-return $default(_that.data,_that.period);case _:
+return $default(_that.data,_that.period,_that.error);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +211,10 @@ return $default(_that.data,_that.period);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Earnings? data,  EarningsPeriod period)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Earnings? data,  EarningsPeriod period,  String? error)?  $default,) {final _that = this;
 switch (_that) {
 case _EarningsState() when $default != null:
-return $default(_that.data,_that.period);case _:
+return $default(_that.data,_that.period,_that.error);case _:
   return null;
 
 }
@@ -225,11 +226,12 @@ return $default(_that.data,_that.period);case _:
 
 
 class _EarningsState implements EarningsState {
-  const _EarningsState({this.data, this.period = EarningsPeriod.month});
+  const _EarningsState({this.data, this.period = EarningsPeriod.month, this.error});
   
 
 @override final  Earnings? data;
 @override@JsonKey() final  EarningsPeriod period;
+@override final  String? error;
 
 /// Create a copy of EarningsState
 /// with the given fields replaced by the non-null parameter values.
@@ -241,18 +243,18 @@ _$EarningsStateCopyWith<_EarningsState> get copyWith => __$EarningsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EarningsState&&(identical(other.data, data) || other.data == data)&&(identical(other.period, period) || other.period == period));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EarningsState&&(identical(other.data, data) || other.data == data)&&(identical(other.period, period) || other.period == period)&&(identical(other.error, error) || other.error == error));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,data,period);
+    return Object.hash(runtimeType,data,period,error);
 }
 
 @override
 String toString() {
-    return 'EarningsState(data: $data, period: $period)';
+    return 'EarningsState(data: $data, period: $period, error: $error)';
 }
 
 
@@ -263,7 +265,7 @@ abstract mixin class _$EarningsStateCopyWith<$Res> implements $EarningsStateCopy
   factory _$EarningsStateCopyWith(_EarningsState value, $Res Function(_EarningsState) _then) = __$EarningsStateCopyWithImpl;
 @override @useResult
 $Res call({
- Earnings? data, EarningsPeriod period
+ Earnings? data, EarningsPeriod period, String? error
 });
 
 
@@ -280,11 +282,12 @@ class __$EarningsStateCopyWithImpl<$Res>
 
 /// Create a copy of EarningsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? data = freezed,Object? period = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? data = freezed,Object? period = null,Object? error = freezed,}) {
   return _then(_EarningsState(
 data: freezed == data ? _self.data : data // ignore: cast_nullable_to_non_nullable
 as Earnings?,period: null == period ? _self.period : period // ignore: cast_nullable_to_non_nullable
-as EarningsPeriod,
+as EarningsPeriod,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

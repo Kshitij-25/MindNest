@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/core.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../safety/domain/safety.dart';
+import '../../../safety/presentation/safety_actions.dart';
 import '../bloc/post_detail_cubit.dart';
 
 Future<void> showCommentSheet(BuildContext context) {
@@ -47,6 +49,7 @@ class _CommentSheetState extends State<_CommentSheet> {
     return BlocBuilder<PostDetailCubit, PostDetailState>(
       builder: (context, s) {
         final canSend = _ctrl.text.trim().isNotEmpty && !s.sending;
+        final me = context.read<AuthBloc>().state.user?.id;
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -82,7 +85,7 @@ class _CommentSheetState extends State<_CommentSheet> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                MnAvatar(name: cm.author, size: 36),
+                                MnAvatar(name: cm.author, size: 36, userId: cm.authorId),
                                 const SizedBox(width: 11),
                                 Expanded(
                                   child: Column(
@@ -99,6 +102,30 @@ class _CommentSheetState extends State<_CommentSheet> {
                                                 Text(cm.author, style: context.text.foot.copyWith(fontWeight: FontWeight.w700)),
                                                 const SizedBox(width: 8),
                                                 Text(timeAgo(cm.createdAt), style: context.text.cap.copyWith(color: c.ink3)),
+                                                if (cm.authorId.isNotEmpty && cm.authorId != me) ...[
+                                                  const Spacer(),
+                                                  Pressable(
+                                                    semanticLabel: 'More options for ${cm.author}’s comment',
+                                                    onTap: () async {
+                                                      final cubit = context.read<PostDetailCubit>();
+                                                      final blocked = await showSafetyMenu(
+                                                        context,
+                                                        ReportSubject(
+                                                          type: ReportTarget.comment,
+                                                          path: 'posts/${s.post?.id}/comments/${cm.id}',
+                                                          ownerId: cm.authorId,
+                                                          ownerName: cm.author,
+                                                        ),
+                                                        reportLabel: 'Report comment',
+                                                      );
+                                                      if (blocked) cubit.removeCommentsBy(cm.authorId);
+                                                    },
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.only(left: 8),
+                                                      child: MnIcon(MnIcons.more, size: 16, color: c.ink3),
+                                                    ),
+                                                  ),
+                                                ],
                                               ],
                                             ),
                                             const SizedBox(height: 3),
@@ -136,7 +163,7 @@ class _CommentSheetState extends State<_CommentSheet> {
               decoration: BoxDecoration(border: Border(top: BorderSide(color: c.hairline, width: .5))),
               child: Row(
                 children: [
-                  MnAvatar(name: context.read<AuthBloc>().state.user?.name ?? 'You', size: 34),
+                  MnAvatar(name: context.read<AuthBloc>().state.user?.name ?? 'You', size: 34, userId: context.read<AuthBloc>().state.user?.id),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Container(

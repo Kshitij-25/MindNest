@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/error/guard.dart';
@@ -37,6 +39,17 @@ class ChatRepositoryImpl implements ChatRepository {
   @override
   ResultFuture<ChatMessage> send(String id, String text) =>
       guard(() async => (await _ds.send(id, text)).toEntity());
+
+  @override
+  ResultFuture<ChatMessage> sendAttachment(
+    String id, {
+    required AttachmentKind kind,
+    required String name,
+    required Uint8List bytes,
+  }) => guard(() async => (await _ds.sendAttachment(id, kind: kind, name: name, bytes: bytes)).toEntity());
+
+  @override
+  ResultFuture<Uint8List> attachment(String id, String attachmentId) => guard(() => _ds.attachment(id, attachmentId));
 
   @override
   ResultFuture<void> markRead(String id) => guard(() => _ds.markRead(id));

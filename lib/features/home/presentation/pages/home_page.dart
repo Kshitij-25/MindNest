@@ -234,7 +234,7 @@ class _TabletHome extends StatelessWidget {
                         children: [
                           Row(
                             children: [
-                              MnAvatar(name: next.therapist.name, size: 52, photo: true),
+                              MnAvatar(name: next.therapist.name, size: 52, photo: true, userId: next.therapist.id),
                               const SizedBox(width: 14),
                               Expanded(
                                 child: Column(
@@ -451,7 +451,7 @@ class _TabletHome extends StatelessWidget {
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    MnAvatar(name: user?.name ?? '', size: 56, photo: true, ring: true),
+                    MnAvatar(name: user?.name ?? '', size: 56, photo: true, ring: true, userId: user?.id),
                     Positioned(
                       bottom: -2,
                       right: -4,

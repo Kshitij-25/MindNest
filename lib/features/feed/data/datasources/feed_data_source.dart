@@ -6,6 +6,7 @@ import '../../../../core/firebase/collections.dart';
 import '../../../../core/firebase/session.dart';
 import '../../domain/entities/post.dart';
 import '../models/post_model.dart';
+import '../../../safety/data/safety_data_source.dart';
 
 abstract interface class FeedDataSource {
   Future<List<PostModel>> posts();
@@ -24,9 +25,10 @@ abstract interface class FeedDataSource {
 /// (`users/{uid}/likedPosts/{postId}`), so they can't drift or be forged.
 @LazySingleton(as: FeedDataSource)
 class FirestoreFeedDataSource implements FeedDataSource {
-  FirestoreFeedDataSource(this._db, this._session);
+  FirestoreFeedDataSource(this._db, this._session, this._safety);
   final FirebaseFirestore _db;
   final FirebaseSession _session;
+  final SafetyDataSource _safety;
 
   String get _me => _session.uid;
   CollectionReference<Map<String, dynamic>> get _liked => _db.userCol(_me, 'likedPosts');
@@ -72,7 +74,8 @@ class FirestoreFeedDataSource implements FeedDataSource {
         .orderBy('publishedAt', descending: true)
         .limit(50)
         .get();
-    return snap.docs.map((d) => _post(d, marks)).toList();
+    final blocked = await _safety.blockedIds();
+    return snap.docs.where((d) => !blocked.contains(d.data()['authorId'])).map((d) => _post(d, marks)).toList();
   }
 
   @override
@@ -110,6 +113,7 @@ class FirestoreFeedDataSource implements FeedDataSource {
     final likedBy = readStrings(d['likedBy']);
     return CommentModel(
       id: s.id,
+      authorId: d['authorId'] as String? ?? '',
       name: d['name'] as String? ?? '',
       createdAt: readDate(d['createdAt']),
       text: d['text'] as String? ?? '',
@@ -121,7 +125,8 @@ class FirestoreFeedDataSource implements FeedDataSource {
   @override
   Future<List<CommentModel>> comments(String postId) async {
     final snap = await _db.posts.doc(postId).collection('comments').orderBy('createdAt').limitToLast(200).get();
-    return snap.docs.map(_comment).toList();
+    final blocked = await _safety.blockedIds();
+    return snap.docs.where((d) => !blocked.contains(d.data()['authorId'])).map(_comment).toList();
   }
 
   @override
@@ -138,7 +143,7 @@ class FirestoreFeedDataSource implements FeedDataSource {
       })
       ..update(postRef, {'comments': FieldValue.increment(1)});
     await batch.commit();
-    return CommentModel(id: ref.id, name: author, createdAt: DateTime.now(), text: text);
+    return CommentModel(id: ref.id, authorId: _me, name: author, createdAt: DateTime.now(), text: text);
   }
 
   @override

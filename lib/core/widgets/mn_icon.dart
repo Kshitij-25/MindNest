@@ -27,6 +27,9 @@ abstract final class MnIcons {
   static const check = MnIconData('M4 12.5 9.5 18 20 6.5');
   static const x = MnIconData('M6 6l12 12M18 6 6 18');
   static const star = MnIconData('M12 3.5l2.5 5.4 5.9.7-4.4 4 1.2 5.8L12 16.6 6.8 19.4 8 13.6l-4.4-4 5.9-.7L12 3.5Z');
+  static const trash = MnIconData('M4 7h16M9 7V4.5h6V7M6.5 7l1 13h9l1-13M10 11v6M14 11v6');
+  static const flag = MnIconData('M5 21V4M5 4h11l-2 4 2 4H5');
+  static const block = MnIconData('M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM5.6 5.6l12.8 12.8');
   static const shield = MnIconData('M12 3.5 5 6v6c0 4.5 3 7 7 8.5 4-1.5 7-4 7-8.5V6l-7-2.5ZM9 12l2 2 4-4');
   static const clock = MnIconData('M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7.5V12l3 2');
   static const camera = MnIconData('M4 8.5h3l1.5-2h7L17 8.5h3a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1ZM12 16.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z');

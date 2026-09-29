@@ -6,7 +6,9 @@
   "scripts": {
     "test:rules": "firebase emulators:exec --only firestore --project demo-mindnest --config ../../firebase.json \"node --test rules.test.mjs\"",
     "seed": "node seed.mjs",
-    "approve": "node approve_pro.mjs"
+    "approve": "node approve_pro.mjs",
+    "reports": "node reports.mjs",
+    "verification": "node verification_files.mjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.2",

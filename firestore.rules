@@ -12,6 +12,9 @@ service cloud.firestore {
     function data() { return request.resource.data; }
     function changed() { return request.resource.data.diff(resource.data).affectedKeys(); }
     function onlyChanges(keys) { return changed().hasOnly(keys); }
+    function hasBlocked(owner, other) {
+      return exists(/databases/$(database)/documents/users/$(owner)/blocked/$(other));
+    }
     function isVerifiedPro(id) {
       return get(/databases/$(database)/documents/therapists/$(id)).data.verified == true;
     }
@@ -28,13 +31,34 @@ service cloud.firestore {
       allow update: if isUser(userId)
         && onlyChanges(['name', 'onboarded', 'verification', 'title', 'phone', 'bio', 'notificationPrefs'])
         && (data().verification == resource.data.verification || data().verification == 'pending');
+      // Account deletion (the app erases subcollections first).
+      allow delete: if isUser(userId);
 
       match /private/{docId} {
         allow read, write: if isUser(userId);
       }
       match /{col}/{docId} {
         allow read, write: if isUser(userId)
-          && col in ['moods', 'journal', 'likedPosts', 'savedPosts', 'savedTherapists', 'fcmTokens'];
+          && col in ['moods', 'journal', 'likedPosts', 'savedPosts', 'savedTherapists', 'fcmTokens', 'blocked'];
+      }
+
+      // Verification documents, stored as ≤900 KB byte chunks (no Storage
+      // on Spark). Owner-only; reviewers read them with the Admin SDK.
+      match /verificationFiles/{kind} {
+        allow read, delete: if isUser(userId);
+        allow create, update: if isUser(userId)
+          && kind in ['licence', 'photoId', 'qualifications']
+          && data().keys().hasOnly(['name', 'mime', 'size', 'chunks', 'uploadedAt'])
+          && data().name is string && data().name.size() <= 200
+          && data().mime in ['application/pdf', 'image/jpeg']
+          && data().size is int && data().size <= 5 * 1024 * 1024
+          && data().chunks is int && data().chunks <= 6;
+        match /chunks/{i} {
+          allow read, delete: if isUser(userId);
+          allow create, update: if isUser(userId)
+            && data().keys().hasOnly(['data'])
+            && data().data is bytes && data().data.size() <= 900 * 1024;
+        }
       }
 
       // Inbox: written by whoever triggers the event, read by the owner.
@@ -55,18 +79,49 @@ service cloud.firestore {
       }
     }
 
+    // ── Profile photos ─────────────────────────────────────────────────
+    // Small JPEGs (no Storage on Spark). Public to signed-in users.
+    match /avatars/{userId} {
+      allow read: if signedIn();
+      allow delete: if isUser(userId);
+      allow create, update: if isUser(userId)
+        && data().keys().hasOnly(['data', 'updatedAt'])
+        && data().data is bytes && data().data.size() <= 150 * 1024;
+    }
+
     // ── Therapist directory ────────────────────────────────────────────
     match /therapists/{proId} {
       allow read: if signedIn();
       allow create: if isUser(proId)
         && data().verified == false && data().rating == 0 && data().reviews == 0;
       // `verified`, `rating` and `reviews` are admin/server-managed.
-      allow update: if isUser(proId)
-        && !changed().hasAny(['verified', 'rating', 'reviews']);
+      allow update: if (isUser(proId)
+          && !changed().hasAny(['verified', 'rating', 'reviews', 'lastReviewId']))
+        // A client's new review bumps the aggregate in the same write.
+        || (signedIn()
+          && onlyChanges(['rating', 'reviews', 'lastReviewId'])
+          && data().reviews == resource.data.get('reviews', 0) + 1
+          && !exists(/databases/$(database)/documents/therapists/$(proId)/reviews/$(data().lastReviewId))
+          && getAfter(/databases/$(database)/documents/therapists/$(proId)/reviews/$(data().lastReviewId)).data.authorId == uid()
+          && math.abs(data().rating
+               - (resource.data.get('rating', 0) * resource.data.get('reviews', 0)
+                  + getAfter(/databases/$(database)/documents/therapists/$(proId)/reviews/$(data().lastReviewId)).data.rating)
+                 / (resource.data.get('reviews', 0) + 1)) < 0.01);
+      allow delete: if isUser(proId);
 
-      // Reviews are written by the Admin SDK / Cloud Functions (aggregates).
+      // One review per completed session; the id is the appointment id.
       match /reviews/{rid} {
+        function appt() { return get(/databases/$(database)/documents/appointments/$(rid)).data; }
         allow read: if signedIn();
+        allow create: if signedIn()
+          && data().keys().hasOnly(['authorId', 'name', 'rating', 'text', 'createdAt'])
+          && data().authorId == uid()
+          && appt().clientId == uid()
+          && appt().therapistId == proId
+          && appt().status == 'completed'
+          && data().rating is int && data().rating >= 1 && data().rating <= 5
+          && data().name is string && data().name.size() <= 40
+          && data().text is string && data().text.size() <= 1000;
       }
 
       // Slot locks: one per booked start time; prevents double booking.
@@ -90,6 +145,9 @@ service cloud.firestore {
 
     // ── Appointments ───────────────────────────────────────────────────
     match /appointments/{aid} {
+      function sessionEnd() {
+        return resource.data.startsAt + duration.value(resource.data.get('minutes', 50), 'm');
+      }
       allow read: if signedIn()
         && (resource.data.clientId == uid() || resource.data.therapistId == uid());
       allow create: if signedIn()
@@ -97,10 +155,18 @@ service cloud.firestore {
         && data().therapistId != uid()
         && data().status == 'pending'
         && data().startsAt is timestamp && data().startsAt > request.time
-        && isVerifiedPro(data().therapistId);
+        && isVerifiedPro(data().therapistId)
+        && !hasBlocked(data().therapistId, uid())
+        && !hasBlocked(uid(), data().therapistId);
       allow update: if signedIn() && (
         // Client cancels.
         (resource.data.clientId == uid()
+          && onlyChanges(['status', 'cancelledAt'])
+          && data().status == 'cancelled')
+        // Professional cancels an upcoming session (e.g. deleting their account).
+        || (resource.data.therapistId == uid()
+          && resource.data.status in ['pending', 'accepted']
+          && resource.data.startsAt > request.time
           && onlyChanges(['status', 'cancelledAt'])
           && data().status == 'cancelled')
         // Professional responds to a pending request.
@@ -108,6 +174,32 @@ service cloud.firestore {
           && resource.data.status == 'pending'
           && onlyChanges(['status', 'respondedAt'])
           && data().status in ['accepted', 'declined'])
+        // Professional records whether the client paid them directly.
+        || (resource.data.therapistId == uid()
+          && resource.data.status == 'completed'
+          && onlyChanges(['paid', 'paidAt'])
+          && data().paid is bool)
+        // Professional marks an ended session as held or missed.
+        || (resource.data.therapistId == uid()
+          && resource.data.status == 'accepted'
+          && request.time > sessionEnd()
+          && onlyChanges(['status', 'completedBy', 'completedAt'])
+          && data().status in ['completed', 'noShow']
+          && data().completedBy == 'therapist')
+        // Either side auto-completes a session left unmarked for 24h.
+        || ((resource.data.therapistId == uid() || resource.data.clientId == uid())
+          && resource.data.status == 'accepted'
+          && request.time > sessionEnd() + duration.value(24, 'h')
+          && onlyChanges(['status', 'completedBy', 'completedAt'])
+          && data().status == 'completed'
+          && data().completedBy == 'auto')
+        // Client flags the session reviewed, alongside creating the review.
+        || (resource.data.clientId == uid()
+          && resource.data.status == 'completed'
+          && resource.data.get('reviewed', false) == false
+          && onlyChanges(['reviewed'])
+          && data().reviewed == true
+          && existsAfter(/databases/$(database)/documents/therapists/$(resource.data.therapistId)/reviews/$(aid)))
       );
       allow delete: if false;
     }
@@ -127,14 +219,55 @@ service cloud.firestore {
         && !changed().hasAny(['participants', 'clientId', 'proId']);
 
       match /messages/{mid} {
-        function convMember() {
-          return uid() in get(/databases/$(database)/documents/conversations/$(cid)).data.participants;
+        function conv() { return get(/databases/$(database)/documents/conversations/$(cid)).data; }
+        function convMember() { return uid() in conv().participants; }
+        function recipient() {
+          return conv().participants[0] == uid() ? conv().participants[1] : conv().participants[0];
         }
         allow read: if signedIn() && convMember();
         allow create: if signedIn() && convMember()
+          && !hasBlocked(recipient(), uid())
           && data().senderId == uid()
-          && data().text is string && data().text.size() > 0 && data().text.size() <= 4000;
+          && data().text is string && data().text.size() <= 4000
+          && (data().text.size() > 0 || (
+            data().attachment is map
+            && data().attachment.kind in ['image', 'pdf']
+            && exists(/databases/$(database)/documents/conversations/$(cid)/attachments/$(data().attachment.id))));
       }
+
+      // Photos and PDFs sent in the thread (≤900 KB, no Storage on Spark).
+      match /attachments/{attId} {
+        function member() {
+          return uid() in get(/databases/$(database)/documents/conversations/$(cid)).data.participants;
+        }
+        allow read: if signedIn() && member();
+        allow create: if signedIn() && member()
+          && data().keys().hasOnly(['senderId', 'kind', 'name', 'data'])
+          && data().senderId == uid()
+          && data().kind in ['image', 'pdf']
+          && data().name is string && data().name.size() <= 200
+          && data().data is bytes && data().data.size() <= 900 * 1024;
+      }
+    }
+
+    // Lets a user find their own comments across posts (account deletion).
+    match /{path=**}/comments/{commentId} {
+      allow read: if signedIn() && resource.data.authorId == uid();
+    }
+
+    // ── Reports ────────────────────────────────────────────────────────
+    // Write-only for users; moderators read them with the Admin SDK.
+    match /reports/{rid} {
+      allow create: if signedIn()
+        && data().keys().hasOnly(['reporterId', 'targetType', 'targetPath', 'targetOwnerId', 'targetOwnerName',
+                                  'reason', 'details', 'status', 'createdAt'])
+        && data().reporterId == uid()
+        && data().targetType in ['post', 'comment', 'message', 'user']
+        && data().targetPath is string && data().targetPath.size() <= 300
+        && data().targetOwnerId is string && data().targetOwnerId != uid()
+        && data().reason in ['harassment', 'hate', 'selfHarm', 'spam', 'inappropriate', 'impersonation', 'other']
+        && data().details is string && data().details.size() <= 1000
+        && data().status == 'open';
     }
 
     // ── Feed ───────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../domain/entities/practice_entities.dart';
 import '../bloc/verification_cubit.dart';
+import '../widgets/document_picker.dart';
 
 @RoutePage()
 class ProCredentialsPage extends StatelessWidget {
@@ -72,7 +73,22 @@ class ProCredentialsPage extends StatelessWidget {
                         doc: d,
                         icon: _icon(d.kind),
                         busy: s.uploading == d.kind,
-                        onTap: () => cubit.toggle(d),
+                        onTap: () async {
+                          if (d.uploaded) {
+                            final remove = await Adaptive.actionSheet<bool>(
+                              context,
+                              title: d.fileName ?? d.title,
+                              actions: const [
+                                AdaptiveAction(label: 'Replace file', value: false, icon: Icons.upload_file),
+                                AdaptiveAction(label: 'Remove', value: true, icon: Icons.delete_outline, destructive: true),
+                              ],
+                            );
+                            if (remove == null || !context.mounted) return;
+                            if (remove) return cubit.remove(d.kind);
+                          }
+                          final file = await pickDocumentFile(context);
+                          if (file != null) await cubit.upload(d.kind, file);
+                        },
                       ),
                   ],
                 ),
@@ -82,7 +98,7 @@ class ProCredentialsPage extends StatelessWidget {
                     MnIcon(MnIcons.lock, size: 15, color: c.ink3),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text('Encrypted & only seen by our verification team.', style: context.text.foot.copyWith(color: c.ink3)),
+                      child: Text('PDF or photo, up to 5 MB. Only you and our verification team can see these.', style: context.text.foot.copyWith(color: c.ink3)),
                     ),
                   ],
                 ),
@@ -109,7 +125,7 @@ class _DocTile extends StatelessWidget {
     final up = doc.uploaded;
     return Semantics(
       button: true,
-      label: '${doc.title}. ${up ? 'Uploaded, tap to remove' : 'Not uploaded, tap to upload'}',
+      label: '${doc.title}. ${up ? 'Uploaded, tap to replace or remove' : 'Not uploaded, tap to upload'}',
       excludeSemantics: true,
       child: Pressable(
         onTap: busy ? null : onTap,
@@ -140,7 +156,7 @@ class _DocTile extends StatelessWidget {
                   children: [
                     Text(doc.title, style: context.text.headline),
                     const SizedBox(height: 2),
-                    Text(up ? 'Uploaded · tap to remove' : doc.description, style: context.text.foot.copyWith(color: c.ink2)),
+                    Text(up ? (doc.fileName ?? 'Uploaded') : doc.description, maxLines: 1, overflow: TextOverflow.ellipsis, style: context.text.foot.copyWith(color: c.ink2)),
                   ],
                 ),
               ),
